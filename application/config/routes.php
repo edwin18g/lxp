@@ -49,75 +49,73 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 | Examples:	my-controller/index	-> my_controller/index
 |		my-controller/my-method	-> my_controller/my_method
 */
-$route['default_controller']   					= 'welcome';
-$route['404_override']         					= '';
-$route['translate_uri_dashes'] 					= FALSE;
+$route['default_controller'] = 'welcome';
+$route['404_override'] = '';
+$route['translate_uri_dashes'] = FALSE;
 
 // change language
-$route['language/(:any)']						= 'ajax/change_language/$1';
+$route['language/(:any)'] = 'ajax/change_language/$1';
 
 // Admin Routes
-$route['logout']               					= 'auth/logout';
-$route['admin']                					= 'admin/dashboard';
+$route['logout'] = 'auth/logout';
+$route['admin'] = 'admin/dashboard';
 
 // Frontend Routes
-$route['cms/faq'] 								= 'cms/faq';
-$route['cms/(:any)'] 							= 'cms/index/$1';
+$route['cms/faq'] = 'cms/faq';
+$route['cms/(:any)'] = 'cms/index/$1';
 
-$route['blogs'] 								= 'blogs';
-$route['blogs/(:any)'] 							= 'blogs/blog/$1';
+$route['blogs'] = 'blogs';
+$route['blogs/(:any)'] = 'blogs/blog/$1';
 
-$route['myblogs'] 								= 'myblogs';
-$route['myblogs/add_new_blog'] 					= 'myblogs/form';
-$route['myblogs/edit_blog/(:any)'] 				= 'myblogs/form/$1';
+$route['myblogs'] = 'myblogs';
+$route['myblogs/add_new_blog'] = 'myblogs/form';
+$route['myblogs/edit_blog/(:any)'] = 'myblogs/form/$1';
 
-$route['courses'] 								= 'courses';
-$route['real_time_users'] 								= 'courses/sample_json';
-$route['real_time_userss'] 								= 'courses/sample_json';
-$route['user_fetch'] 								= 'courses/user_input_json';
-$route['user_input'] 								= 'courses/user_input';
-$route['stream'] 								= 'courses/stream_sample';
-
-
-
-
-$route['courses/content_course'] 				= 'courses/content_course';
-$route['courses/my_courses'] 					= 'courses/my_courses';
-$route['courses/my_courses_new'] 					= 'courses/my_courses_new';
-$route['courses/search_categories'] 			= 'courses/search_categories';
-$route['courses/(:any)'] 						= 'courses/index/$1';
-$route['courses/detail/(:any)']					= 'courses/detail/$1';
-$route['courses/lecture/(:any)']				= 'courses/lecture/$1';
-$route['courses/course_board/(:any)']		= 'courses/course_board/$1';
+$route['courses'] = 'courses';
+$route['real_time_users'] = 'courses/sample_json';
+$route['real_time_userss'] = 'courses/sample_json';
+$route['user_fetch'] = 'courses/user_input_json';
+$route['user_input'] = 'courses/user_input';
+$route['stream'] = 'courses/stream_sample';
 
 
 
-$route['events'] 								= 'events';
-$route['events/search_categories'] 				= 'events/search_categories';
-$route['events/(:any)'] 						= 'events/index/$1';
-$route['events/detail/(:any)']					= 'events/detail/$1';
 
-$route['tutors'] 								= 'tutors';
-$route['tutors/(:any)'] 						= 'tutors/tutor/$1';
+$route['courses/content_course'] = 'courses/content_course';
+$route['courses/my_courses'] = 'courses/my_courses';
+$route['courses/my_courses_new'] = 'courses/my_courses_new';
+$route['courses/search_categories'] = 'courses/search_categories';
+$route['courses/(:any)'] = 'courses/index/$1';
+$route['courses/detail/(:any)'] = 'courses/detail/$1';
+$route['courses/lecture/(:any)'] = 'courses/lecture/$1';
+$route['courses/course_board/(:any)'] = 'courses/course_board/$1';
 
-$route['bbooking/get_batches']					= 'bbooking/get_batches';
-$route['bbooking/get_net_fees']					= 'bbooking/get_net_fees';
-$route['bbooking/get_booked_seats']				= 'bbooking/get_booked_seats';
-$route['bbooking/initiate_booking']				= 'bbooking/initiate_booking';
-$route['bbooking/payment_method']				= 'bbooking/payment_method';
-$route['bbooking/pay_with_paypal']				= 'bbooking/pay_with_paypal';
-$route['bbooking/pay_with_stripe']				= 'bbooking/pay_with_stripe';
-$route['bbooking/finish_booking']				= 'bbooking/finish_booking';
-$route['bbooking/booking_complete']				= 'bbooking/booking_complete';
-$route['bbooking/(:any)']						= 'bbooking/index/$1';
 
-$route['ebooking/get_events']					= 'ebooking/get_events';
-$route['ebooking/get_net_fees']					= 'ebooking/get_net_fees';
-$route['ebooking/get_booked_seats']				= 'ebooking/get_booked_seats';
-$route['ebooking/initiate_booking']				= 'ebooking/initiate_booking';
-$route['ebooking/payment_method']				= 'ebooking/payment_method';
-$route['ebooking/pay_with_paypal']				= 'ebooking/pay_with_paypal';
-$route['ebooking/pay_with_stripe']				= 'ebooking/pay_with_stripe';
-$route['ebooking/finish_booking']				= 'ebooking/finish_booking';
-$route['ebooking/booking_complete']				= 'ebooking/booking_complete';
-$route['ebooking/(:any)']						= 'ebooking/index/$1';
+
+$route['events'] = 'events';
+$route['events/search_categories'] = 'events/search_categories';
+$route['events/(:any)'] = 'events/index/$1';
+$route['events/detail/(:any)'] = 'events/detail/$1';
+
+$route['tutors'] = 'tutors';
+$route['tutors/(:any)'] = 'tutors/tutor/$1';
+
+$route['bbooking/get_batches'] = 'bbooking/get_batches';
+$route['bbooking/get_net_fees'] = 'bbooking/get_net_fees';
+$route['bbooking/get_booked_seats'] = 'bbooking/get_booked_seats';
+$route['bbooking/initiate_booking'] = 'bbooking/initiate_booking';
+$route['bbooking/payment_method'] = 'bbooking/payment_method';
+$route['bbooking/pay_with_paypal'] = 'bbooking/pay_with_paypal';
+$route['bbooking/finish_booking'] = 'bbooking/finish_booking';
+$route['bbooking/booking_complete'] = 'bbooking/booking_complete';
+$route['bbooking/(:any)'] = 'bbooking/index/$1';
+
+$route['ebooking/get_events'] = 'ebooking/get_events';
+$route['ebooking/get_net_fees'] = 'ebooking/get_net_fees';
+$route['ebooking/get_booked_seats'] = 'ebooking/get_booked_seats';
+$route['ebooking/initiate_booking'] = 'ebooking/initiate_booking';
+$route['ebooking/payment_method'] = 'ebooking/payment_method';
+$route['ebooking/pay_with_paypal'] = 'ebooking/pay_with_paypal';
+$route['ebooking/finish_booking'] = 'ebooking/finish_booking';
+$route['ebooking/booking_complete'] = 'ebooking/booking_complete';
+$route['ebooking/(:any)'] = 'ebooking/index/$1';

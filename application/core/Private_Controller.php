@@ -7,7 +7,6 @@
 class Private_Controller extends MY_Controller
 {
 
-    var $stripe_creds;
 
     /**
      * Constructor
@@ -27,16 +26,6 @@ class Private_Controller extends MY_Controller
             redirect('auth/');
         }
 
-        // load stripe if enabled
-        if ($this->settings->s_secret_key && $this->settings->s_publishable_key) {
-            $this->stripe_creds = array(
-                "secret_key" => $this->settings->s_secret_key,
-                "publishable_key" => $this->settings->s_publishable_key,
-            );
-
-            \Stripe\Stripe::setApiKey($this->stripe_creds['secret_key']);
-            \Stripe\Stripe::setVerifySslCerts(false);
-        }
 
         // prepare theme name
         $this->settings->theme = strtolower($this->config->item('public_theme'));
