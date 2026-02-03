@@ -1,0 +1,14 @@
+.env
+error_log
+captcha/*
+upload/*
+application/logs/*
+application/cache/*
+php.ini
+.user.ini
+*.pdf
+debug_login.php
+test_db.php
+whoami.php
+node_modules/
+.DS_Store
