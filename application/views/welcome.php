@@ -1,189 +1,612 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
 <style>
-    .hero-minimal {
+    /* Hero Section - Premium Polish */
+    .hero-plus {
+        padding: 0 0;
+        background: linear-gradient(180deg, #f0f6ff 0%, #e6f0fa 100%);
+        /* Subtle gradient */
         position: relative;
-        height: 80vh;
-        min-height: 500px;
-        background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
-        color: #fff;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
         overflow: hidden;
+        /* To contain the shapes */
     }
 
-    .hero-minimal .container {
-        position: relative;
+    /* Background Shapes */
+    .hero-bg-shapes {
+        position: absolute;
+        top: 50%;
+        right: -100px;
+        transform: translateY(-50%);
+        width: 600px;
+        height: 600px;
+        z-index: 1;
+        pointer-events: none;
+    }
+
+    .shape-fan-1,
+    .shape-fan-2,
+    .shape-fan-3 {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        transform-origin: bottom left;
+    }
+
+    .shape-fan-1 {
+        background: transparent;
+        border: 2px solid #0056d2;
+        /* Darker blue outline */
+        transform: rotate(-15deg) scale(0.9);
+        opacity: 0.3;
+    }
+
+    .shape-fan-2 {
+        background: #1f6ce6;
+        /* Mid blue */
+        transform: rotate(15deg) scale(0.95);
+        clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+        /* Quarter circle approx */
+        z-index: 1;
+    }
+
+    .shape-fan-3 {
+        background: #0056d2;
+        /* Dark blue */
+        transform: rotate(45deg);
+        z-index: 0;
+        clip-path: circle(50% at 0 100%);
+    }
+
+    /* Simple blue arc approximation */
+    .blue-fan-bg {
+        position: absolute;
+        right: -5%;
+        top: 10%;
+        width: 600px;
+        height: 600px;
+        z-index: 1;
+        filter: drop-shadow(0 20px 40px rgba(0, 86, 210, 0.1));
+        /* Soft shadow for depth */
+        animation: float-delayed 8s ease-in-out infinite;
+    }
+
+    .fan-blade {
+        position: absolute;
+        bottom: 50px;
+        left: 50px;
+        width: 400px;
+        height: 600px;
+        transform-origin: bottom left;
+        border-radius: 0 400px 0 0;
+        box-shadow: -10px 0 20px rgba(0, 0, 0, 0.05);
+        /* Separation between blades */
+    }
+
+    .fan-blade-1 {
+        background: linear-gradient(135deg, #3c82e6 0%, #2b6cb0 100%);
+        transform: rotate(-20deg);
+        z-index: 1;
+    }
+
+    .fan-blade-2 {
+        background: linear-gradient(135deg, #1f6ce6 0%, #0056d2 100%);
+        transform: rotate(0deg);
         z-index: 2;
     }
 
-    .hero-minimal h1 {
-        font-size: 3.5rem;
-        font-weight: 700;
-        margin-bottom: 1.5rem;
+    .fan-blade-3 {
+        background: linear-gradient(135deg, #0056d2 0%, #003c8f 100%);
+        transform: rotate(20deg);
+        z-index: 3;
     }
 
-    .hero-minimal p {
-        font-size: 1.25rem;
-        opacity: 0.9;
-        margin-bottom: 2rem;
-        max-width: 600px;
-        margin-left: auto;
-        margin-right: auto;
+    /* Animations */
+    @keyframes float {
+        0% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-10px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
     }
 
-    .search-bar-modern {
-        background: rgba(255, 255, 255, 0.1);
-        backdrop-filter: blur(10px);
-        padding: 0.5rem;
-        border-radius: 50px;
+    @keyframes float-delayed {
+        0% {
+            transform: translateY(0px);
+        }
+
+        50% {
+            transform: translateY(-15px);
+        }
+
+        100% {
+            transform: translateY(0px);
+        }
+    }
+
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .hero-content {
+        animation: fadeInUp 0.8s ease-out;
+        position: relative;
+        z-index: 10;
+    }
+
+    .hero-plus-badge {
         display: flex;
-        max-width: 500px;
-        margin: 0 auto;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 24px;
     }
 
-    .search-bar-modern input {
-        background: none;
-        border: none;
+    .hero-plus-badge span:first-child {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--coursera-blue);
+        letter-spacing: -1px;
+    }
+
+    .hero-plus-badge span:last-child {
+        background: linear-gradient(90deg, #0056d2, #1f6ce6);
         color: #fff;
-        padding: 0.75rem 1.5rem;
-        flex-grow: 1;
-        font-size: 1rem;
+        padding: 4px 12px;
+        border-radius: 4px;
+        font-weight: 800;
+        font-size: 0.9rem;
+        box-shadow: 0 4px 10px rgba(0, 86, 210, 0.2);
     }
 
-    .search-bar-modern input::placeholder {
-        color: rgba(255, 255, 255, 0.6);
+    .hero-plus h1 {
+        font-size: 4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        margin-bottom: 24px;
+        color: #1a1a1a;
+        letter-spacing: -1.5px;
     }
 
-    .search-bar-modern .btn-search {
-        background: #fff;
-        color: #1a237e;
-        border-radius: 50px;
-        padding: 0.75rem 2rem;
-        font-weight: 600;
-        transition: all 0.3s ease;
+    .hero-plus .subtext {
+        font-size: 1.25rem;
+        color: #404040;
+        margin-bottom: 12px;
+        font-weight: 500;
     }
 
-    .search-bar-modern .btn-search:hover {
-        transform: scale(1.05);
-        background: #f0f0f0;
-    }
-
-    .section-padding {
-        padding: 80px 0;
-    }
-
-    .course-card-minimal {
-        background: #fff;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-        height: 100%;
-        margin-bottom: 30px;
-    }
-
-    .course-card-minimal:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .course-card-minimal img {
-        width: 100%;
-        height: 200px;
-        object-fit: cover;
-    }
-
-    .course-content-minimal {
-        padding: 1.5rem;
-    }
-
-    .course-content-minimal h4 {
-        font-weight: 600;
-        margin-bottom: 1rem;
+    .hero-plus .price {
         font-size: 1.1rem;
+        color: #404040;
+        margin-bottom: 40px;
     }
 
-    .course-footer-minimal {
-        border-top: 1px solid #f0f0f0;
-        padding: 1rem 1.5rem;
+    .btn-plus-trial {
+        display: inline-block;
+        background: linear-gradient(90deg, #0056d2, #1f6ce6);
+        color: #fff;
+        padding: 18px 40px;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 1.1rem;
+        text-decoration: none;
+        margin-bottom: 24px;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(0, 86, 210, 0.2);
+    }
+
+    .btn-plus-trial:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 15px 30px rgba(0, 86, 210, 0.3);
+        color: #fff;
+    }
+
+    .hero-plus .guarantee {
+        font-size: 0.95rem;
+        color: var(--coursera-blue);
+        font-weight: 600;
+        opacity: 0.9;
+    }
+
+    .hero-plus-image {
+        position: relative;
+    }
+
+    .hero-plus-image img {
+        width: 100%;
+        position: relative;
+        z-index: 2;
+        /* Floating animation for the person */
+        animation: float 6s ease-in-out infinite;
+        filter: drop-shadow(0 20px 40px rgba(0, 86, 210, 0.15));
+    }
+
+    /* Partners Section - Exact */
+    .partners-section {
+        padding: 60px 0;
+        border-bottom: 1px solid #ebedef;
+    }
+
+    .partners-section h2 {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 48px;
+    }
+
+    .partner-logos-exact {
         display: flex;
         justify-content: space-between;
         align-items: center;
+        gap: 40px;
+        flex-wrap: wrap;
     }
 
-    .btn-enroll-minimal {
-        color: #1a237e;
-        font-weight: 600;
+    .partner-logos-exact img {
+        max-height: 40px;
+        filter: grayscale(100%);
+        opacity: 0.8;
+        transition: var(--transition);
+    }
+
+    .partner-logos-exact img:hover {
+        filter: grayscale(0%);
+        opacity: 1;
+    }
+
+    /* Invest Section - Exact */
+    .invest-section {
+        padding: 80px 0;
+        background: #f5f7f8;
+    }
+
+    .invest-section h2 {
+        font-size: 1.5rem;
+        font-weight: 700;
+        margin-bottom: 60px;
+    }
+
+    .benefit-item {
+        text-align: left;
+    }
+
+    .benefit-item .icon {
+        font-size: 2rem;
+        color: var(--text-dark);
+        margin-bottom: 24px;
+    }
+
+    .benefit-item h3 {
+        font-size: 1.1rem;
+        font-weight: 700;
+        margin-bottom: 12px;
+    }
+
+    .benefit-item p {
+        font-size: 0.95rem;
+        color: #404040;
+        line-height: 1.5;
+    }
+
+    /* Course Grid Polish */
+    .course-grid-modern {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 24px;
+        margin-top: 40px;
+    }
+
+    .course-card-premium {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 16px;
+        overflow: hidden;
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+        text-decoration: none;
+        color: inherit;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    }
+
+    .course-card-premium:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1);
+        border-color: var(--coursera-blue);
+    }
+
+    .card-banner-wrap {
+        position: relative;
+        height: 180px;
+        overflow: hidden;
+    }
+
+    .card-banner-wrap img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
+    }
+
+    .course-card-premium:hover .card-banner-wrap img {
+        transform: scale(1.1);
+    }
+
+    .card-content {
+        padding: 24px;
+        flex-grow: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .category-label {
+        font-size: 0.75rem;
+        font-weight: 700;
+        color: var(--coursera-blue);
+        text-transform: uppercase;
+        margin-bottom: 12px;
+        letter-spacing: 1px;
+        display: inline-block;
+        padding: 4px 12px;
+        background: #e8f0fe;
+        border-radius: 50px;
+        width: fit-content;
+    }
+
+    .course-title-premium {
+        font-size: 1.25rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+        line-height: 1.4;
+        color: var(--text-dark);
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .instructor-meta {
+        margin-top: auto;
+        display: flex;
+        align-items: center;
         font-size: 0.9rem;
+        color: var(--text-muted);
+        padding-top: 16px;
+        border-top: 1px solid #f0f0f0;
+    }
+
+    .instructor-meta img {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        margin-right: 12px;
+        object-fit: cover;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    /* Testimonials Redesign */
+    .testimonial-card-premium {
+        background: #fff;
+        border: 1px solid var(--border-color);
+        border-radius: 20px;
+        padding: 40px;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        transition: var(--transition);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+    }
+
+    .testimonial-card-premium:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+        border-color: var(--coursera-blue);
+    }
+
+    .testimonial-text {
+        font-size: 1.1rem;
+        font-style: italic;
+        line-height: 1.7;
+        color: var(--text-dark);
+        margin-bottom: 30px;
+        position: relative;
+    }
+
+    .testimonial-text::before {
+        content: '"';
+        position: absolute;
+        top: -20px;
+        left: -10px;
+        font-size: 4rem;
+        color: #e8f0fe;
+        font-family: 'Outfit';
+        z-index: -1;
+    }
+
+    .testimonial-author {
+        display: flex;
+        align-items: center;
+        margin-top: auto;
+    }
+
+    .author-info h5 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 700;
+    }
+
+    .author-info span {
+        font-size: 0.9rem;
+        color: var(--text-muted);
+    }
+
+    /* Value Prop Section */
+    .value-prop {
+        padding: 100px 0;
+        background: #fff;
+    }
+
+    .vp-item {
+        margin-bottom: 50px;
+        display: flex;
+        gap: 20px;
+    }
+
+    .vp-item i {
+        font-size: 2.2rem;
+        color: var(--coursera-blue);
+        flex-shrink: 0;
+    }
+
+    .vp-item h4 {
+        font-weight: 700;
+        margin-bottom: 10px;
+        font-size: 1.3rem;
+    }
+
+    .vp-item p {
+        color: var(--text-muted);
+        line-height: 1.6;
+    }
+
+    /* Skills Cloud */
+    .skills-cloud {
+        padding: 40px 0;
+        text-align: center;
+    }
+
+    .skill-tag {
+        display: inline-block;
+        padding: 10px 24px;
+        background: #f5f7f8;
+        border-radius: 50px;
+        margin: 10px;
+        font-size: 1rem;
+        font-weight: 500;
+        color: var(--text-dark);
+        transition: var(--transition);
+        border: 1px solid #ebebeb;
+    }
+
+    .skill-tag:hover {
+        background: #fff;
+        border-color: var(--coursera-blue);
+        color: var(--coursera-blue);
+        transform: translateY(-3px);
     }
 </style>
 
 <!-- Hero Section -->
-<section class="hero-minimal">
+<section class="hero-plus">
     <div class="container">
-        <h1 data-animation="fadeInUp"><?php echo $this->settings->banner_title_1 ?></h1>
-        <p data-animation="fadeInUp" data-delay="600"><?php echo $this->settings->banner_description_1 ?></p>
-        <div class="search-bar-modern" data-animation="fadeInUp" data-delay="1000">
-            <input type="text" placeholder="Search for courses..." id="course-search">
-            <button class="btn-search">Search</button>
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <div class="hero-content">
+                    <div class="hero-plus-badge">
+                        <span>zeyobron</span> <span>PLUS</span>
+                    </div>
+                    <h1>Achieve your career goals with Zeyobron Plus</h1>
+                    <p class="subtext">Subscribe to build job-ready skills from world-class institutions.</p>
+
+                    <div class="hero-actions">
+                        <a href="<?php echo site_url('courses') ?>" class="btn-plus-trial">Explore courses</a>
+                    </div>
+
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="hero-plus-image">
+                    <div class="blue-fan-bg">
+                        <div class="fan-blade fan-blade-1"></div>
+                        <div class="fan-blade fan-blade-2"></div>
+                        <div class="fan-blade fan-blade-3"></div>
+                    </div>
+                    <img src="<?php echo base_url('upload/zeyobron_plus_hero_transparent.png') ?>"
+                        alt="Big Data Professional">
+                </div>
+            </div>
         </div>
     </div>
 </section>
+
 
 <!-- Featured Courses -->
 <?php if (!empty($f_courses)): ?>
-    <section class="section-padding bg-light">
-        <div class="container text-center">
-            <div class="title-wrap margin-bottom-50">
-                <h2 class="title"><?php echo lang('w_featured_courses') ?></h2>
-                <p>Explore our most popular learning paths</p>
+    <section class="section-padding" style="background: #f5f7f8;">
+        <div class="container">
+            <div class="section-title" data-aos="fade-up">
+                <h2>Explore Featured Courses</h2>
+                <p>Over 5,000 courses from leading experts</p>
             </div>
 
-            <div class="row">
-                <?php foreach ($f_courses as $val):
+            <div class="course-grid-modern">
+                <?php foreach (array_slice($f_courses, 0, 8) as $key => $val):
                     $course_url = site_url('courses/detail/') . str_replace(' ', '+', $val->title);
-                    if ($this->session->userdata('logged_in') && in_array($val->id, $my_courses)) {
-                        $course_url = site_url('courses/lecture/' . $val->id);
-                    }
                     ?>
-                    <div class="col-md-3 col-sm-6">
-                        <div class="course-card-minimal">
-                            <a href="<?php echo $course_url; ?>">
-                                <img src="<?php echo base_url() . ($val->images ? '/upload/courses/images/' . image_to_thumb(json_decode($val->images)[0]) : 'themes/default/images/course/course-01.jpg') ?>"
+                    <div data-aos="fade-up" data-aos-delay="<?php echo ($key % 4) * 100; ?>">
+                        <a href="<?php echo $course_url; ?>" class="course-card-premium">
+                            <div class="card-banner-wrap">
+                                <img src="<?php echo base_url() . ($val->images ? '/upload/courses/images/' . image_to_thumb(json_decode($val->images)[0]) : 'upload/default_course_banner.png') ?>"
                                     alt="<?php echo $val->title ?>">
-                            </a>
-                            <div class="course-content-minimal text-left">
-                                <h4><a href="<?php echo $course_url; ?>"><?php echo $val->title ?></a></h4>
                             </div>
-                            <div class="course-footer-minimal">
-                                <a href="<?php echo $course_url; ?>" class="btn-enroll-minimal">View Course <i
-                                        class="fa fa-arrow-right"></i></a>
+                            <div class="card-content">
+                                <div class="category-label">Professional Certificate</div>
+                                <h4 class="course-title-premium"><?php echo $val->title ?></h4>
+                                <div class="instructor-meta">
+                                    <img src="<?php echo base_url('upload/expert_mentor_avatar.png'); ?>" alt="Instructor">
+                                    <span>Expert Mentor</span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     </div>
                 <?php endforeach; ?>
+            </div>
+
+            <div class="text-center mt-5" data-aos="fade-up">
+                <a href="<?php echo site_url('courses') ?>" class="btn-primary-coursera"
+                    style="background: none; border: 1px solid var(--coursera-blue); color: var(--coursera-blue);">View All
+                    Courses</a>
             </div>
         </div>
     </section>
 <?php endif; ?>
 
-<!-- Testimonials (Simplified) -->
+
+<!-- Testimonials -->
 <?php if (!empty($testimonials)): ?>
     <section class="section-padding bg-white">
-        <div class="container text-center">
-            <h2 class="margin-bottom-50">What Our Learners Say</h2>
+        <div class="container">
+            <div class="section-title" data-aos="fade-up">
+                <h2>From the Zeyobron Community</h2>
+                <p>100+ million people are already learning with us</p>
+            </div>
             <div class="row">
-                <?php foreach (array_slice($testimonials, 0, 3) as $val): ?>
-                    <div class="col-md-4">
-                        <div class="testimonial-minimal">
-                            <p class="text-italic">"<?php echo $val->t_feedback; ?>"</p>
-                            <div class="margin-top-20">
-                                <strong><?php echo $val->t_name ?></strong>
-                                <span class="block text-muted small"><?php echo $val->t_type ?></span>
+                <?php foreach (array_slice($testimonials, 0, 3) as $key => $val): ?>
+                    <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="<?php echo $key * 100; ?>">
+                        <div class="testimonial-card-premium">
+                            <div class="testimonial-text">
+                                <?php echo $val->t_feedback; ?>
+                            </div>
+                            <div class="testimonial-author">
+                                <div class="author-info">
+                                    <h5><?php echo $val->t_name ?></h5>
+                                    <span><?php echo $val->t_type ?></span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -193,12 +616,20 @@
     </section>
 <?php endif; ?>
 
-<!-- Contact Section (Minimal) -->
-<section class="section-padding bg-dark color-light text-center">
-    <div class="container">
-        <h2>Ready to start?</h2>
-        <p class="margin-bottom-30">Get in touch for personalized learning solutions.</p>
-        <a href="<?php echo site_url('contact') ?>" class="btn-search"
-            style="display:inline-block; text-decoration:none;">Contact Us</a>
+
+<!-- CTA Section -->
+<section class="section-padding" style="background: var(--coursera-blue); color: #fff; text-align: center;">
+    <div class="container" data-aos="zoom-in">
+        <h2 style="font-size: 3rem; font-weight: 700; margin-bottom: 24px;">Take the next step toward your goals.</h2>
+        <p style="font-size: 1.25rem; margin-bottom: 40px; opacity: 0.9;">Join now to receive personalized
+            recommendations from the Zeyobron catalog.</p>
+        <a href="<?php echo site_url('courses') ?>" class="btn-primary-coursera"
+            style="background: #fff; color: var(--coursera-blue);">Join for Free</a>
     </div>
 </section>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initializing AOS is handled in template.php
+    });
+</script>

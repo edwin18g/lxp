@@ -7,9 +7,10 @@
  *
  * @package     classiebit
  * @author      prodpk
-*/
+ */
 
-class Course_model extends CI_Model {
+class Course_model extends CI_Model
+{
 
     /**
      * Constructor
@@ -54,14 +55,14 @@ class Course_model extends CI_Model {
     public function count_total_b_sales()
     {
         return $this->db->select(array(
-                            'SUM(b_bookings_payments.total_amount) total_amount',
-                            'b_bookings_payments.date_added',
-                        ))
-                        ->order_by('b_bookings_payments.date_added', 'ASC')
-                        ->group_by('b_bookings_payments.date_added')
-                        ->get('b_bookings_payments')
-                        ->result();
-    }    
+            'SUM(b_bookings_payments.total_amount) total_amount',
+            'b_bookings_payments.date_added',
+        ))
+            ->order_by('b_bookings_payments.date_added', 'ASC')
+            ->group_by('b_bookings_payments.date_added')
+            ->get('b_bookings_payments')
+            ->result();
+    }
 
     /**
      * todays_batches_list
@@ -69,18 +70,18 @@ class Course_model extends CI_Model {
     public function todays_batches_list()
     {
         return $this->db->select(array(
-                            'id',
-                            'title',
-                            'start_time',
-                            'end_time',
-                            ' "admin/batches/view/" url',
-                            ' "batch" type',
-                        ))
-                        ->where(array('start_date <='=>date('Y-m-d'), 'end_date >='=>date('Y-m-d')))
-                        ->order_by('start_date', 'ASC')
-                        ->get('batches')
-                        ->result();
-    }    
+            'id',
+            'title',
+            'start_time',
+            'end_time',
+            ' "admin/batches/view/" url',
+            ' "batch" type',
+        ))
+            ->where(array('start_date <=' => date('Y-m-d'), 'end_date >=' => date('Y-m-d')))
+            ->order_by('start_date', 'ASC')
+            ->get('batches')
+            ->result();
+    }
 
     /**
      * top_courses_list
@@ -88,106 +89,103 @@ class Course_model extends CI_Model {
     public function top_courses_list()
     {
         return $this->db->query("SELECT c.id, c.title, c.images, 'courses/detail/' url, 'course' type, (SELECT COUNT(bbm.id) FROM b_bookings_members bbm WHERE bbm.b_bookings_id IN (SELECT bb.id FROM b_bookings bb WHERE bb.courses_id = c.id)) total_bookings FROM courses c where featured = '1' ORDER BY total_bookings DESC LIMIT 5")
-                        ->result();
-    }    
-    
+            ->result();
+    }
+
     /**
      * get_courses
      */
-    
-   
+
+
     public function is_suscribed_course($id = null)
     {
         $this->db->select('*')
-                        ->where(array("$this->table.status != " => 0))->where_in('id',$categories);
+            ->where(array("$this->table.status != " => 0))->where('id', $id);
 
-        
+
 
         return $this->db->order_by('id', 'DESC')
-                        ->get($this->table)
-                        ->result();
+            ->get($this->table)
+            ->result();
     }
     public function get_my_courses_ids($id)
     {
         $this->db->select('*')
-        ->where("course_subscription.cs_user_id",$id);
+            ->where("course_subscription.cs_user_id", $id);
 
 
 
-return $this->db
-        ->get('course_subscription')
-        ->result_array();
+        return $this->db
+            ->get('course_subscription')
+            ->result_array();
     }
-    public function check_secure($finger_id,$user_id)
+    public function check_secure($finger_id, $user_id)
     {
-        $query      = $this->db->where(array('id'=>$user_id,'secure_key'=>$finger_id))->get('users');
-        $count      = $query->num_rows();
-        $return     = false;
-        if($count > 0)
-        {
-            $return  = true;
+        $query = $this->db->where(array('id' => $user_id, 'secure_key' => $finger_id))->get('users');
+        $count = $query->num_rows();
+        $return = false;
+        if ($count > 0) {
+            $return = true;
         }
         return $return;
     }
     public function get_my_courses($categories = array())
     {
-        if(!empty($categories)){
-          $this->db->select(array(
-                            "$this->table.id",
-                            "$this->table.title",
-                            "$this->table.status",
-                            "$this->table.images",
-                            "$this->table.course_categories_id",
-                            "$this->table.date_added",
-                            "$this->table.date_updated",
-                            "(SELECT users.id FROM users WHERE users.id = (SELECT bt.users_id FROM batches_tutors bt WHERE bt.batches_id = (SELECT ba.id FROM batches ba WHERE ba.courses_id = $this->table.id LIMIT 1) LIMIT 1) LIMIT 1) users_id",
-                            "(SELECT cc.title FROM course_categories cc WHERE cc.id = $this->table.course_categories_id) category_name",
-                            "(SELECT COUNT(ba.id) FROM batches ba WHERE ba.courses_id = $this->table.id) total_batches",
-                            "(SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price",
-                            "(SELECT COUNT(DISTINCT(bt.users_id)) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors",
-                            "(SELECT COUNT(ba4.id) FROM batches ba4 WHERE ba4.courses_id = $this->table.id AND ba4.recurring = 1) total_recurring",
-                            "(SELECT COUNT(bm.id) FROM b_bookings_members bm WHERE bm.b_bookings_id IN (SELECT bk.id FROM b_bookings bk WHERE bk.courses_id = $this->table.id)) total_b_bookings",
-                        ));
-                        $this->db->where_in('id',$categories);
+        if (!empty($categories)) {
+            $this->db->select(array(
+                "$this->table.id",
+                "$this->table.title",
+                "$this->table.status",
+                "$this->table.images",
+                "$this->table.course_categories_id",
+                "$this->table.date_added",
+                "$this->table.date_updated",
+                "(SELECT users.id FROM users WHERE users.id = (SELECT bt.users_id FROM batches_tutors bt WHERE bt.batches_id = (SELECT ba.id FROM batches ba WHERE ba.courses_id = $this->table.id LIMIT 1) LIMIT 1) LIMIT 1) users_id",
+                "(SELECT cc.title FROM course_categories cc WHERE cc.id = $this->table.course_categories_id) category_name",
+                "(SELECT COUNT(ba.id) FROM batches ba WHERE ba.courses_id = $this->table.id) total_batches",
+                "(SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price",
+                "(SELECT COUNT(DISTINCT(bt.users_id)) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors",
+                "(SELECT COUNT(ba4.id) FROM batches ba4 WHERE ba4.courses_id = $this->table.id AND ba4.recurring = 1) total_recurring",
+                "(SELECT COUNT(bm.id) FROM b_bookings_members bm WHERE bm.b_bookings_id IN (SELECT bk.id FROM b_bookings bk WHERE bk.courses_id = $this->table.id)) total_b_bookings",
+            ));
+            $this->db->where_in('id', $categories);
 
-        
 
-        return $this->db->order_by('id', 'DESC')
-                        ->get($this->table)
-                        ->result();   
-        }
-        else
-        {
+
+            return $this->db->order_by('id', 'DESC')
+                ->get($this->table)
+                ->result();
+        } else {
             return array();
         }
-       
+
     }
     public function get_courses($categories = array())
     {
         $this->db->select(array(
-                            "$this->table.id",
-                            "$this->table.title",
-                            "$this->table.status",
-                            "$this->table.images",
-                            "$this->table.course_categories_id",
-                            "$this->table.date_added",
-                            "$this->table.date_updated",
-                            "(SELECT users.id FROM users WHERE users.id = (SELECT bt.users_id FROM batches_tutors bt WHERE bt.batches_id = (SELECT ba.id FROM batches ba WHERE ba.courses_id = $this->table.id LIMIT 1) LIMIT 1) LIMIT 1) users_id",
-                            "(SELECT cc.title FROM course_categories cc WHERE cc.id = $this->table.course_categories_id) category_name",
-                            "(SELECT COUNT(ba.id) FROM batches ba WHERE ba.courses_id = $this->table.id) total_batches",
-                            "(SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price",
-                            "(SELECT COUNT(DISTINCT(bt.users_id)) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors",
-                            "(SELECT COUNT(ba4.id) FROM batches ba4 WHERE ba4.courses_id = $this->table.id AND ba4.recurring = 1) total_recurring",
-                            "(SELECT COUNT(bm.id) FROM b_bookings_members bm WHERE bm.b_bookings_id IN (SELECT bk.id FROM b_bookings bk WHERE bk.courses_id = $this->table.id)) total_b_bookings",
-                        ))
-                        ->where(array("$this->table.status != " => 0 ,"$this->table.featured" => 0));
+            "$this->table.id",
+            "$this->table.title",
+            "$this->table.status",
+            "$this->table.images",
+            "$this->table.course_categories_id",
+            "$this->table.date_added",
+            "$this->table.date_updated",
+            "(SELECT users.id FROM users WHERE users.id = (SELECT bt.users_id FROM batches_tutors bt WHERE bt.batches_id = (SELECT ba.id FROM batches ba WHERE ba.courses_id = $this->table.id LIMIT 1) LIMIT 1) LIMIT 1) users_id",
+            "(SELECT cc.title FROM course_categories cc WHERE cc.id = $this->table.course_categories_id) category_name",
+            "(SELECT COUNT(ba.id) FROM batches ba WHERE ba.courses_id = $this->table.id) total_batches",
+            "(SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price",
+            "(SELECT COUNT(DISTINCT(bt.users_id)) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors",
+            "(SELECT COUNT(ba4.id) FROM batches ba4 WHERE ba4.courses_id = $this->table.id AND ba4.recurring = 1) total_recurring",
+            "(SELECT COUNT(bm.id) FROM b_bookings_members bm WHERE bm.b_bookings_id IN (SELECT bk.id FROM b_bookings bk WHERE bk.courses_id = $this->table.id)) total_b_bookings",
+        ))
+            ->where(array("$this->table.status != " => 0));
 
-        if(! empty($categories))
+        if (!empty($categories))
             $this->db->where_in("$this->table.course_categories_id", $categories);
 
         return $this->db->order_by('id', 'DESC')
-                        ->get($this->table)
-                        ->result();
+            ->get($this->table)
+            ->result();
     }
 
     /**
@@ -196,26 +194,26 @@ return $this->db
     public function get_f_courses()
     {
         $this->db->select(array(
-                            "$this->table.id",
-                            "$this->table.title",
-                            "$this->table.status",
-                            "$this->table.images",
-                            "$this->table.course_categories_id",
-                            "$this->table.date_added",
-                            "$this->table.date_updated",
-                            "(SELECT users.id FROM users WHERE users.id = (SELECT bt.users_id FROM batches_tutors bt WHERE bt.batches_id = (SELECT ba.id FROM batches ba WHERE ba.courses_id = $this->table.id LIMIT 1) LIMIT 1) LIMIT 1) users_id",
-                            "(SELECT cc.title FROM course_categories cc WHERE cc.id = $this->table.course_categories_id) category_name",
-                            "(SELECT COUNT(ba.id) FROM batches ba WHERE ba.courses_id = $this->table.id) total_batches",
-                            "(SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price",
-                            "(SELECT COUNT(DISTINCT(bt.users_id)) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors",
-                            "(SELECT COUNT(ba4.id) FROM batches ba4 WHERE ba4.courses_id = $this->table.id AND ba4.recurring = 1) total_recurring",
-                            "(SELECT COUNT(bm.id) FROM b_bookings_members bm WHERE bm.b_bookings_id IN (SELECT bk.id FROM b_bookings bk WHERE bk.courses_id = $this->table.id)) total_b_bookings",
-                        ))
-                        ->where(array("$this->table.status != " => 0, "$this->table.featured"=>1));
+            "$this->table.id",
+            "$this->table.title",
+            "$this->table.status",
+            "$this->table.images",
+            "$this->table.course_categories_id",
+            "$this->table.date_added",
+            "$this->table.date_updated",
+            "(SELECT users.id FROM users WHERE users.id = (SELECT bt.users_id FROM batches_tutors bt WHERE bt.batches_id = (SELECT ba.id FROM batches ba WHERE ba.courses_id = $this->table.id LIMIT 1) LIMIT 1) LIMIT 1) users_id",
+            "(SELECT cc.title FROM course_categories cc WHERE cc.id = $this->table.course_categories_id) category_name",
+            "(SELECT COUNT(ba.id) FROM batches ba WHERE ba.courses_id = $this->table.id) total_batches",
+            "(SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price",
+            "(SELECT COUNT(DISTINCT(bt.users_id)) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors",
+            "(SELECT COUNT(ba4.id) FROM batches ba4 WHERE ba4.courses_id = $this->table.id AND ba4.recurring = 1) total_recurring",
+            "(SELECT COUNT(bm.id) FROM b_bookings_members bm WHERE bm.b_bookings_id IN (SELECT bk.id FROM b_bookings bk WHERE bk.courses_id = $this->table.id)) total_b_bookings",
+        ))
+            ->where(array("$this->table.status != " => 0, "$this->table.featured" => 1));
 
         return $this->db->order_by('date_updated', 'DESC')
-                        ->get($this->table)
-                        ->result();
+            ->get($this->table)
+            ->result();
     }
 
     /**
@@ -224,13 +222,13 @@ return $this->db
      * @return array
      * 
      **/
-    public function get_course_categories_id($category = NULL) 
+    public function get_course_categories_id($category = NULL)
     {
         return $this->db->select(array('id'))
-                         ->where(array('title'=>$category))
-                         ->get('course_categories')
-                         ->row();
-        
+            ->where(array('title' => $category))
+            ->get('course_categories')
+            ->row();
+
     }
 
     /**
@@ -239,13 +237,13 @@ return $this->db
      * @return array
      * 
      **/
-    public function get_course_id_by_title($title = NULL) 
+    public function get_course_id_by_title($title = NULL)
     {
         return $this->db->select(array('id', 'course_categories_id'))
-                         ->where(array('title'=>$title, 'status !='=>'0'))
-                         ->get($this->table)
-                         ->row();
-        
+            ->where(array('title' => $title, 'status !=' => '0'))
+            ->get($this->table)
+            ->row();
+
     }
 
     /**
@@ -254,13 +252,13 @@ return $this->db
      * @return array
      * 
      **/
-    public function get_title_by_id($id = NULL, $table = NULL) 
+    public function get_title_by_id($id = NULL, $table = NULL)
     {
         return $this->db->select(array('title'))
-                         ->where(array('id'=>$id))
-                         ->get($table)
-                         ->row();
-        
+            ->where(array('id' => $id))
+            ->get($table)
+            ->row();
+
     }
 
     /**
@@ -268,81 +266,83 @@ return $this->db
      */
     public function get_course_detail($course_title = NULL, $param = array())
     {
-        $id = (!empty($param['id']))?$param['id']:false;
+        $id = (!empty($param['id'])) ? $param['id'] : false;
         $this->db->select(array(
-                            "$this->table.id",
-                            "$this->table.title",
-                            "$this->table.description",
-                            "$this->table.status",
-                            "$this->table.images",
-                            "$this->table.course_categories_id",
-                            "$this->table.meta_title",
-                            "$this->table.meta_tags",
-                            "$this->table.meta_description",
-                            "$this->table.date_added",
-                            "$this->table.date_updated",
-                            "(SELECT cc.title FROM course_categories cc WHERE cc.id = $this->table.course_categories_id) category_name",
-                            "(SELECT COUNT(ba.id) FROM batches ba WHERE ba.courses_id = $this->table.id) total_batches",
-                            "(SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price",
-                            "(SELECT MIN(ba2.start_date) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_date",
-                            "(SELECT COUNT(DISTINCT(bt.users_id)) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors",
-                            "(SELECT COUNT(ba4.id) FROM batches ba4 WHERE ba4.courses_id = $this->table.id AND ba4.recurring = 1) total_recurring",
-                            "(SELECT COUNT(bm.id) FROM b_bookings_members bm WHERE bm.b_bookings_id IN (SELECT bk.id FROM b_bookings bk WHERE bk.courses_id = $this->table.id)) total_b_bookings",
+            "$this->table.id",
+            "$this->table.title",
+            "$this->table.description",
+            "$this->table.status",
+            "$this->table.images",
+            "$this->table.course_categories_id",
+            "$this->table.meta_title",
+            "$this->table.meta_tags",
+            "$this->table.meta_description",
+            "$this->table.date_added",
+            "$this->table.date_updated",
+            "(SELECT cc.title FROM course_categories cc WHERE cc.id = $this->table.course_categories_id) category_name",
+            "(SELECT COUNT(ba.id) FROM batches ba WHERE ba.courses_id = $this->table.id) total_batches",
+            "(SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price",
+            "(SELECT MIN(ba2.start_date) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_date",
+            "(SELECT COUNT(DISTINCT(bt.users_id)) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors",
+            "(SELECT COUNT(ba4.id) FROM batches ba4 WHERE ba4.courses_id = $this->table.id AND ba4.recurring = 1) total_recurring",
+            "(SELECT COUNT(bm.id) FROM b_bookings_members bm WHERE bm.b_bookings_id IN (SELECT bk.id FROM b_bookings bk WHERE bk.courses_id = $this->table.id)) total_b_bookings",
 
         ));
         $this->db->where(array("$this->table.title" => $course_title));
 
-                        if($id)
-                        {
-                            $this->db->where(array("$this->table.id" => $id));
-                        }
-        $return =  $this->db->get($this->table)->row();
-//echo $this->db->last_query();die;
-                        return $return;
+        if ($id) {
+            $this->db->where(array("$this->table.id" => $id));
+        }
+        $return = $this->db->get($this->table)->row();
+        //echo $this->db->last_query();die;
+        return $return;
     }
     public function get_course_by_id($param = array())
     {
-        $id = (!empty($param['id']))?$param['id']:false;
+        $id = (!empty($param['id'])) ? $param['id'] : false;
         $this->db->select("*");
-      
 
-                        if($id)
-                        {
-                            $this->db->where(array("$this->table.id" => $id));
-                        }
-        $return =  $this->db->get($this->table)->row();
-//echo $this->db->last_query();die;
-                        return $return;
+
+        if ($id) {
+            $this->db->where(array("$this->table.id" => $id));
+        }
+        $return = $this->db->get($this->table)->row();
+        //echo $this->db->last_query();die;
+        return $return;
     }
     public function get_course_lecture($id = NULL)
     {
         $this->db->select('*')
-                        ->where('course_lecture.cl_course_id',$id);
+            ->where('course_lecture.cl_course_id', $id);
 
         return $this->db->get('course_lecture')
-                        ->result_array();
+            ->result_array();
     }
     public function get_course_lecture_by_id($id = NULL)
     {
-        $this->db->select('*')
-                        ->where('course_lecture.id',$id);
+        $this->db->select('course_lecture.*, courses.title as course_title')
+            ->from('course_lecture')
+            ->join('courses', 'courses.id = course_lecture.cl_course_id', 'left')
+            ->where('course_lecture.id', $id);
 
-        $result = $this->db->get('course_lecture')
-                        ->row_array();
+        $result = $this->db->get()
+            ->row_array();
         return $result;
     }
-    
-     public function get_course_lecture_random_id($courses_id = NULL)
-    {
-        $this->db->select('*')
-                        ->where('course_lecture.cl_course_id',$courses_id);
-                        
-                         $this->db->order_by("course_lecture.id","ASC");
-                         $this->db->limit(1); 
 
-        $result = $this->db->get('course_lecture')
-                        ->result_array();
-              
+    public function get_course_lecture_random_id($courses_id = NULL)
+    {
+        $this->db->select('course_lecture.*, courses.title as course_title')
+            ->from('course_lecture')
+            ->join('courses', 'courses.id = course_lecture.cl_course_id', 'left')
+            ->where('course_lecture.cl_course_id', $courses_id);
+
+        $this->db->order_by("course_lecture.id", "ASC");
+        $this->db->limit(1);
+
+        $result = $this->db->get()
+            ->result_array();
+
         return $result[0];
     }
 
@@ -361,7 +361,7 @@ return $this->db
                                         users.image , 
                                         (SELECT COUNT(DISTINCT(bt.batches_id)) FROM batches_tutors bt WHERE bt.users_id = users.id) total_batches
                                  FROM users WHERE users.id IN (SELECT bt.users_id FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba.id FROM batches ba WHERE ba.courses_id = $courses_id))")
-                        ->result();
+            ->result();
     }
 
     /**
@@ -381,7 +381,7 @@ return $this->db
                                         (SELECT MIN(ba2.fees) FROM batches ba2 WHERE ba2.courses_id = $this->table.id) starting_price,
                                         (SELECT COUNT(bt.users_id) FROM batches_tutors bt WHERE bt.batches_id IN (SELECT ba3.id FROM batches ba3 WHERE ba3.courses_id = $this->table.id)) total_tutors
                                  FROM $this->table WHERE $this->table.id IN (SELECT ba.courses_id FROM batches ba WHERE ba.id IN (SELECT bt.batches_id FROM batches_tutors bt WHERE bt.users_id = $user_id))")
-                        ->result();
+            ->result();
     }
 
     /**
@@ -393,23 +393,23 @@ return $this->db
     public function get_courses_tutor($username = NULL)
     {
         return $this->db->select(array(
-                            'users.id',
-                            'users.username',
-                            'users.first_name',
-                            'users.last_name',
-                            'users.gender',
-                            'users.dob',
-                            'users.email',
-                            'users.mobile',
-                            'users.address',
-                            'users.profession',
-                            'users.experience',
-                            'users.about',
-                            'users.image',
-                        ))
-                        ->where(array('users.username'=>$username))
-                        ->get('users')
-                        ->row();
+            'users.id',
+            'users.username',
+            'users.first_name',
+            'users.last_name',
+            'users.gender',
+            'users.dob',
+            'users.email',
+            'users.mobile',
+            'users.address',
+            'users.profession',
+            'users.experience',
+            'users.about',
+            'users.image',
+        ))
+            ->where(array('users.username' => $username))
+            ->get('users')
+            ->row();
     }
 
     /**
@@ -420,31 +420,30 @@ return $this->db
      **/
     public function get_tutors($ids = array())
     {
-        if(empty($ids))
-        {
+        if (empty($ids)) {
             return array();
         }
         return $this->db->select(array(
-                            'users.id',
-                            'users.username',
-                            'users.first_name',
-                            'users.last_name',
-                            'users.gender',
-                            'users.dob',
-                            'users.email',
-                            'users.mobile',
-                            'users.address',
-                            'users.profession',
-                            'users.experience',
-                            'users.about',
-                            'users.image',
-                            "(SELECT COUNT(DISTINCT(bt.batches_id)) FROM batches_tutors bt WHERE bt.users_id = users.id) total_batches",
-                            "(SELECT COUNT(DISTINCT(et.events_id)) FROM events_tutors et WHERE et.users_id = users.id) total_events",
-                        ))
-                        ->where_in('id', $ids)
-                        ->get('users')
-                        ->result();
-    }    
+            'users.id',
+            'users.username',
+            'users.first_name',
+            'users.last_name',
+            'users.gender',
+            'users.dob',
+            'users.email',
+            'users.mobile',
+            'users.address',
+            'users.profession',
+            'users.experience',
+            'users.about',
+            'users.image',
+            "(SELECT COUNT(DISTINCT(bt.batches_id)) FROM batches_tutors bt WHERE bt.users_id = users.id) total_batches",
+            "(SELECT COUNT(DISTINCT(et.events_id)) FROM events_tutors et WHERE et.users_id = users.id) total_events",
+        ))
+            ->where_in('id', $ids)
+            ->get('users')
+            ->result();
+    }
 
     /**
      * get_categories
@@ -455,14 +454,66 @@ return $this->db
     public function get_categories($search = '')
     {
         return $this->db->select(array(
-                            'course_categories.title',
-                        ))
-                        ->like('course_categories.title', $search, 'both')
-                        ->where(array('course_categories.status !='=>'0'))
-                        ->get('course_categories')
-                        ->result();
-    }    
+            'course_categories.title',
+        ))
+            ->like('course_categories.title', $search, 'both')
+            ->where(array('course_categories.status !=' => '0'))
+            ->get('course_categories')
+            ->result();
+    }
 
+    public function mark_lecture_complete($user_id, $lecture_id, $course_id)
+    {
+        $data = array(
+            'user_id' => $user_id,
+            'lecture_id' => $lecture_id,
+            'course_id' => $course_id,
+        );
+
+        // Use insert_ignore or similar if possible, but CI version might vary.
+        // We'll check if exists first to avoid duplicate key error.
+        $exists = $this->db->get_where('user_lecture_progress', array('user_id' => $user_id, 'lecture_id' => $lecture_id))->num_rows();
+
+        if (!$exists) {
+            return $this->db->insert('user_lecture_progress', $data);
+        }
+        return true;
+    }
+
+    public function get_course_progress($user_id, $course_id)
+    {
+        // Get total lectures in course
+        $total_lectures = $this->db->where('cl_course_id', $course_id)->count_all_results('course_lecture');
+
+        if ($total_lectures == 0)
+            return 0;
+
+        // Get completed lectures
+        $completed_lectures = $this->db->where(array('user_id' => $user_id, 'course_id' => $course_id))->count_all_results('user_lecture_progress');
+
+        return round(($completed_lectures / $total_lectures) * 100);
+    }
+
+    public function get_user_completed_lectures($user_id, $course_id)
+    {
+        $result = $this->db->select('lecture_id')
+            ->where(array('user_id' => $user_id, 'course_id' => $course_id))
+            ->get('user_lecture_progress')
+            ->result_array();
+
+        return array_column($result, 'lecture_id');
+    }
+
+    public function get_my_courses_details($user_id)
+    {
+        return $this->db->select("{$this->table}.*, course_categories.title as category_name")
+            ->from($this->table)
+            ->join('course_subscription', "course_subscription.cs_course_id = {$this->table}.id")
+            ->join('course_categories', "course_categories.id = {$this->table}.course_categories_id", 'left')
+            ->where('course_subscription.cs_user_id', $user_id)
+            ->get()
+            ->result();
+    }
 }
 
 /*Course model ends*/
