@@ -1,6 +1,7 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Contact extends Public_Controller {
+class Contact extends Public_Controller
+{
 
     /**
      * Constructor
@@ -36,28 +37,24 @@ class Contact extends Public_Controller {
         $this->form_validation->set_rules('message', lang('contacts_message'), 'required|trim|min_length[10]');
         $this->form_validation->set_rules('captcha', lang('contacts_captcha'), 'required|trim|callback__check_captcha');
 
-        if ($this->form_validation->run() == TRUE)
-        {
+        if ($this->form_validation->run() == TRUE) {
             // attempt to save and send the message
             $post_data = $this->security->xss_clean($this->input->post());
             $saved_and_sent = $this->contact_model->save_and_send_message($post_data, $this->settings);
 
-            if ($saved_and_sent)
-            {
-                $notification   = array(
-                    'users_id'  => 1,
-                    'n_type'    => 'contacts',
+            if ($saved_and_sent) {
+                $notification = array(
+                    'users_id' => 1,
+                    'n_type' => 'contacts',
                     'n_content' => 'noti_new_message',
-                    'n_url'     => site_url('admin/contacts'), 
+                    'n_url' => site_url('admin/contacts'),
                 );
-                $this->notifications_model->save_notifications($notification);    
+                $this->notifications_model->save_notifications($notification);
 
                 // redirect to home page
                 $this->session->set_flashdata('message', sprintf(lang('contacts_send_success'), $this->input->post('name', TRUE)));
                 redirect(site_url('contact'));
-            }
-            else
-            {
+            } else {
                 // stay on contact page
                 $this->error = sprintf(lang('contacts_error_send_failed'), $this->input->post('name', TRUE));
             }
@@ -65,17 +62,17 @@ class Contact extends Public_Controller {
 
         // create captcha image
         $captcha = create_captcha(array(
-            'img_path'   => "./captcha/",
-            'img_url'    => base_url('/captcha') . "/",
-            'font_path'  => FCPATH . "themes/core/fonts/bromine/Bromine.ttf",
-            'img_width'	 => 300,
+            'img_path' => "./captcha/",
+            'img_url' => base_url('/captcha') . "/",
+            'font_path' => FCPATH . "themes/core/fonts/bromine/Bromine.ttf",
+            'img_width' => 300,
             'img_height' => 100
         ));
 
         $captcha_data = array(
-            'captcha_time' => $captcha['time'],
-            'ip_address'   => $this->input->ip_address(),
-            'word'	       => $captcha['word']
+            'captcha_time' => $captcha ? $captcha['time'] : time(),
+            'ip_address' => $this->input->ip_address(),
+            'word' => $captcha ? $captcha['word'] : ''
         );
 
         // store captcha image
@@ -83,14 +80,14 @@ class Contact extends Public_Controller {
 
         // setup page header data
         $this
-        ->add_js_theme( "pages/contact/index.js")
-        ->set_title( lang('menu_contact') );
+            ->add_js_theme("pages/contact/index.js")
+            ->set_title(lang('menu_contact'));
 
         $data = $this->includes;
 
         // set content data
         $content_data = array(
-            'captcha_image' => $captcha['image']
+            'captcha_image' => $captcha ? $captcha['image'] : ''
         );
 
         // load views
@@ -114,14 +111,11 @@ class Contact extends Public_Controller {
     {
         $verified = $this->contact_model->verify_captcha($captcha);
 
-        if ($verified == FALSE)
-        {
+        if ($verified == FALSE) {
             $this->form_validation->set_message('_check_captcha', lang('contacts_error_captcha'));
             return FALSE;
-        }
-        else
-        {
-            return $captcha;    
+        } else {
+            return $captcha;
         }
     }
 

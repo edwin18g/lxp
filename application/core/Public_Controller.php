@@ -30,19 +30,18 @@ class Public_Controller extends MY_Controller
         // set up global header data
         $this
             ->add_plugin_theme(array(
-                'animate-css/animate.min.css',
-
-                // Bootstrap Select
-                'bootstrap-select/css/bootstrap-select.min.css',
-                'bootstrap-select/js/bootstrap-select.min.js',
-
+                'jquery/jquery.min.js',
+                'bootstrap/css/bootstrap.min.css',
+                'bootstrap/js/bootstrap.min.js',
                 'font-awesome/css/font-awesome.min.css',
-
+            ), 'core')
+            ->add_plugin_theme(array(
+                'animate-css/animate.min.css',
                 'univershicon/univershicon.css',
-
+                'owl-carousel/owl.carousel.css',
+                'owl-carousel/owl.carousel.min.js',
                 'pretty-photo/prettyPhoto.css',
                 'pretty-photo/jquery.prettyPhoto.js',
-
                 'theme-lib/jquery.appear.min.js',
                 'theme-lib/jquery.easing.min.js',
                 'theme-lib/menu.js',
