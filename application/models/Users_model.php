@@ -117,6 +117,22 @@ class Users_model extends CI_Model
 
     }
 
+    /**
+     * reset_device_lock
+     *
+     * @return boolean
+     * 
+     **/
+    public function reset_device_lock($id)
+    {
+        if ($id) {
+            $this->db->where('id', $id)
+                ->update($this->table, array('device_locked' => 0, 'last_session_id' => NULL));
+            return TRUE;
+        }
+        return FALSE;
+    }
+
 
     /**
      * Check to see if a username already exists

@@ -474,6 +474,10 @@ if (!function_exists('action_buttons')) {
             $menu .= '<li><a href="' . site_url("admin/" . $route . "/users/" . $id) . '" class="waves-effect waves-block"><i class="material-icons">list</i>Active Students</a></li>';
         }
 
+        if ($route == 'users') {
+            $menu .= '<li><a href="' . site_url("admin/users/unlock_device/" . $id) . '" class="waves-effect waves-block"><i class="material-icons">lock_open</i>Unlock Device</a></li>';
+        }
+
 
         if ($route !== 'bbookings' && $route !== 'ebookings' && $route !== 'pages')
             $menu .= '<li role="separator" class="divider"></li>

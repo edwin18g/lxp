@@ -663,6 +663,30 @@ class Users extends Admin_Controller
     }
 
 
+    /**
+     * Unlock Device
+     */
+    public function unlock_device($id = NULL)
+    {
+        if (!$this->ion_auth->is_admin()) {
+            echo '<p>' . lang('users_only_admin_can') . '</p>';
+            exit;
+        }
+
+        $id = (int) $id;
+        if (empty($id)) {
+            $this->session->set_flashdata('error', sprintf(lang('alert_not_found'), lang('menu_user')));
+            redirect('admin/users');
+        }
+
+        if ($this->users_model->reset_device_lock($id)) {
+            $this->session->set_flashdata('message', 'User device has been unlocked successfully.');
+        } else {
+            $this->session->set_flashdata('error', 'Failed to unlock user device.');
+        }
+        redirect('admin/users');
+    }
+
 }
 
 /* Users controller ends */

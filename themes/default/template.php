@@ -410,9 +410,8 @@ if (
                     </div>
 
                     <div class="header-links">
-                        <a href="<?php echo site_url('courses') ?>">Explore <i class="fa fa-chevron-down"
-                                style="font-size: 10px; margin-left: 4px;"></i></a>
-                        <a href="#">Degrees</a>
+                        <a href="<?php echo site_url('courses') ?>"> Courses </a>
+
                     </div>
 
                     <form class="header-search" action="<?php echo site_url('courses') ?>" method="get">

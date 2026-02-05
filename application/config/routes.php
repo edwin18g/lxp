@@ -61,6 +61,7 @@ $route['logout'] = 'auth/logout';
 $route['admin'] = 'admin/dashboard';
 
 // Frontend Routes
+$route['cms/about-us'] = 'cms/about_us';
 $route['cms/faq'] = 'cms/faq';
 $route['cms/(:any)'] = 'cms/index/$1';
 
@@ -83,6 +84,7 @@ $route['stream'] = 'courses/stream_sample';
 
 $route['courses/content_course'] = 'courses/content_course';
 $route['courses/my_courses'] = 'courses/my_courses';
+$route['my_courses'] = 'courses/my_courses';
 $route['courses/my_courses_new'] = 'courses/my_courses_new';
 $route['courses/search_categories'] = 'courses/search_categories';
 $route['courses/(:any)'] = 'courses/index/$1';

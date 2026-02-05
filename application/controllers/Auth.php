@@ -78,6 +78,36 @@ class Auth extends Public_Controller
                 //if the login is successful
                 //redirect them back to the home page
                 $user_id = $this->session->userdata('user_id');
+
+                // Strict Single Device Login Check
+                // Check if account is locked
+                $is_locked = $this->db->select('device_locked')->where('id', $user_id)->get('users')->row()->device_locked;
+                if ($is_locked == 1) {
+                    $this->ion_auth->logout();
+                    $this->session->set_flashdata('error', 'Your account has been locked due to a login attempt from another device. Please contact the administrator.');
+                    redirect('auth/login', 'refresh');
+                }
+
+                // Check for existing active session
+                $existing_session = $this->db->select('last_session_id')->where('id', $user_id)->get('users')->row();
+
+                // If there is a last_session_id recorded, check if it is still valid in CI sessions table
+                $session_active = false;
+                if ($existing_session && $existing_session->last_session_id) {
+                    $sess_check = $this->db->where('id', $existing_session->last_session_id)->get('ce_sessn');
+                    if ($sess_check->num_rows() > 0) {
+                        $session_active = true;
+                    }
+                }
+
+                if ($session_active) {
+                    // Lock the account!
+                    $this->users_model->save_users(['device_locked' => 1], $user_id);
+                    $this->ion_auth->logout();
+                    $this->session->set_flashdata('error', 'Security Alert: Simultaneous login attempt detected. Your account has been locked. Contact Admin to unlock.');
+                    redirect('auth/login', 'refresh');
+                }
+
                 $result = $this->users_model->get_users_by_id($user_id, TRUE);
 
                 // Single Device Login: store current session ID
@@ -102,6 +132,7 @@ class Auth extends Public_Controller
             // the user is not logging in so display the login page
             // setup page header data
             $this->set_title(lang('users_login'));
+            $this->includes['hide_header'] = TRUE;
             $data = $this->includes;
 
             // load views
@@ -566,6 +597,7 @@ class Auth extends Public_Controller
 
         // setup page header data
         $this->set_title(lang('users_register'));
+        $this->includes['hide_header'] = TRUE;
 
         $data = $this->includes;
 
