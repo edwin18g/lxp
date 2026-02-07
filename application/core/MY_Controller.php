@@ -63,34 +63,7 @@ class MY_Controller extends CI_Controller
         // get current user
         $this->user = $this->session->userdata('logged_in');
 
-        // Single Device Login check
-        if ($this->user && isset($this->user['id'])) {
-            // Check if account is locked
-            $is_locked = $this->db->select('device_locked')->where('id', $this->user['id'])->get('users')->row()->device_locked;
-
-            if ($is_locked == 1) {
-                // Force logout
-                $this->session->unset_userdata('logged_in');
-                $this->session->unset_userdata('user_id');
-                $this->ion_auth->logout();
-                $this->session->set_flashdata('error', 'Your account has been locked due to a login attempt from another device. Please contact the administrator.');
-                redirect('auth/login');
-            }
-
-            $current_user_session = $this->db->select('last_session_id')
-                ->where('id', $this->user['id'])
-                ->get('users')
-                ->row();
-
-            if ($current_user_session && $current_user_session->last_session_id && $current_user_session->last_session_id !== session_id()) {
-                // Logout the user if session ID doesn't match
-                $this->session->unset_userdata('logged_in');
-                $this->session->unset_userdata('user_id');
-                $this->ion_auth->logout();
-                $this->session->set_flashdata('error', 'You have been logged in from another device.');
-                redirect('auth/login');
-            }
-        }
+        // Single Device Login check REMOVED
 
         // get languages
         $this->languages = get_languages();

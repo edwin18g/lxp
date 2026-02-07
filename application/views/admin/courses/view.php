@@ -4,15 +4,24 @@
 <div class="row clearfix index-page">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card">
-            <div class="header">
+            <div class="header"
+                style="background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px;">
                 <!-- Page Heading -->
-                <h2 class="text-uppercase p-l-3-em"><?php echo lang('action_view'); ?></h2>
-                
-                <!-- Back Button -->
-                <a href="<?php echo site_url($this->uri->segment(1).'/'.$this->uri->segment(2)) ?>" class="btn btn-default btn-circle waves-effect waves-circle waves-float pull-left"><i class="material-icons">arrow_back</i></a>
+                <h2 class="text-uppercase" style="margin: 0; font-weight: 500;">
+                    <?php echo lang('action_view'); ?>
+                </h2>
 
-                <!-- Delete Button -->
-                <?php  echo '<a role="button" onclick="ajaxDelete('.$courses->id.', `'.mb_substr($courses->title, 0, 20, 'utf-8').'`, `'.lang('menu_course').'`)" class="btn btn-default btn-circle waves-effect waves-circle waves-float pull-right"><i class="material-icons">delete_forever</i></a>';  ?>
+                <div class="header-dropdown m-r--5">
+                    <!-- Back Button -->
+                    <a href="<?php echo site_url($this->uri->segment(1) . '/' . $this->uri->segment(2)) ?>"
+                        class="btn btn-default btn-circle waves-effect waves-circle waves-float" title="Back"
+                        style="margin-right: 10px;">
+                        <i class="material-icons">arrow_back</i>
+                    </a>
+
+                    <!-- Delete Button -->
+                    <?php echo '<a role="button" onclick="ajaxDelete(' . $courses->id . ', `' . mb_substr($courses->title, 0, 20, 'utf-8') . '`, `' . lang('menu_course') . '`)" class="btn btn-default btn-circle waves-effect waves-circle waves-float" title="Delete"><i class="material-icons">delete_forever</i></a>'; ?>
+                </div>
             </div>
             <div class="body table-responsive">
                 <table class="table table-striped">
@@ -27,18 +36,21 @@
                         </tr>
                         <tr>
                             <th><?php echo lang('common_description'); ?></th>
-                            <td class="text-capitalize"><?php echo $courses->description ? $courses->description : 'N/A'; ?></td>
+                            <td class="text-capitalize">
+                                <?php echo $courses->description ? $courses->description : 'N/A'; ?></td>
                         </tr>
                         <tr>
                             <th><?php echo lang('common_images'); ?></th>
                             <td>
-                            <?php if(! empty($courses->images)) { 
-                                    foreach(json_decode($courses->images) as $image) {
-                            ?>
-                                <img src="<?php echo base_url('upload/courses/images/'.image_to_thumb($image)); ?>" class="img-responsive col-sm-2 thumbnail">
-                            <?php } } else { ?>
-                                N/A
-                            <?php } ?>
+                                <?php if (!empty($courses->images)) {
+                                    foreach (json_decode($courses->images) as $image) {
+                                        ?>
+                                        <img src="<?php echo base_url('upload/courses/images/' . image_to_thumb($image)); ?>"
+                                            class="img-responsive col-sm-2 thumbnail">
+                                    <?php }
+                                } else { ?>
+                                    N/A
+                                <?php } ?>
                             </td>
                         </tr>
                         <tr>
@@ -63,11 +75,13 @@
                         </tr>
                         <tr>
                             <th><?php echo lang('common_featured'); ?></th>
-                            <td><?php echo ($courses->featured) ? '<span class="label label-success">'.lang('common_featured_enabled').'</span>' : '<span class="label label-default">'.lang('common_featured_disabled').'</span>'; ?></td>
+                            <td><?php echo ($courses->featured) ? '<span class="label label-success">' . lang('common_featured_enabled') . '</span>' : '<span class="label label-default">' . lang('common_featured_disabled') . '</span>'; ?>
+                            </td>
                         </tr>
                         <tr>
                             <th><?php echo lang('common_status'); ?></th>
-                            <td><?php echo ($courses->status) ? '<span class="label label-success">'.lang('common_status_active').'</span>' : '<span class="label label-default">'.lang('common_status_inactive').'</span>'; ?></td>
+                            <td><?php echo ($courses->status) ? '<span class="label label-success">' . lang('common_status_active') . '</span>' : '<span class="label label-default">' . lang('common_status_inactive') . '</span>'; ?>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

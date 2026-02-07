@@ -615,7 +615,7 @@ function user_detials($id)
     if (!$result) {
         return '';
     }
-    return '<span><img src="http://pixoart.domain/upload/users/images/' . str_replace('.jpg', '', ($result['image'] ?? '')) . '_thumb.jpg" width="48" height="48" alt="User Image" style="    border-radius: 50%;
+    return '<span><img src="' . base_url('upload/users/images/' . str_replace('.jpg', '', ($result['image'] ?? '')) . '_thumb.jpg') . '" width="48" height="48" alt="User Image" style="    border-radius: 50%;
     margin: 0px 17px;"></span><span>' . ($result['username'] ?? '') . '<span>';
 }
 function status_switch_lecture($status = NULL, $id = NULL)

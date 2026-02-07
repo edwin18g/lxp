@@ -1,15 +1,16 @@
-
 # BEGIN WordPress
 <IfModule mod_rewrite.c>
-RewriteEngine On
-RewriteBase /
-RewriteCond %{HTTP_HOST} ^zeyobron\.com [NC]
-RewriteCond %{SERVER_PORT} 80
-RewriteRule ^(.*)$ https://www.zeyobron.com/$1 [R=301,L]
-RewriteRule ^index\.php$ - [L]
-RewriteCond %{REQUEST_FILENAME} !-f
-RewriteCond %{REQUEST_FILENAME} !-d
-RewriteRule . /index.php [L]
+   RewriteEngine On
+   RewriteBase /
+   RewriteCond %{HTTP_HOST} ^zeyobron\.com [NC]
+   RewriteCond %{SERVER_PORT} 80
+   RewriteRule ^(.*)$ https://www.zeyobron.com/$1 [R=301,L]
+   RewriteRule ^Assets/(.*)$ /assets/$1 [L,NC,R=301]
+   RewriteRule ^Upload/(.*)$ /upload/$1 [L,NC,R=301]
+   RewriteRule ^index\.php$ - [L]
+   RewriteCond %{REQUEST_FILENAME} !-f
+   RewriteCond %{REQUEST_FILENAME} !-d
+   RewriteRule . /index.php [L]
 </IfModule>
 
 # END WordPress

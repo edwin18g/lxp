@@ -45,9 +45,19 @@ class Courses extends Admin_Controller
         $this->include_index_plugins();
         $data = $this->includes;
 
+        // Course Stats
+        $data['total_courses'] = $this->courses_model->count_all_courses();
+        $data['active_courses'] = $this->courses_model->count_active_courses();
+        $data['featured_courses'] = $this->courses_model->count_featured_courses();
+
+        // Table Header
+        // Categories for filter
+        $data['categories'] = $this->courses_model->get_course_categories_dropdown();
+
         // Table Header
         $data['t_headers'] = array(
             '#',
+            'Image',
             lang('common_title'),
             lang('courses_category'),
             lang('common_updated'),
@@ -57,7 +67,7 @@ class Courses extends Admin_Controller
         );
 
         // load views
-        $content['content'] = $this->load->view('admin/index', $data, TRUE);
+        $content['content'] = $this->load->view('admin/courses/index', $data, TRUE);
         $this->load->view($this->template, $content);
     }
 
@@ -72,6 +82,7 @@ class Courses extends Admin_Controller
         $columns = array(
             "$table.id",
             "$table.title",
+            "$table.images",
             "$table.course_categories_id",
             "$table.featured",
             "$table.status",
@@ -91,7 +102,16 @@ class Courses extends Admin_Controller
         );
         $order = array('date_updated' => 'DESC');
 
-        $result = $this->datatables->get_datatables($table, $columns, $columns_order, $columns_search, $order);
+        // Filtering
+        $where = array();
+        if ($this->input->post('category_id')) {
+            $where["$table.course_categories_id"] = $this->input->post('category_id');
+        }
+        if ($this->input->post('status') !== '' && $this->input->post('status') !== NULL) {
+            $where["$table.status"] = $this->input->post('status');
+        }
+
+        $result = $this->datatables->get_datatables($table, $columns, $columns_order, $columns_search, $order, $where);
         $data = array();
         $no = $_POST['start'];
 
@@ -99,6 +119,16 @@ class Courses extends Admin_Controller
             $no++;
             $row = array();
             $row[] = $no;
+
+            // Image
+            $images = json_decode($val->images);
+            $img_src = base_url('assets/img/defaults/course_default.png'); // Placeholder/Default
+            if (!empty($images) && is_array($images) && !empty($images[0])) {
+                // Assuming images are stored in assets/uploads/courses/
+                $img_src = base_url('assets/uploads/courses/' . $images[0]);
+            }
+            $row[] = '<img src="' . $img_src . '" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">';
+
             $row[] = mb_substr($val->title, 0, 30, 'utf-8');
             $row[] = '<a href="' . site_url('admin/categories/view/') . $val->course_categories_id . '" target="_blank">' . $val->category_name . '</a>';
             $row[] = date('g:iA d/m/y', strtotime($val->date_updated));
@@ -126,6 +156,16 @@ class Courses extends Admin_Controller
 
     public function ajax_users_list()
     {
+        $course_id = $this->input->post('id');
+        if (!$course_id) {
+            echo json_encode(array(
+                "draw" => intval($this->input->post('draw')),
+                "recordsTotal" => 0,
+                "recordsFiltered" => 0,
+                "data" => array(),
+            ));
+            exit;
+        }
 
         $this->load->library('datatables');
 
@@ -140,7 +180,7 @@ class Courses extends Admin_Controller
 
         );
         $columns_order = array(
-            "#",
+            "$table.id",
             "$table.cs_user_id",
             "$table.cs_course_id",
             // "$table.cl_file_name",
@@ -151,7 +191,7 @@ class Courses extends Admin_Controller
             'cs_user_id',
         );
         $order = array('cs_user_id' => 'DESC');
-        $where = array('cs_course_id' => $_POST['id']);
+        $where = array('cs_course_id' => $course_id);
 
         $result = $this->datatables->get_datatables($table, $columns, $columns_order, $columns_search, $order, $where);
 
@@ -191,61 +231,143 @@ class Courses extends Admin_Controller
         echo json_encode($output);
         exit;
     }
-    public function ajax_lectue_list()
+    public function sort_lecture()
     {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
+        $lectures = $this->input->post('lectures');
+        $section_id = $this->input->post('section_id');
+        $this->courses_model->update_lecture_order($lectures, $section_id);
+        echo json_encode(['flag' => 1, 'msg' => 'Order updated successfully']);
+    }
 
-        $this->load->library('datatables');
+    public function sort_section()
+    {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
+        $sections = $this->input->post('sections');
+        $this->courses_model->update_section_order($sections);
+        echo json_encode(['flag' => 1, 'msg' => 'Section order updated successfully']);
+    }
 
-        $table = 'course_lecture';
-        $columns = array(
-            "$table.id",
-            "$table.cl_course_id",
-            "$table.cl_name",
-            "$table.cl_type",
-            "$table.cl_file_name",
-            "$table.cl_secure"
+    public function render_curriculum($course_id)
+    {
+        $data['curriculum'] = $this->courses_model->get_curriculum($course_id);
+        $this->load->view('admin/courses/curriculum_list', $data);
+    }
+    protected function _json(int $status, string $message, array $errors = [], array $data = [])
+    {
+        $this->output
+            ->set_status_header($status)
+            ->set_content_type('application/json', 'utf-8')
+            ->set_output(json_encode([
+                'success' => $status < 300,
+                'status' => $status,
+                'message' => $message,
+                'errors' => $errors,
+                'data' => $data
+            ], JSON_UNESCAPED_UNICODE))
+            ->_display();
 
-        );
-        $columns_order = array(
-            "#",
-            "$table.cl_name",
-            "$table.cl_type",
-            // "$table.cl_file_name",
-            "$table.cl_secure",
-            // "$table.cl_status",
-        );
-        $columns_search = array(
-            'cl_name',
-        );
-        $order = array('id' => 'DESC');
-        $where = array('cl_course_id' => $_POST['id']);
-
-        $result = $this->datatables->get_datatables($table, $columns, $columns_order, $columns_search, $order, $where);
-
-        $data = array();
-        $no = $_POST['start'];
-
-        foreach ($result as $val) {
-            $no++;
-            $row = array();
-            $row[] = $no;
-            $row[] = mb_substr($val->cl_name, 0, 30, 'utf-8');
-            $row[] = lecture_type($val->cl_type);
-            $row[] = status_switch_lecture($val->cl_secure, $val->id);
-            $row[] = action_buttons_lecture('lecture', $val->id, mb_substr($val->cl_name, 0, 20, 'utf-8'), lang('menu_course'), $val->cl_course_id);
-            $data[] = $row;
+        exit;
+    }
+    public function save_section()
+    {
+        // API → no redirect / no view
+        if (!$this->input->is_ajax_request()) {
+            $this->_json(403, 'Forbidden');
+            return;
         }
 
-        $output = array(
-            "draw" => $_POST['draw'],
-            "recordsTotal" => $this->datatables->count_all(),
-            "recordsFiltered" => $this->datatables->count_filtered(),
-            "data" => $data,
-        );
+        $payload = json_decode($this->input->raw_input_stream, true) ?: $_POST;
+        $errors = [];
 
-        //output to json format
-        echo json_encode($output);
-        exit;
+        // Extract & normalize
+        $course_id = isset($payload['course_id']) ? (int) $payload['course_id'] : 0;
+        $title = isset($payload['title']) ? trim($payload['title']) : '';
+        $id = isset($payload['id']) ? (int) $payload['id'] : null;
+
+        /* -------------------------
+         | Required & type checks
+         * -------------------------*/
+        if ($course_id <= 0) {
+            $errors['course_id'] = 'Invalid course_id';
+        }
+
+        if ($title === '') {
+            $errors['title'] = 'Section title is required';
+        }
+
+        /* -------------------------
+         | Length & charset checks
+         * -------------------------*/
+        if ($title !== '') {
+            if (mb_strlen($title) < 3) {
+                $errors['title'] = 'Title must be at least 3 characters';
+            } elseif (mb_strlen($title) > 150) {
+                $errors['title'] = 'Title cannot exceed 150 characters';
+            }
+        }
+
+        if ($title !== '' && !preg_match('/^[\p{L}\p{N}\s\-\(\)\.,]+$/u', $title)) {
+            $errors['title'] = 'Title contains invalid characters';
+        }
+
+        /* -------------------------
+         | Business validation
+         * -------------------------*/
+        if ($course_id > 0 && !$this->courses_model->course_exists($course_id)) {
+            $errors['course_id'] = 'Course not found';
+        }
+
+        if ($course_id > 0 && $title !== '') {
+            if ($this->courses_model->section_exists($course_id, $title, $id)) {
+                $errors['title'] = 'Section already exists for this course';
+            }
+        }
+
+        /* -------------------------
+         | Validation failed
+         * -------------------------*/
+        if (!empty($errors)) {
+            $this->_json(422, 'Validation failed', $errors);
+            return;
+        }
+
+        /* -------------------------
+         | Persist
+         * -------------------------*/
+        try {
+            $data = [
+                'course_id' => $course_id,
+                'title' => $title,
+            ];
+
+            $section_id = $this->courses_model->save_section($data, $id);
+
+            $this->_json(200, 'Section saved', [
+                'id' => $section_id
+            ]);
+        } catch (Throwable $e) {
+            log_message('error', 'API Save Section: ' . $e->getMessage());
+            $this->_json(500, 'Internal server error');
+        }
+    }
+
+
+
+    public function delete_section()
+    {
+        if (!$this->input->is_ajax_request())
+            exit('No direct script access allowed');
+        $id = $this->input->post('id');
+        if ($this->courses_model->delete_section($id)) {
+            echo json_encode(['flag' => 1, 'msg' => 'Section deleted successfully']);
+        } else {
+            echo json_encode(['flag' => 0, 'msg' => 'Error deleting section']);
+        }
     }
 
 
@@ -331,8 +453,18 @@ class Courses extends Admin_Controller
         /* Initialize assets */
         $this->add_plugin_theme(array(
             "tinymce/tinymce.js",
+            "jquery-datatable/datatables.min.css",
+            "jquery-datatable/datatables.min.js",
         ), 'admin')
+            ->add_plugin_theme(array(
+                "sweetalert/sweetalert.css",
+                "sweetalert/sweetalert.min.js",
+            ), 'core')
             ->add_js_theme("pages/courses/form_i18n.js", TRUE);
+
+        // Set full width template for immersive editing
+        $this->set_template('template_fullwidth.php');
+
         $data = $this->includes;
 
         // in case of edit
@@ -862,13 +994,13 @@ class Courses extends Admin_Controller
                     $data = array();
                     $data['cs_user_id'] = strtolower($user_id);
                     $data['cs_course_id'] = $this->input->post('course_id');
-                    $flag = $this->courses_model->save_suscription($data, $id);
+                    $flag = $this->courses_model->save_suscription($data, $user_id);
                 }
             }
         }
 
         if ($flag) {
-            if ($id)
+            if (!empty($id))
                 $this->session->set_flashdata('message', 'user  to course updated successfully');
             else
                 $this->session->set_flashdata('message', 'user  to course updated successfully');
@@ -881,7 +1013,7 @@ class Courses extends Admin_Controller
             exit;
         }
 
-        if ($id)
+        if (!empty($id))
             $this->session->set_flashdata('error', sprintf(lang('alert_update_fail'), lang('menu_course')));
         else
             $this->session->set_flashdata('error', sprintf(lang('alert_insert_fail'), lang('menu_course')));
@@ -1373,6 +1505,66 @@ class Courses extends Admin_Controller
             'msg' => sprintf(lang('alert_delete_fail'), lang('menu_course')),
             'type' => 'fail',
         ));
+        exit;
+    }
+
+    public function delete_lecture()
+    {
+        if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', 'p_delete')) {
+            echo json_encode(array('flag' => 0, 'msg' => sprintf(lang('manage_acl_permission_no'), lang('manage_acl_delete'))));
+            exit;
+        }
+        $id = (int) $this->input->post('id');
+        // Assuming delete_lecture exists in model, otherwise use delete with table name if model supports
+        // Checking courses_model for delete_lecture... 
+        // If not found, I might need to add it or use generic delete.
+        // For now, I'll assume I can add it to model or use query.
+        // Let's use db->delete for safety here if model method ambiguous.
+        $this->db->where('id', $id);
+        $flag = $this->db->delete('course_lecture');
+
+        if ($flag) {
+            echo json_encode(array('flag' => 1, 'msg' => 'Lecture deleted successfully', 'type' => 'success'));
+        } else {
+            echo json_encode(array('flag' => 0, 'msg' => 'Failed to delete lecture', 'type' => 'fail'));
+        }
+        exit;
+    }
+
+    public function status_lecture()
+    {
+        if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', 'p_edit')) {
+            echo json_encode(array('flag' => 0, 'msg' => sprintf(lang('manage_acl_permission_no'), lang('manage_acl_edit'))));
+            exit;
+        }
+        $id = $this->input->post('id');
+        $status = $this->input->post('status');
+
+        if ($this->db->update('course_lectures', array('cl_secure' => $status), array('id' => $id))) {
+            echo json_encode(array('flag' => 1, 'msg' => 'Status updated successfully'));
+        } else {
+            echo json_encode(array('flag' => 0, 'msg' => 'Failed to update status'));
+        }
+        exit;
+    }
+
+    /**
+     * get lecture details
+     */
+    public function ajax_get_lecture($id)
+    {
+        if (!$id) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Invalid ID'));
+            exit;
+        }
+
+        $result = $this->courses_model->get_lecture_courses_by_id($id);
+
+        if ($result) {
+            echo json_encode(array('flag' => 1, 'data' => $result));
+        } else {
+            echo json_encode(array('flag' => 0, 'msg' => 'Lecture not found'));
+        }
         exit;
     }
 

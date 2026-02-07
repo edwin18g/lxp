@@ -60,6 +60,7 @@ class Users_model extends CI_Model
             "$this->table.role",
             "$this->table.date_added",
             "$this->table.date_updated",
+            "$this->table.secure_key",
             "(SELECT gr.name FROM `groups` gr WHERE gr.id = (SELECT ug.group_id FROM users_groups ug WHERE ug.user_id = $this->table.id)) group_name",
         ))
             ->where(array('id' => $id));
@@ -127,7 +128,7 @@ class Users_model extends CI_Model
     {
         if ($id) {
             $this->db->where('id', $id)
-                ->update($this->table, array('device_locked' => 0, 'last_session_id' => NULL));
+                ->update($this->table, array('device_locked' => 0, 'last_session_id' => NULL, 'secure_key' => ''));
             return TRUE;
         }
         return FALSE;
@@ -260,6 +261,25 @@ class Users_model extends CI_Model
     {
         return $this->db->where(array('users_id' => $id))
             ->count_all_results('batches_tutors');
+    }
+
+    /**
+     * count_users_by_month
+     *
+     * @return array
+     */
+    public function count_users_by_month()
+    {
+        $query = $this->db->query("
+            SELECT 
+                MONTH(date_added) as month, 
+                COUNT(id) as count 
+            FROM users 
+            WHERE YEAR(date_added) = YEAR(CURDATE()) 
+            GROUP BY MONTH(date_added)
+        ");
+
+        return $query->result_array();
     }
 
 }

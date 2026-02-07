@@ -34,11 +34,7 @@ class Dashboard extends Admin_Controller
             ->add_plugin_theme(array(
                 // Jquery CountTo
                 'jquery-countto/jquery.countTo.js',
-                // Amcharts
-                'amcharts/amcharts.js',
-                'amcharts/serial.js',
             ), 'admin')
-            ->add_js_theme("pages/dashboard_i18n.js", TRUE)
             ->set_title(lang('menu_dashboard'));
 
         $data = $this->includes;
@@ -46,15 +42,22 @@ class Dashboard extends Admin_Controller
         // Breadcrumb
         $data['breadcrumb'][0] = array('icon' => 'dashboard', 'route_name' => lang('menu_dashboard'), 'route_path' => site_url('admin'));
 
-        $data['total_users'] = 5;//$this->users_model->count_users();
-        $data['total_bookings'] = $this->course_model->count_b_bookings() + $this->event_model->count_e_bookings();
+        $data['total_users'] = $this->users_model->count_users();
+        $data['total_courses'] = $this->course_model->count_courses();
         $data['total_batches'] = $this->course_model->count_batches();
-        $data['total_events'] = $this->event_model->count_events();
-        $data['total_visits'] = array();
-        $data['total_sales'] = $this->course_model->count_total_b_sales() + $this->event_model->count_total_e_sales();
+
         $data['todays_b_e'] = $this->course_model->todays_batches_list() + $this->event_model->todays_events_list();
         $data['top_batches'] = $this->batches_model->top_batches_list();
+        $data['top_batches'] = $this->batches_model->top_batches_list();
         $data['top_events'] = $this->events_model->top_events_list();
+
+        // Chart Data
+        $user_counts = $this->users_model->count_users_by_month();
+        $monthly_data = array_fill(0, 12, 0); // Initialize all 12 months with 0
+        foreach ($user_counts as $row) {
+            $monthly_data[$row['month'] - 1] = (int) $row['count'];
+        }
+        $data['user_growth_data'] = json_encode($monthly_data);
 
         // load views
         $content['content'] = $this->load->view('admin/dashboard', $data, TRUE);

@@ -4,15 +4,24 @@
 <div class="row clearfix index-page">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <div class="card">
-            <div class="header">
+            <div class="header"
+                style="background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); color: white; padding: 20px;">
                 <!-- Page Heading -->
-                <h2 class="text-uppercase p-l-3-em"><?php echo lang('action_view'); ?></h2>
-                
-                <!-- Back Button -->
-                <a href="<?php echo site_url($this->uri->segment(1).'/'.$this->uri->segment(2)) ?>" class="btn btn-default btn-circle waves-effect waves-circle waves-float pull-left"><i class="material-icons">arrow_back</i></a>
+                <h2 class="text-uppercase" style="margin: 0; font-weight: 500;">
+                    <?php echo lang('action_view'); ?>
+                </h2>
 
-                <!-- Delete Button -->
-                <?php  echo '<a role="button" onclick="ajaxDelete('.$id.', `'.mb_substr($title, 0, 20, 'utf-8').'`, `'.lang('menu_batch').'`)" class="btn btn-default btn-circle waves-effect waves-circle waves-float pull-right"><i class="material-icons">delete_forever</i></a>';  ?>
+                <div class="header-dropdown m-r--5">
+                    <!-- Back Button -->
+                    <a href="<?php echo site_url($this->uri->segment(1) . '/' . $this->uri->segment(2)) ?>"
+                        class="btn btn-default btn-circle waves-effect waves-circle waves-float" title="Back"
+                        style="margin-right: 10px;">
+                        <i class="material-icons">arrow_back</i>
+                    </a>
+
+                    <!-- Delete Button -->
+                    <?php echo '<a role="button" onclick="ajaxDelete(' . $id . ', `' . mb_substr($title, 0, 20, 'utf-8') . '`, `' . lang('menu_batch') . '`)" class="btn btn-default btn-circle waves-effect waves-circle waves-float" title="Delete"><i class="material-icons">delete_forever</i></a>'; ?>
+                </div>
             </div>
             <div class="body table-responsive">
                 <table class="table table-striped">
@@ -23,7 +32,9 @@
                         </tr>
                         <tr>
                             <th><?php echo lang('batches_courses'); ?></th>
-                            <td class="text-capitalize"><?php echo '<a href="'.site_url('admin/courses/view/').$courses_id.'" target="_blank">'.$courses_title.'</a>'; ?></td>
+                            <td class="text-capitalize">
+                                <?php echo '<a href="' . site_url('admin/courses/view/') . $courses_id . '" target="_blank">' . $courses_title . '</a>'; ?>
+                            </td>
                         </tr>
                         <tr>
                             <th><?php echo lang('common_description'); ?></th>
@@ -62,26 +73,30 @@
                         <tr>
                             <th><?php echo lang('batches_weekdays'); ?></th>
                             <td class="text-capitalize">
-                                 <?php foreach($weekdays as $key => $val) { ?>
-                                <input type="checkbox" id="w_<?php echo $key; ?>" name="weekdays[]" value="<?php echo $key; ?>" class="filled-in" <?php echo isset($_POST['weekdays']) ? (in_array($key, $_POST['weekdays']) ? 'checked' : '') :'' ; ?> disabled>
-                                <label for="w_<?php echo $key; ?>" class="weekdays"><?php echo $val; ?></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-                            <?php } ?>
+                                <?php foreach ($weekdays as $key => $val) { ?>
+                                    <input type="checkbox" id="w_<?php echo $key; ?>" name="weekdays[]"
+                                        value="<?php echo $key; ?>" class="filled-in" <?php echo isset($_POST['weekdays']) ? (in_array($key, $_POST['weekdays']) ? 'checked' : '') : ''; ?> disabled>
+                                    <label for="w_<?php echo $key; ?>"
+                                        class="weekdays"><?php echo $val; ?></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <?php } ?>
                             </td>
                         </tr>
                         <tr>
                             <th><?php echo lang('batches_recurring_types'); ?></th>
                             <td>
-                                <?php foreach($recurring_types as $key => $val) { ?>
-                                    <input type="radio" id="r_<?php echo $key; ?>" name="recurring_type" value="<?php echo $key; ?>" class="filled-in" <?php echo isset($_POST['recurring_type']) ? ($key == $_POST['recurring_type'] ? 'checked' : '') :'' ; ?> disabled>
-                                    <label for="r_<?php echo $key; ?>" class="recurring_type"><?php echo $val; ?></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                                <?php foreach ($recurring_types as $key => $val) { ?>
+                                    <input type="radio" id="r_<?php echo $key; ?>" name="recurring_type"
+                                        value="<?php echo $key; ?>" class="filled-in" <?php echo isset($_POST['recurring_type']) ? ($key == $_POST['recurring_type'] ? 'checked' : '') : ''; ?> disabled>
+                                    <label for="r_<?php echo $key; ?>"
+                                        class="recurring_type"><?php echo $val; ?></label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
                                 <?php } ?>
                             </td>
                         </tr>
                         <tr>
                             <th><?php echo lang('batches_tutors'); ?></th>
                             <td class="text-capitalize">
-                                <?php foreach($tutors as $val) { 
-                                    echo '<span class="label label-info">'.$val->first_name.' '.$val->last_name.'</span> ';
+                                <?php foreach ($tutors as $val) {
+                                    echo '<span class="label label-info">' . $val->first_name . ' ' . $val->last_name . '</span> ';
                                 } ?>
                             </td>
                         </tr>
@@ -95,7 +110,8 @@
                         </tr>
                         <tr>
                             <th><?php echo lang('common_status'); ?></th>
-                            <td><?php echo ($status) ? '<span class="label label-success">'.lang('common_status_active').'</span>' : '<span class="label label-default">'.lang('common_status_inactive').'</span>'; ?></td>
+                            <td><?php echo ($status) ? '<span class="label label-success">' . lang('common_status_active') . '</span>' : '<span class="label label-default">' . lang('common_status_inactive') . '</span>'; ?>
+                            </td>
                         </tr>
                     </tbody>
                 </table>

@@ -1,0 +1,204 @@
+/* Modern Admin Theme */
+
+:root {
+    --primary-color: #6200ea;
+    /* Deep Purple */
+    --secondary-color: #00bfa5;
+    /* Teal Accent */
+    --bg-color: #f4f6f9;
+    --sidebar-bg: #1e1e2d;
+    --sidebar-text: #a6a6c0;
+    --sidebar-active: #ffffff;
+    --sidebar-active-bg: #1b1b28;
+    --card-bg: #ffffff;
+    --text-color: #333333;
+    --header-bg: #ffffff;
+    --border-radius: 12px;
+    --shadow-soft: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Roboto', sans-serif;
+    color: var(--text-color);
+}
+
+/* Sidebar Overrides */
+.sidebar {
+    background: var(--sidebar-bg) !important;
+    box-shadow: 4px 0 10px rgba(0, 0, 0, 0.1);
+    width: 260px !important;
+}
+
+.sidebar .user-info {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+    padding: 20px;
+    border-bottom: none;
+    height: 150px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.sidebar .user-info .info-container .name {
+    color: #fff;
+    font-weight: 600;
+    font-size: 16px;
+    margin-top: 10px;
+}
+
+.sidebar .user-info .info-container .email {
+    color: rgba(255, 255, 255, 0.8);
+    font-size: 13px;
+}
+
+.sidebar .image img {
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    padding: 2px;
+}
+
+.sidebar .menu .list {
+    padding-top: 15px;
+}
+
+.sidebar .menu .list a {
+    color: rgba(255, 255, 255, 0.8) !important;
+    /* High contrast for readability */
+    display: flex;
+    align-items: center;
+    padding: 12px 20px 12px 15px;
+    /* Tighter padding for alignment */
+    transition: all 0.2s ease-in-out;
+    font-size: 14px;
+    font-weight: 500;
+    margin: 4px 10px;
+    border-radius: 8px;
+    letter-spacing: 0.3px;
+    text-decoration: none !important;
+}
+
+.sidebar .menu .list a:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    text-decoration: none !important;
+    transform: translateX(4px);
+}
+
+.sidebar .menu .list .active>a {
+    background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)) !important;
+    color: #ffffff !important;
+    /* Force white text on active */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+}
+
+.sidebar .menu .list .active>a i,
+.sidebar .menu .list .active>a span {
+    color: #ffffff !important;
+    /* Ensure icons and text are white */
+}
+
+.sidebar .menu .list a i {
+    color: rgba(255, 255, 255, 0.7) !important;
+    /* Lighter icons */
+    margin-right: 15px;
+    font-size: 20px;
+    width: 20px;
+    /* Fixed width for alignment */
+    text-align: center;
+    display: inline-block;
+}
+
+.sidebar .menu .list a:hover i {
+    color: #ffffff !important;
+}
+
+.sidebar .legal {
+    background: var(--sidebar-bg) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: var(--sidebar-text) !important;
+    padding: 15px;
+}
+
+/* Navbar Overrides */
+.navbar {
+    background-color: var(--header-bg) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05) !important;
+}
+
+/* Sidebar Menu Headers */
+.sidebar .menu .list .header {
+    background: transparent !important;
+    color: rgba(255, 255, 255, 0.5) !important;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 15px 20px 5px 25px;
+    /* Aligned with item padding left (15px) + margin (10px) = 25px */
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-top: 10px;
+}
+
+/* Sidebar Scrollbar */
+.sidebar {
+    overflow-y: auto;
+}
+
+.sidebar::-webkit-scrollbar {
+    width: 5px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: var(--sidebar-bg);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Submenu */
+.ml-menu {
+    background-color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.ml-menu li a {
+    padding-left: 65px !important;
+    /* Adjusted for alignment */
+    font-size: 13px !important;
+}
+
+/* Footer polish */
+.sidebar .legal {
+    background: var(--sidebar-bg) !important;
+    border-top: 1px solid rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.4) !important;
+    padding: 20px;
+    font-size: 12px;
+}
+
+.sidebar .legal a {
+    color: var(--secondary-color) !important;
+    text-decoration: none;
+    font-weight: 500;
+}
+
+/* Navbar Brand Refinement */
+.navbar-brand {
+    color: var(--primary-color) !important;
+    font-weight: 800;
+    font-size: 20px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    padding: 15px 15px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1199px) {
+    .content {
+        margin-left: 15px !important;
+    }
+}

@@ -79,34 +79,8 @@ class Auth extends Public_Controller
                 //redirect them back to the home page
                 $user_id = $this->session->userdata('user_id');
 
-                // Strict Single Device Login Check
-                // Check if account is locked
-                $is_locked = $this->db->select('device_locked')->where('id', $user_id)->get('users')->row()->device_locked;
-                if ($is_locked == 1) {
-                    $this->ion_auth->logout();
-                    $this->session->set_flashdata('error', 'Your account has been locked due to a login attempt from another device. Please contact the administrator.');
-                    redirect('auth/login', 'refresh');
-                }
-
-                // Check for existing active session
-                $existing_session = $this->db->select('last_session_id')->where('id', $user_id)->get('users')->row();
-
-                // If there is a last_session_id recorded, check if it is still valid in CI sessions table
-                $session_active = false;
-                if ($existing_session && $existing_session->last_session_id) {
-                    $sess_check = $this->db->where('id', $existing_session->last_session_id)->get('ce_sessn');
-                    if ($sess_check->num_rows() > 0) {
-                        $session_active = true;
-                    }
-                }
-
-                if ($session_active) {
-                    // Lock the account!
-                    $this->users_model->save_users(['device_locked' => 1], $user_id);
-                    $this->ion_auth->logout();
-                    $this->session->set_flashdata('error', 'Security Alert: Simultaneous login attempt detected. Your account has been locked. Contact Admin to unlock.');
-                    redirect('auth/login', 'refresh');
-                }
+                // Strict Single Device Login Check REMOVED
+                // Check for existing active session REMOVED
 
                 $result = $this->users_model->get_users_by_id($user_id, TRUE);
 
@@ -115,6 +89,15 @@ class Auth extends Public_Controller
 
                 $group = $this->ion_auth->get_users_groups($result['id'])->row();
                 $_SESSION['groups_id'] = $group ? $group->id : NULL;
+
+                // --- Single Device Login Logic (Group 3 - Learners) ---
+                if (!$this->_verify_device_lock($result['id'], $group ? $group->id : NULL, $result['secure_key'])) {
+                    $this->ion_auth->logout();
+                    $this->session->set_flashdata('error', 'Login not allowed from this device. Your account is locked to another device.');
+                    redirect('auth/login', 'refresh');
+                    return;
+                }
+                // ------------------------------------------------------
 
                 $this->session->set_userdata('logged_in', $result);
                 if ($result['role'] != 1) {
@@ -459,14 +442,18 @@ class Auth extends Public_Controller
 
             $_SESSION['groups_id'] = $this->ion_auth->get_users_groups($result['id'])->row()->id;
 
+            // --- Single Device Login Logic ---
+            if (!$this->_verify_device_lock($result['id'], $_SESSION['groups_id'], $result['secure_key'])) {
+                $this->ion_auth->logout();
+                $this->session->set_flashdata('error', 'Login not allowed from this device. Your account is locked to another device.');
+                redirect('auth/login', 'refresh');
+                return;
+            }
+            // ---------------------------------
+
             $this->session->set_userdata('logged_in', $result);
 
             // Single Device Login: store current session ID
-            $user_id = $result['id'];
-            $user_data = $this->db->select('last_session_id')->where('id', $user_id)->get('users')->row();
-            if ($user_data && $user_data->last_session_id && $user_data->last_session_id !== session_id()) {
-                $this->db->delete('ce_sessn', array('id' => $user_data->last_session_id));
-            }
             $this->users_model->save_users(['last_session_id' => session_id()], $user_id);
 
             redirect(site_url());
@@ -575,14 +562,18 @@ class Auth extends Public_Controller
 
                 $_SESSION['groups_id'] = $this->ion_auth->get_users_groups($flag)->row()->id;
 
+                // --- Single Device Login Logic ---
+                if (!$this->_verify_device_lock($result['id'], $_SESSION['groups_id'], $result['secure_key'])) {
+                    $this->ion_auth->logout();
+                    $this->session->set_flashdata('error', 'Login not allowed from this device. Your account is locked to another device.');
+                    redirect('auth/login', 'refresh');
+                    return;
+                }
+                // ---------------------------------
+
                 $this->session->set_userdata('logged_in', $result);
 
                 // Single Device Login: store current session ID
-                $user_id = $flag;
-                $user_data = $this->db->select('last_session_id')->where('id', $user_id)->get('users')->row();
-                if ($user_data && $user_data->last_session_id && $user_data->last_session_id !== session_id()) {
-                    $this->db->delete('ce_sessn', array('id' => $user_data->last_session_id));
-                }
                 $this->users_model->save_users(['last_session_id' => session_id()], $user_id);
 
                 redirect(site_url());
@@ -828,6 +819,74 @@ class Auth extends Public_Controller
         } else {
             return FALSE;
         }
+    }
+
+    /**
+     * Verify Device Lock for Learners (Group 3)
+     * Handles generating/validating secure_key and cookies.
+     * 
+     * @param int $user_id
+     * @param int $group_id
+     * @param string $db_secure_key
+     * @return bool TRUE if allowed, FALSE if blocked
+     */
+    private function _verify_device_lock($user_id, $group_id, $db_secure_key)
+    {
+        // Only for Group 3 (Learners)
+        if ($group_id != 3) {
+            log_message('error', "DeviceLock: User $user_id is in group $group_id. Skipping check.");
+            return TRUE;
+        }
+
+        $this->load->helper('cookie');
+        $this->load->helper('string');
+
+        $cookie_name = 'site_device_token';
+        $device_token_cookie = get_cookie($cookie_name);
+
+        log_message('error', "DeviceLock: Checking User $user_id. DB Key: '$db_secure_key', Cookie: '$device_token_cookie'");
+
+        // Scenario 1: First time setup (DB key is empty)
+        if (empty($db_secure_key)) {
+            // Use existing cookie if present, else generate new
+            $new_token = $device_token_cookie ? $device_token_cookie : random_string('alnum', 32);
+
+            log_message('error', "DeviceLock: Optimization - First login/Reset. Setting new key: $new_token");
+
+            $this->users_model->save_users(['secure_key' => $new_token], $user_id);
+
+            // Set/Refresh long-lived cookie (10 years)
+            set_cookie(array(
+                'name' => $cookie_name,
+                'value' => $new_token,
+                'expire' => 315360000,
+                'domain' => '',
+                'path' => '/',
+                'prefix' => '',
+                'secure' => FALSE
+            ));
+            return TRUE;
+        }
+
+        // Scenario 2: Validation (DB key exists)
+        if ($device_token_cookie === $db_secure_key) {
+            log_message('error', "DeviceLock: Valid match. Access granted.");
+            // Valid device - Refresh cookie expiry
+            set_cookie(array(
+                'name' => $cookie_name,
+                'value' => $db_secure_key,
+                'expire' => 315360000,
+                'domain' => '',
+                'path' => '/',
+                'prefix' => '',
+                'secure' => FALSE
+            ));
+            return TRUE;
+        }
+
+        // Scenario 3: Blocked (DB key mismatch or missing cookie)
+        log_message('error', "DeviceLock: BLOCKING. Cookie mismatch.");
+        return FALSE;
     }
 
 }
