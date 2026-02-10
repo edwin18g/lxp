@@ -90,7 +90,8 @@ class Courses extends Admin_Controller
             "(SELECT cc.title FROM course_categories cc WHERE cc.id = $table.course_categories_id) category_name",
         );
         $columns_order = array(
-            "#",
+            "$table.id",
+            "",
             "$table.title",
             "$table.course_categories_id",
             "$table.date_updated",
@@ -121,7 +122,7 @@ class Courses extends Admin_Controller
             $row[] = $no;
 
             // Image
-            $images = json_decode($val->images);
+            $images = ($val->images) ? json_decode($val->images) : null;
             $img_src = base_url('assets/img/defaults/course_default.png'); // Placeholder/Default
             if (!empty($images) && is_array($images) && !empty($images[0])) {
                 // Assuming images are stored in assets/uploads/courses/
@@ -481,7 +482,7 @@ class Courses extends Admin_Controller
             $data['id'] = $result->id;
 
             // current images
-            $data['c_images'] = json_decode($result->images);
+            $data['c_images'] = ($result->images) ? json_decode($result->images) : null;
 
             // render category levels for current category in case of edit
             $categories_levels = $this->courses_model->get_courses_levels($result->course_categories_id);

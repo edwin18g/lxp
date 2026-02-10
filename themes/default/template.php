@@ -16,11 +16,11 @@
     <link rel="icon" type="image/png" href="<?php echo base_url('/upload/institute/logo.png') ?>" />
     <meta name="theme-color" content="#1a237e">
 
-    <!-- Premium Typography -->
+    <!-- Premium Typography Upgrade -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
     <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
 
@@ -88,9 +88,12 @@ if (
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
             color: var(--text-dark);
             background: #fff;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
         }
 
         h1,
@@ -99,8 +102,9 @@ if (
         h4,
         h5,
         h6 {
-            font-family: 'Outfit', sans-serif;
+            font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
             font-weight: 700;
+            letter-spacing: -0.02em;
         }
 
         /* Minimal Header */
@@ -436,7 +440,9 @@ if (
                                 <?php if (!empty($this->session->userdata('logged_in')['image'])): ?>
                                     <div class="header-avatar">
                                         <img src="<?php echo base_url('upload/users/images/' . $this->session->userdata('logged_in')['image']); ?>"
-                                            alt="Profile">
+                                            alt="Profile" style="
+    width: 100%;
+">
                                     </div>
                                 <?php else: ?>
                                     <div class="avatar-placeholder">

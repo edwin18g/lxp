@@ -282,6 +282,168 @@ class Users_model extends CI_Model
         return $query->result_array();
     }
 
-}
+    /**
+     * get_enrolled_users_dt
+     */
+    public function get_enrolled_users_dt($limit, $start, $orders, $search)
+    {
+        $this->db->select("
+            users.id,
+            users.first_name,
+            users.last_name,
+            users.username,
+            users.email,
+            users.mobile,
+            users.image,
+            users.active,
+            COUNT(course_subscription.id) as course_count
+        ");
+        $this->db->from('users');
+        $this->db->join('course_subscription', 'course_subscription.cs_user_id = users.id');
+        $this->db->where('course_subscription.cs_status', '1');
+        $this->db->group_by('users.id');
 
+        if ($search) {
+            $this->db->group_start();
+            $this->db->like('users.first_name', $search);
+            $this->db->or_like('users.last_name', $search);
+            $this->db->or_like('users.email', $search);
+            $this->db->group_end();
+        }
+
+        if ($orders) {
+            foreach ($orders as $key => $val) {
+                $this->db->order_by($key, $val);
+            }
+        } else {
+            $this->db->order_by('users.first_name', 'ASC');
+        }
+
+        if ($limit != -1) {
+            $this->db->limit($limit, $start);
+        }
+
+        return $this->db->get()->result();
+    }
+
+    public function count_all_enrolled_users()
+    {
+        return $this->db->query("SELECT COUNT(DISTINCT cs_user_id) as count FROM course_subscription WHERE cs_status = '1'")->row()->count;
+    }
+
+    public function count_filtered_enrolled_users($search)
+    {
+        $this->db->select("COUNT(DISTINCT users.id) as count");
+        $this->db->from('users');
+        $this->db->join('course_subscription', 'course_subscription.cs_user_id = users.id');
+        $this->db->where('course_subscription.cs_status', '1');
+
+        if ($search) {
+            $this->db->group_start();
+            $this->db->like('users.first_name', $search);
+            $this->db->or_like('users.last_name', $search);
+            $this->db->or_like('users.email', $search);
+            $this->db->group_end();
+        }
+
+        return $this->db->get()->row()->count;
+    }
+
+    /**
+     * get_user_course_details
+     * 
+     * @param int $user_id
+     * @return array
+     */
+    public function get_user_course_details($user_id)
+    {
+        $this->db->select("
+            courses.id,
+            courses.title,
+            courses.images,
+            courses.status,
+            course_subscription.cs_start_date,
+            course_subscription.cs_end_date
+        ");
+        $this->db->from('course_subscription');
+        $this->db->join('courses', 'courses.id = course_subscription.cs_course_id');
+        $this->db->where('course_subscription.cs_user_id', $user_id);
+        $this->db->where('course_subscription.cs_status', '1');
+        $this->db->order_by('courses.title', 'ASC');
+
+        return $this->db->get()->result();
+    }
+
+
+    /**
+     * get_users_dt (DataTables Server-side)
+     */
+    public function get_users_dt($limit, $start, $orders, $search)
+    {
+        $this->db->select("
+            users.id,
+            users.image,
+            users.first_name,
+            users.last_name,
+            users.username,
+            users.mobile,
+            users.email,
+            users.active,
+            users.date_updated,
+            (SELECT gr.name FROM `groups` gr WHERE gr.id = (SELECT ug.group_id FROM users_groups ug WHERE ug.user_id = users.id LIMIT 1)) as group_name
+        ");
+        $this->db->from('users');
+
+        if ($search) {
+            $this->db->group_start();
+            $this->db->like('users.first_name', $search);
+            $this->db->or_like('users.last_name', $search);
+            $this->db->or_like('users.username', $search);
+            $this->db->or_like('users.email', $search);
+            $this->db->or_like('users.mobile', $search);
+            $this->db->group_end();
+        }
+
+        if ($orders) {
+            foreach ($orders as $key => $val) {
+                 $this->db->order_by($key, $val);
+            }
+        } else {
+             $this->db->order_by('users.id', 'DESC');
+        }
+
+        if ($limit != -1) {
+            $this->db->limit($limit, $start);
+        }
+
+        return $this->db->get()->result();
+    }
+
+    /**
+     * count_all_users
+     */
+    public function count_all_users()
+    {
+        return $this->db->count_all('users');
+    }
+
+    /**
+     * count_filtered_users
+     */
+    public function count_filtered_users($search)
+    {
+        $this->db->from('users');
+        if ($search) {
+            $this->db->group_start();
+            $this->db->like('users.first_name', $search);
+            $this->db->or_like('users.last_name', $search);
+            $this->db->or_like('users.username', $search);
+            $this->db->or_like('users.email', $search);
+            $this->db->or_like('users.mobile', $search);
+            $this->db->group_end();
+        }
+        return $this->db->count_all_results();
+    }
+
+}
 /*Users model ends*/

@@ -35,20 +35,26 @@ class Users extends Admin_Controller
         $this->include_index_plugins();
         $data = $this->includes;
 
-        // Table Header
+        // Fetch User Stats
+        $data['total_users'] = $this->db->count_all('users');
+        $data['active_users'] = $this->db->where('active', 1)->count_all_results('users');
+        $data['inactive_users'] = $this->db->where('active', 0)->count_all_results('users');
+
         $data['t_headers'] = array(
             '#',
+            'Image', // Static string for safety
             lang('users_first_name'),
             lang('users_last_name'),
             lang('users_username'),
             lang('users_email'),
             'Phone',
-            lang('common_updated'),
+            'Role',
             lang('common_status'),
             lang('action_action'),
         );
+
         // load views
-        $content['content'] = $this->load->view('admin/index', $data, TRUE);
+        $content['content'] = $this->load->view('admin/users/index', $data, TRUE);
         $this->load->view($this->template, $content);
     }
 
@@ -57,76 +63,130 @@ class Users extends Admin_Controller
      */
     public function ajax_list()
     {
-        $this->load->library('datatables');
+        $start = $this->input->post('start');
+        $length = $this->input->post('length');
+        $search = $this->input->post('search')['value'];
+        $order_post = $this->input->post('order');
 
-        $table = 'users';
-        $columns = array(
-            "$table.id",
-            "$table.first_name",
-            "$table.last_name",
-            "$table.username",
-            "$table.mobile",
-            "$table.email",
-            "(SELECT gr.name FROM `groups` gr WHERE gr.id = (SELECT ug.group_id FROM users_groups ug WHERE ug.user_id = $table.id)) group_name",
-            "$table.active",
-            "$table.date_updated",
+        $orders = array();
+        // Map columns index to DB columns
+        $columns_map = array(
+            0 => 'users.id',
+            1 => 'users.image',
+            2 => 'users.first_name',
+            3 => 'users.last_name',
+            4 => 'users.username',
+            5 => 'users.email',
+            6 => 'users.mobile',
+            7 => 'group_name',
+            8 => 'users.active',
         );
-        $columns_order = array(
-            "#",
-            "$table.first_name",
-            "$table.last_name",
-            "$table.username",
-            "$table.email",
-            "$table.group_name",
-            "$table.date_updated",
-            "$table.active",
-        );
-        $columns_search = array(
-            'first_name',
-            'last_name',
-            'username',
-            'email',
-            'mobile',
-        );
-        $order = array('date_updated' => 'DESC');
 
-        // multi table sorting
-        $sort_table2 = '';
-        $order_data = $this->input->post('order');
-        if (isset($order_data[0]['column']) && $order_data[0]['column'] == 4) {
-            $sort_table2 = 'group_id';
+        if ($order_post) {
+            foreach ($order_post as $o) {
+                if (isset($columns_map[$o['column']])) {
+                    $orders[$columns_map[$o['column']]] = $o['dir'];
+                }
+            }
         }
 
-        $result = $this->datatables->get_datatables($table, $columns, $columns_order, $columns_search, $order, array(), $sort_table2);
-        $data = array();
-        $no = $this->input->post('start');
+        $list = $this->users_model->get_users_dt($length, $start, $orders, $search);
 
-        foreach ($result as $val) {
+        $data = array();
+        $no = $start;
+
+        foreach ($list as $val) {
             $no++;
             $row = array();
             $row[] = $no;
+
+            // Image
+            if ($val->image) {
+                $img_url = base_url('upload/users/images/' . $val->image);
+                $row[] = '<img src="' . $img_url . '" class="img-circle" width="40" height="40" alt="User">';
+            } else {
+                $initial = mb_substr($val->first_name, 0, 1) . mb_substr($val->last_name, 0, 1);
+                $row[] = '<div class="btn-circle bg-blue waves-effect waves-circle waves-float" style="width:40px;height:40px;line-height:40px;text-align:center;color:#fff;font-weight:bold;">' . strtoupper($initial) . '</div>';
+            }
+
             $row[] = $val->first_name;
             $row[] = $val->last_name;
             $row[] = $val->username;
             $row[] = $val->email;
             $row[] = $val->mobile;
-            $row[] = date('g:iA d/m/y ', strtotime($val->date_updated));
-            $row[] = status_switch($val->active, $val->id);
-            $row[] = action_buttons('users', $val->id, mb_substr($val->first_name . ' ' . $val->last_name, 0, 30, 'utf-8'), lang('menu_user'));
+            $row[] = '<span class="label label-info">' . $val->group_name . '</span>';
+
+            // Status 
+            $status_link = $val->active ? site_url('admin/users/deactivate/' . $val->id) : site_url('admin/users/activate/' . $val->id);
+            $status_label = $val->active ? '<span class="label label-success">' . lang('users_active') . '</span>' : '<span class="label label-danger">' . lang('users_inactive') . '</span>';
+            $row[] = '<a href="' . $status_link . '">' . $status_label . '</a>';
+
+
+            // Action
+            $action = '<div class="btn-group">';
+            // View Offcanvas
+            $action .= '<button type="button" class="btn btn-primary btn-circle waves-effect waves-circle waves-float" onclick="openUserSidebar(' . $val->id . ')" title="View Details"><i class="material-icons">visibility</i></button>';
+            // Edit
+            $action .= '<a href="' . site_url('admin/users/form/' . $val->id) . '" class="btn btn-default btn-circle waves-effect waves-circle waves-float" title="Edit"><i class="material-icons">edit</i></a>';
+            // Delete
+            $action .= '<a href="' . site_url('admin/users/delete/' . $val->id) . '" class="btn btn-danger btn-circle waves-effect waves-circle waves-float" onclick="return confirm(\'Are you sure?\')" title="Delete"><i class="material-icons">delete</i></a>';
+
+            $action .= '</div>';
+            $row[] = $action;
+
             $data[] = $row;
         }
 
         $output = array(
             "draw" => $this->input->post('draw'),
-            "recordsTotal" => $this->datatables->count_all(),
-            "recordsFiltered" => $this->datatables->count_filtered(),
+            "recordsTotal" => $this->users_model->count_all_users(),
+            "recordsFiltered" => $this->users_model->count_filtered_users($search),
             "data" => $data,
         );
 
-        //output to json format
         echo json_encode($output);
-        exit;
     }
+
+    /**
+     * get_user_details
+     */
+    public function get_user_details($id)
+    {
+        $user = $this->users_model->get_users_by_id($id);
+
+        if ($user) {
+            $html = '<div class="user-details">';
+
+            // Header / Image
+            $html .= '<div class="text-center" style="margin-bottom: 20px;">';
+            if ($user->image) {
+                $html .= '<img src="' . base_url('upload/users/images/' . $user->image) . '" class="img-circle" width="100" height="100">';
+            } else {
+                $initial = mb_substr($user->first_name, 0, 1) . mb_substr($user->last_name, 0, 1);
+                $html .= '<div style="width:100px;height:100px;line-height:100px;background:#2196F3;color:#fff;font-size:40px;border-radius:50%;margin:0 auto;">' . strtoupper($initial) . '</div>';
+            }
+            $html .= '<h3>' . $user->first_name . ' ' . $user->last_name . '</h3>';
+            $html .= '<p class="text-muted">' . $user->email . '</p>';
+            $html .= '</div>';
+
+            // Details List
+            $html .= '<ul class="list-group">';
+            $html .= '<li class="list-group-item"><strong>Username:</strong> ' . $user->username . '</li>';
+            $html .= '<li class="list-group-item"><strong>Mobile:</strong> ' . $user->mobile . '</li>';
+            $html .= '<li class="list-group-item"><strong>Role:</strong> ' . $user->group_name . '</li>';
+            $html .= '<li class="list-group-item"><strong>Status:</strong> ' . ($user->active ? 'Active' : 'Inactive') . '</li>';
+            $html .= '<li class="list-group-item"><strong>Joined:</strong> ' . date('d M Y', strtotime($user->date_added)) . '</li>';
+            $html .= '</ul>';
+
+            $html .= '</div>';
+
+            echo $html;
+        } else {
+            echo '<p class="text-danger">User not found.</p>';
+        }
+    }
+
+
 
     /**
      * form

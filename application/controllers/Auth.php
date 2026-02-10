@@ -454,7 +454,7 @@ class Auth extends Public_Controller
             $this->session->set_userdata('logged_in', $result);
 
             // Single Device Login: store current session ID
-            $this->users_model->save_users(['last_session_id' => session_id()], $user_id);
+            $this->users_model->save_users(['last_session_id' => session_id()], $result['id']);
 
             redirect(site_url());
         }
@@ -487,7 +487,6 @@ class Auth extends Public_Controller
         // validators
         $this->form_validation
             ->set_error_delimiters($this->config->item('error_delimeter_left'), $this->config->item('error_delimeter_right'))
-            ->set_rules('username', lang('users_username'), 'required|trim|min_length[3]|max_length[128]|callback__check_username')
             ->set_rules('first_name', lang('users_first_name'), 'required|trim|min_length[2]|max_length[128]')
             ->set_rules('last_name', lang('users_last_name'), 'required|trim|min_length[2]|max_length[128]')
             ->set_rules('email', lang('users_email'), 'required|trim|max_length[256]|valid_email|callback__check_email')
@@ -520,17 +519,28 @@ class Auth extends Public_Controller
                 $_POST['image'] = '';
 
 
-            $username = $this->input->post('username');
+            $first_name = $this->input->post('first_name');
+            $last_name = $this->input->post('last_name');
+
+            // Auto-generate unique username
+            $base_username = strtolower(preg_replace('/[^A-Za-z0-9]/', '', $first_name . $last_name));
+            if (empty($base_username)) {
+                $base_username = 'user';
+            }
+
+            $username = $base_username;
+            $i = 1;
+            while ($this->users_model->username_exists($username)) {
+                $username = $base_username . $i;
+                $i++;
+            }
+
             $email = $this->input->post('email');
             $password = $this->input->post('password');
             $additional_data = array(
                 'first_name' => $this->input->post('first_name'),
                 'last_name' => $this->input->post('last_name'),
-                'gender' => $this->input->post('gender'),
-                'dob' => $this->input->post('dob'),
-                'mobile' => $this->input->post('mobile'),
                 'image' => $this->input->post('image'),
-                'address' => $this->input->post('address'),
                 'language' => $this->input->post('language'),
             );
 
@@ -574,7 +584,7 @@ class Auth extends Public_Controller
                 $this->session->set_userdata('logged_in', $result);
 
                 // Single Device Login: store current session ID
-                $this->users_model->save_users(['last_session_id' => session_id()], $user_id);
+                $this->users_model->save_users(['last_session_id' => session_id()], $result['id']);
 
                 redirect(site_url());
             } else {

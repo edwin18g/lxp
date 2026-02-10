@@ -12,7 +12,7 @@ $is_logged_in = $this->session->userdata('logged_in');
       --primary-hover: #0044a5;
       --text-color: #1a1a1a;
       --text-muted: #6d7a8d;
-      --border-color: #e1e5eb;
+      --border-color: rgba(255, 255, 255, 0.2);
       --bg-color: #ffffff;
     }
 
@@ -20,154 +20,91 @@ $is_logged_in = $this->session->userdata('logged_in');
     html {
       height: 100%;
       margin: 0;
-      overflow: hidden;
-      /* Prevent body scroll */
+      overflow-x: hidden;
+      font-family: 'Inter', sans-serif;
     }
 
     .auth-layout {
-      display: flex;
-      height: 100vh;
-      /* Fixed height */
+      min-height: 100vh;
       width: 100%;
-      overflow: hidden;
-    }
-
-    /* Left Side - Brand/Image */
-    .auth-brand {
-      flex: 1;
-      background-image: url('<?php echo base_url("themes/default/images/course/course-01.jpg"); ?>');
-      background-size: cover;
-      background-position: center;
-      position: relative;
       display: flex;
-      flex-direction: column;
-      justify-content: flex-end;
-      padding: 30px;
-      /* Reduced from 40px */
-      color: white;
-      display: none;
-      /* Hidden on mobile by default */
-      height: 100%;
-    }
-
-    @media (min-width: 992px) {
-      .auth-brand {
-        display: flex;
-      }
-    }
-
-    .auth-brand::before {
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: linear-gradient(to bottom, rgba(0, 0, 0, 0.3) 0%, rgba(0, 0, 0, 0.7) 100%);
-      z-index: 1;
-    }
-
-    .brand-content {
-      position: relative;
-      z-index: 2;
-      max-width: 480px;
-    }
-
-    .brand-content h2 {
-      font-size: 2.2rem;
-      /* Increased */
-      font-weight: 700;
-      margin-bottom: 5px;
-      line-height: 1.1;
-      color: #fff;
-    }
-
-    .brand-content p {
-      font-size: 1rem;
-      /* Increased */
-      opacity: 0.9;
-      font-weight: 400;
-    }
-
-    /* Right Side - Form */
-    .auth-form-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
       align-items: center;
       justify-content: center;
-      background: var(--bg-color);
-      padding: 20px;
-      /* Increased */
-      height: 100%;
-      overflow-y: auto;
-      /* Internal scroll only */
+      padding: 40px 20px;
+      /* Premium Mesh Gradient Background */
+      background-color: #f8fbff;
+      background-image:
+        radial-gradient(at 0% 0%, hsla(216, 100%, 95%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 0%, hsla(202, 100%, 98%, 1) 0, transparent 50%),
+        radial-gradient(at 100% 0%, hsla(190, 100%, 96%, 1) 0, transparent 50%),
+        radial-gradient(at 50% 100%, hsla(216, 100%, 95%, 1) 0, transparent 50%);
     }
 
+    /* Glassmorphism Card */
     .auth-form-wrapper {
       width: 100%;
-      max-width: 480px;
-      /* Slightly wider */
-      animation: fadeIn 0.5s ease-out;
-      margin: auto 0;
+      max-width: 500px;
+      padding: 50px;
+      background: rgba(255, 255, 255, 0.7);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.4);
+      border-radius: 24px;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.08);
+      animation: fadeInScale 0.6s cubic-bezier(0.165, 0.84, 0.44, 1);
     }
 
     .auth-header {
       text-align: center;
-      margin-bottom: 25px;
-      /* Restored */
+      margin-bottom: 35px;
     }
 
     .auth-logo {
-      margin-bottom: 15px;
+      margin-bottom: 24px;
       display: block;
-      text-align: center;
     }
 
     .auth-logo img {
-      height: 38px;
-      /* Larger */
+      height: 42px;
     }
 
     .auth-header h1 {
-      font-size: 1.6rem;
-      /* Increased */
-      font-weight: 700;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 2rem;
+      font-weight: 800;
       color: var(--text-color);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
+      letter-spacing: -0.03em;
     }
 
     .auth-header p {
       color: var(--text-muted);
-      font-size: 0.95rem;
-      /* Increased */
+      font-size: 1rem;
+      font-weight: 500;
     }
 
     /* Form Elements */
     .form-group-modern {
-      margin-bottom: 16px;
-      /* Restored */
+      margin-bottom: 20px;
     }
 
     .form-group-modern label {
       display: block;
-      font-size: 0.95rem;
-      /* Increased */
+      font-size: 0.9rem;
       font-weight: 600;
       color: var(--text-color);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
     .form-control-modern {
       width: 100%;
-      padding: 10px 14px;
-      /* Increased */
-      border: 1px solid var(--border-color);
-      border-radius: 6px;
+      padding: 12px 16px;
+      border: 1.5px solid #e1e5eb;
+      border-radius: 10px;
       font-size: 1rem;
-      /* Increased */
-      transition: all 0.2s;
-      background: #fcfcfc;
+      transition: all 0.3s;
+      background: rgba(255, 255, 255, 0.5);
+      color: var(--text-color);
     }
 
     .form-control-modern:focus {
@@ -175,71 +112,70 @@ $is_logged_in = $this->session->userdata('logged_in');
       background: #fff;
       outline: none;
       box-shadow: 0 0 0 4px rgba(0, 86, 210, 0.1);
+      transform: translateY(-1px);
     }
 
     .row-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 15px;
-      /* Restored */
+      gap: 20px;
     }
 
     @media (max-width: 576px) {
       .row-grid {
         grid-template-columns: 1fr;
       }
+
+      .auth-form-wrapper {
+        padding: 30px 20px;
+      }
     }
 
     .btn-primary-modern {
       width: 100%;
-      padding: 12px;
-      /* Increased */
+      padding: 14px;
       background: var(--primary-color);
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 1rem;
-      /* Increased */
-      font-weight: 600;
+      border-radius: 12px;
+      font-size: 1.1rem;
+      font-weight: 700;
       cursor: pointer;
-      transition: background 0.2s, transform 0.1s;
-      margin-top: 10px;
+      transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+      margin-top: 15px;
+      box-shadow: 0 10px 20px -5px rgba(0, 86, 210, 0.3);
     }
 
     .btn-primary-modern:hover {
       background: var(--primary-hover);
-      transform: translateY(-1px);
+      transform: translateY(-3px);
+      box-shadow: 0 15px 30px -8px rgba(0, 86, 210, 0.4);
     }
 
     .auth-links {
-      margin-top: 20px;
+      margin-top: 25px;
       text-align: center;
-      font-size: 0.9rem;
-      /* Increased */
+      font-size: 0.95rem;
       color: var(--text-muted);
+      font-weight: 500;
     }
 
     .auth-links a {
       color: var(--primary-color);
       text-decoration: none;
-      font-weight: 600;
-    }
-
-    .auth-links a:hover {
-      text-decoration: underline;
+      font-weight: 700;
     }
 
     /* Social Auth */
     .divider-modern {
       display: flex;
       align-items: center;
-      margin: 20px 0;
+      margin: 30px 0;
       color: var(--text-muted);
       font-size: 0.8rem;
-      /* Increased */
-      font-weight: 600;
+      font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 1.5px;
     }
 
     .divider-modern::before,
@@ -247,7 +183,7 @@ $is_logged_in = $this->session->userdata('logged_in');
       content: '';
       flex: 1;
       height: 1px;
-      background: var(--border-color);
+      background: #e1e5eb;
     }
 
     .divider-modern span {
@@ -264,162 +200,127 @@ $is_logged_in = $this->session->userdata('logged_in');
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 10px;
-      /* Increased */
-      border: 1px solid var(--border-color);
-      border-radius: 8px;
-      background: white;
+      padding: 12px;
+      border: 1.5px solid #e1e5eb;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.5);
       color: var(--text-color);
       text-decoration: none;
-      font-weight: 500;
-      transition: all 0.2s;
+      font-weight: 600;
+      transition: all 0.3s;
       font-size: 0.95rem;
-      /* Increased */
     }
 
     .btn-social:hover {
-      background: #f8f9fa;
-      border-color: #d1d7dc;
-    }
-
-    .btn-social i {
-      margin-right: 10px;
-      font-size: 1.1rem;
-    }
-
-    .btn-social.google {
-      color: #db4437;
-    }
-
-    .btn-social.facebook {
-      color: #4267B2;
+      background: #fff;
+      border-color: var(--primary-color);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.05);
     }
 
     .checkbox-modern {
       display: flex;
       align-items: flex-start;
-      gap: 10px;
-      font-size: 0.9rem;
-      /* Increased */
+      gap: 12px;
+      font-size: 0.85rem;
       color: var(--text-muted);
-      line-height: 1.4;
-      margin-bottom: 20px;
+      line-height: 1.5;
+      margin-bottom: 25px;
+      cursor: pointer;
     }
 
-    .checkbox-modern input {
-      margin-top: 4px;
-      /* Adjusted alignment */
-    }
-
-    @keyframes fadeIn {
+    @keyframes fadeInScale {
       from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: scale(0.95) translateY(10px);
       }
 
       to {
         opacity: 1;
-        transform: translateY(0);
+        transform: scale(1) translateY(0);
       }
     }
   </style>
 
   <div class="auth-layout">
-    <!-- Brand Side -->
-    <div class="auth-brand">
-      <div class="brand-content">
-        <h2>Start your journey.</h2>
-        <p>Create an account to unlock exclusive courses and community features.</p>
+    <div class="auth-form-wrapper">
+      <div class="auth-header">
+        <a href="<?php echo site_url(); ?>" class="auth-logo">
+          <img src="<?php echo base_url('/upload/institute/logo.png') ?>" alt="Logo">
+        </a>
+        <h1>Create an Account</h1>
+        <p>Start your learning journey today</p>
       </div>
-    </div>
 
-    <!-- Form Side -->
-    <div class="auth-form-container">
-      <div class="auth-form-wrapper">
-        <div class="auth-header">
-          <a href="<?php echo site_url(); ?>" class="auth-logo">
-            <img src="<?php echo base_url('/upload/institute/logo.png') ?>" alt="Logo">
-          </a>
-          <h1>Create an Account</h1>
-          <p>It's free and only takes a minute.</p>
-        </div>
+      <?php echo form_open_multipart('', array('role' => 'form', 'id' => 'form_register')); ?>
+      <input type="hidden" name="language" value="english">
 
-        <?php echo form_open_multipart('', array('role' => 'form', 'id' => 'form_register')); ?>
-        <input type="hidden" name="language" value="english">
-
-        <div class="row-grid">
-          <div class="form-group-modern">
-            <label>First Name</label>
-            <?php echo form_input(array('name' => 'first_name', 'placeholder' => 'First Name', 'value' => set_value('first_name'), 'class' => 'form-control-modern', 'required' => 'required')); ?>
-          </div>
-          <div class="form-group-modern">
-            <label>Last Name</label>
-            <?php echo form_input(array('name' => 'last_name', 'placeholder' => 'Last Name', 'value' => set_value('last_name'), 'class' => 'form-control-modern', 'required' => 'required')); ?>
-          </div>
-        </div>
-
+      <div class="row-grid">
         <div class="form-group-modern">
-          <label>Username</label>
-          <?php echo form_input(array('name' => 'username', 'placeholder' => 'Choose a username', 'value' => set_value('username'), 'class' => 'form-control-modern', 'required' => 'required')); ?>
-          <?php if (form_error('username')): ?><span
-              class="text-danger small mt-1 d-block"><?php echo form_error('username'); ?></span><?php endif; ?>
+          <label>First Name</label>
+          <?php echo form_input(array('name' => 'first_name', 'placeholder' => 'First Name', 'value' => set_value('first_name'), 'class' => 'form-control-modern', 'required' => 'required')); ?>
         </div>
-
         <div class="form-group-modern">
-          <label>Email Address</label>
-          <?php echo form_input(array('name' => 'email', 'type' => 'email', 'placeholder' => 'name@example.com', 'value' => set_value('email'), 'class' => 'form-control-modern', 'required' => 'required')); ?>
-          <?php if (form_error('email')): ?><span
-              class="text-danger small mt-1 d-block"><?php echo form_error('email'); ?></span><?php endif; ?>
+          <label>Last Name</label>
+          <?php echo form_input(array('name' => 'last_name', 'placeholder' => 'Last Name', 'value' => set_value('last_name'), 'class' => 'form-control-modern', 'required' => 'required')); ?>
         </div>
-
-        <div class="row-grid">
-          <div class="form-group-modern">
-            <label>Password</label>
-            <?php echo form_password(array('name' => 'password', 'placeholder' => '••••••••', 'class' => 'form-control-modern', 'required' => 'required')); ?>
-            <?php if (form_error('password')): ?><span
-                class="text-danger small mt-1 d-block"><?php echo form_error('password'); ?></span><?php endif; ?>
-          </div>
-          <div class="form-group-modern">
-            <label>Confirm Password</label>
-            <?php echo form_password(array('name' => 'password_confirm', 'placeholder' => '••••••••', 'class' => 'form-control-modern', 'required' => 'required')); ?>
-            <?php if (form_error('password_confirm')): ?><span
-                class="text-danger small mt-1 d-block"><?php echo form_error('password_confirm'); ?></span><?php endif; ?>
-          </div>
-        </div>
-
-        <label class="checkbox-modern">
-          <input type="checkbox" name="terms" value="1" required>
-          <span>I agree to the Terms and Conditions. The content, videos, and materials belong to Z-eyobron. Unauthorized
-            sharing is subject to penalties.</span>
-        </label>
-
-        <button type="submit" name="submit_form" class="btn-primary-modern"><?php echo lang('users_register'); ?></button>
-        <?php echo form_close(); ?>
-
-        <div class="auth-links">
-          Already have an account? <a href="<?php echo site_url('auth/login'); ?>">Log in</a>
-        </div>
-
-        <?php if (($this->settings->fb_app_id && $this->settings->fb_app_secret) || ($this->settings->g_client_id && $this->settings->g_client_secret)): ?>
-          <div class="divider-modern"><span>Or sign up with</span></div>
-
-          <div class="social-buttons">
-            <?php if ($this->settings->g_client_id && $this->settings->g_client_secret): ?>
-              <a href="<?php echo site_url('auth/g_register') ?>" class="btn-social google">
-                <i class="fa fa-google"></i> Google
-              </a>
-            <?php endif; ?>
-
-            <?php if ($this->settings->fb_app_id && $this->settings->fb_app_secret): ?>
-              <a href="<?php echo site_url('auth/f_register') ?>" class="btn-social facebook">
-                <i class="fa fa-facebook"></i> Facebook
-              </a>
-            <?php endif; ?>
-          </div>
-        <?php endif; ?>
-
       </div>
+
+      <div class="form-group-modern">
+        <label>Email Address</label>
+        <?php echo form_input(array('name' => 'email', 'type' => 'email', 'placeholder' => 'name@example.com', 'value' => set_value('email'), 'class' => 'form-control-modern', 'required' => 'required')); ?>
+        <?php if (form_error('email')): ?><span
+            class="text-danger small mt-1 d-block"><?php echo form_error('email'); ?></span><?php endif; ?>
+      </div>
+
+      <div class="row-grid">
+        <div class="form-group-modern">
+          <label>Password</label>
+          <?php echo form_password(array('name' => 'password', 'placeholder' => '••••••••', 'class' => 'form-control-modern', 'required' => 'required')); ?>
+          <?php if (form_error('password')): ?><span
+              class="text-danger small mt-1 d-block"><?php echo form_error('password'); ?></span><?php endif; ?>
+        </div>
+        <div class="form-group-modern">
+          <label>Confirm Password</label>
+          <?php echo form_password(array('name' => 'password_confirm', 'placeholder' => '••••••••', 'class' => 'form-control-modern', 'required' => 'required')); ?>
+          <?php if (form_error('password_confirm')): ?><span
+              class="text-danger small mt-1 d-block"><?php echo form_error('password_confirm'); ?></span><?php endif; ?>
+        </div>
+      </div>
+
+      <label class="checkbox-modern">
+        <input type="checkbox" name="terms" value="1" required>
+        <span>I agree to the Terms and Conditions. The content, videos, and materials belong to Z-eyobron. Unauthorized
+          sharing is subject to penalties.</span>
+      </label>
+
+      <button type="submit" name="submit_form" class="btn-primary-modern"><?php echo lang('users_register'); ?></button>
+      <?php echo form_close(); ?>
+
+      <div class="auth-links">
+        Already have an account? <a href="<?php echo site_url('auth/login'); ?>">Log in</a>
+      </div>
+
+      <?php if (($this->settings->fb_app_id && $this->settings->fb_app_secret) || ($this->settings->g_client_id && $this->settings->g_client_secret)): ?>
+        <div class="divider-modern"><span>Or sign up with</span></div>
+
+        <div class="social-buttons">
+          <?php if ($this->settings->g_client_id && $this->settings->g_client_secret): ?>
+            <a href="<?php echo site_url('auth/g_register') ?>" class="btn-social google">
+              <i class="fa fa-google"></i> Google
+            </a>
+          <?php endif; ?>
+
+          <?php if ($this->settings->fb_app_id && $this->settings->fb_app_secret): ?>
+            <a href="<?php echo site_url('auth/f_register') ?>" class="btn-social facebook">
+              <i class="fa fa-facebook"></i> Facebook
+            </a>
+          <?php endif; ?>
+        </div>
+      <?php endif; ?>
+
     </div>
+  </div>
   </div>
 
 <?php else: ?>

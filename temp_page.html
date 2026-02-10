@@ -1,0 +1,536 @@
+ <!-- Default Public Template --> <!DOCTYPE html> <html> <head> <meta charset="utf-8"> <meta name="viewport" content="width=device-width, initial-scale=1"> <title> Welcome to zeyobron - zeyobron </title> <!-- Favicon --> <link rel="icon" type="image/png" href="http://local.zeyobron.com/upload/institute/logo.png" /> <meta name="theme-color" content="#1a237e"> <!-- Premium Typography --> <link rel="preconnect" href="https://fonts.googleapis.com"> <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin> <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet"> <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"> <!-- SEO Meta --> <meta name="description" content="test"> <meta name="keywords" content="tag"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/core/plugins/bootstrap/css/bootstrap.min.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/core/plugins/sweetalert/sweetalert.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/core/css/core.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/core/plugins/font-awesome/css/font-awesome.min.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/plugins/animate-css/animate.min.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/plugins/univershicon/univershicon.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/plugins/owl-carousel/owl.carousel.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/plugins/pretty-photo/prettyPhoto.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/css/default.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/css/menu.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/css/skins/default.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/css/theme.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/css/theme-responsive.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/css/ie.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/css/custom.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/plugins/easy-autocomplete/easy-autocomplete.min.css?v=3.3.8"> <link rel="stylesheet" href="http://local.zeyobron.com/themes/default/plugins/easy-autocomplete/easy-autocomplete.themes.min.css?v=3.3.8"> <script type="text/javascript">
+        var base_url = "http://local.zeyobron.com/";
+        var site_url = "http://local.zeyobron.com/";
+        var csrf_name = "ci_csrf_token";
+        var csrf_token = "";
+    </script> </head> <body class="one-page sticky-menu-active" data-target=".single-menu" data-spy="scroll" data-offset="200" > <!-- Page Loader --> <!-- <div id="pageloader"> <div class="loader-inner"> <i class="fa fa-circle-o-notch fa-spin fa-3x fa-fw"></i> </div> </div> --> <!-- Page Loader --> <style> :root { --coursera-blue: #0056d2; --coursera-hover: #0041a3; --text-dark: #1f1f1f; --text-muted: #6a6a6a; --border-color: #d1d7dc; --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06); --transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); /* Premium Palette */ --glass-bg: rgba(255, 255, 255, 0.8); --glass-border: rgba(255, 255, 255, 0.3); --accent-gradient: linear-gradient(135deg, #0056d2 0%, #00a2ff 100%); --mesh-gradient: radial-gradient(at 0% 0%, hsla(216, 100%, 95%, 1) 0, transparent 50%), radial-gradient(at 50% 0%, hsla(202, 100%, 98%, 1) 0, transparent 50%), radial-gradient(at 100% 0%, hsla(190, 100%, 96%, 1) 0, transparent 50%); } body { font-family: 'Inter', sans-serif; color: var(--text-dark); background: #fff; } h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; font-weight: 700; } /* Minimal Header */ #header { background: #fff; border-bottom: 1px solid var(--border-color); box-shadow: var(--shadow); height: 72px; display: flex; align-items: center; position: sticky; top: 0; z-index: 1000; padding: 0; } #header .container { display: flex; justify-content: space-between; align-items: center; } .header-left { display: flex; align-items: center; gap: 16px; flex-grow: 1; } .header-search { position: relative; flex-grow: 1; max-width: 600px; margin-left: 12px; display: flex; align-items: center; } .header-search input { width: 100%; padding: 10px 50px 10px 16px; border: 1px solid #747474; border-radius: 4px; font-size: 14px; background: #fff; transition: all 0.3s ease; } .header-search button { position: absolute; right: 4px; top: 50%; transform: translateY(-50%); background: var(--coursera-blue); color: #fff; border: none; width: 32px; height: 32px; border-radius: 4px; display: flex; align-items: center; justify-content: center; cursor: pointer; } .header-search button:hover { background: var(--coursera-hover); } .nav--main { display: flex; align-items: center; } .logo img { height: 30px; width: auto; vertical-align: middle; } .header-links { display: flex; align-items: center; gap: 24px; margin-right: 24px; } .header-links a { color: var(--text-dark); text-decoration: none; font-weight: 500; font-size: 14px; } .header-right { display: flex; align-items: center; gap: 16px; } .btn-login { color: var(--coursera-blue); font-weight: 600; text-decoration: none; font-size: 14px; } .btn-join { border: 1px solid var(--coursera-blue); color: var(--coursera-blue); padding: 8px 16px; border-radius: 4px; font-weight: 600; text-decoration: none; font-size: 14px; transition: var(--transition); } .btn-join:hover { background: rgba(0, 86, 210, 0.05); } .nav-main { margin: 0; } .nav-main>ul { display: flex; list-style: none; margin: 0; padding: 0; align-items: center; } .nav-main>ul>li { margin-left: 24px; } .nav-main>ul>li>a { font-size: 14px; font-weight: 500; color: var(--text-dark); text-decoration: none; transition: color 0.2s; } .nav-main>ul>li>a:hover { color: var(--coursera-blue); } /* Auth Buttons */ .btn-login { color: var(--coursera-blue) !important; font-weight: 600 !important; } .btn-register-header { background: var(--coursera-blue); color: #fff !important; padding: 8px 20px; border-radius: 4px; font-weight: 600; transition: background 0.2s; } .btn-register-header:hover { background: var(--coursera-hover); text-decoration: none; } .user-nav .dropdown-toggle { display: flex; align-items: center; gap: 10px; font-weight: 500; padding: 4px 8px; border-radius: 20px; transition: background 0.2s; } .user-nav .dropdown-toggle:hover { background: #f1f3f4; text-decoration: none; } .header-avatar { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; border: 2px solid #fff; box-shadow: 0 0 0 1px var(--border-color); } .avatar-placeholder { width: 34px; height: 34px; border-radius: 50%; background: #e8f0fe; color: var(--coursera-blue); display: flex; align-items: center; justify-content: center; font-size: 16px; } /* Footer Improvements */ .footer-modern { background: #fff; border-top: 1px solid var(--border-color); padding: 64px 0 32px; color: var(--text-dark); } .footer-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 48px; margin-bottom: 48px; } .footer-brand h5 { font-weight: 700; margin-bottom: 16px; } .footer-links h6, .footer-social h6 { font-weight: 700; margin-bottom: 20px; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; } .footer-links ul { list-style: none; padding: 0; } .footer-links li { margin-bottom: 12px; } .footer-links a { color: var(--text-muted); text-decoration: none; font-size: 14px; } .footer-links a:hover { color: var(--coursera-blue); text-decoration: underline; } .footer-bottom { border-top: 1px solid var(--border-color); padding-top: 32px; text-align: center; color: var(--text-muted); font-size: 13px; } .social-icons a { color: var(--text-muted); font-size: 20px; margin-right: 20px; transition: color 0.2s; } .social-icons a:hover { color: var(--coursera-blue); } /* Desktop/Mobile handling */ @media (max-width: 991px) { .navbar-collapse { background: #fff; position: absolute; top: 72px; left: 0; right: 0; padding: 20px; box-shadow: var(--shadow); } .nav-main>ul { flex-direction: column; align-items: flex-start; } .nav-main>ul>li { margin: 10px 0; } } </style> <!-- Header Begins --> <header id="header"> <div class="container"> <div class="header-left"> <div class="logo"> <a href="http://local.zeyobron.com/"> <img src="http://local.zeyobron.com/upload/institute/logo.png" alt="Logo"> </a> </div> <div class="header-links"> <a href="http://local.zeyobron.com/courses"> Courses </a> </div> <form class="header-search" action="http://local.zeyobron.com/courses" method="get"> <input type="text" name="search" placeholder="What do you want to learn?"> <button type="submit"> <i class="fa fa-search"></i> </button> </form> </div> <div class="header-right"> <a href="http://local.zeyobron.com/auth/login" class="btn-login">Log In</a> <a href="http://local.zeyobron.com/auth/register" class="btn-join">Join for Free</a> </div> </div> </header> <!-- Page Header --> <!-- Page Main --> <div role="main" class="main"> <!-- Main Content --> <style> /* Hero Section - Premium Polish */ .hero-plus { padding: 0 0; background: linear-gradient(180deg, #f0f6ff 0%, #e6f0fa 100%); /* Subtle gradient */ position: relative; overflow: hidden; /* To contain the shapes */ } /* Background Shapes */ .hero-bg-shapes { position: absolute; top: 50%; right: -100px; transform: translateY(-50%); width: 600px; height: 600px; z-index: 1; pointer-events: none; } .shape-fan-1, .shape-fan-2, .shape-fan-3 { position: absolute; bottom: 0; left: 0; width: 100%; height: 100%; border-radius: 50%; transform-origin: bottom left; } .shape-fan-1 { background: transparent; border: 2px solid #0056d2; /* Darker blue outline */ transform: rotate(-15deg) scale(0.9); opacity: 0.3; } .shape-fan-2 { background: #1f6ce6; /* Mid blue */ transform: rotate(15deg) scale(0.95); clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%); /* Quarter circle approx */ z-index: 1; } .shape-fan-3 { background: #0056d2; /* Dark blue */ transform: rotate(45deg); z-index: 0; clip-path: circle(50% at 0 100%); } /* Simple blue arc approximation */ .blue-fan-bg { position: absolute; right: -5%; top: 10%; width: 600px; height: 600px; z-index: 1; filter: drop-shadow(0 20px 40px rgba(0, 86, 210, 0.1)); /* Soft shadow for depth */ animation: float-delayed 8s ease-in-out infinite; } .fan-blade { position: absolute; bottom: 50px; left: 50px; width: 400px; height: 600px; transform-origin: bottom left; border-radius: 0 400px 0 0; box-shadow: -10px 0 20px rgba(0, 0, 0, 0.05); /* Separation between blades */ } .fan-blade-1 { background: linear-gradient(135deg, #3c82e6 0%, #2b6cb0 100%); transform: rotate(-20deg); z-index: 1; } .fan-blade-2 { background: linear-gradient(135deg, #1f6ce6 0%, #0056d2 100%); transform: rotate(0deg); z-index: 2; } .fan-blade-3 { background: linear-gradient(135deg, #0056d2 0%, #003c8f 100%); transform: rotate(20deg); z-index: 3; } /* Animations */ @keyframes float { 0% { transform: translateY(0px); } 50% { transform: translateY(-10px); } 100% { transform: translateY(0px); } } @keyframes float-delayed { 0% { transform: translateY(0px); } 50% { transform: translateY(-15px); } 100% { transform: translateY(0px); } } @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } } .hero-content { animation: fadeInUp 0.8s ease-out; position: relative; z-index: 10; } .hero-plus-badge { display: flex; align-items: center; gap: 8px; margin-bottom: 24px; } .hero-plus-badge span:first-child { font-size: 1.5rem; font-weight: 800; color: var(--coursera-blue); letter-spacing: -1px; } .hero-plus-badge span:last-child { background: linear-gradient(90deg, #0056d2, #1f6ce6); color: #fff; padding: 4px 12px; border-radius: 4px; font-weight: 800; font-size: 0.9rem; box-shadow: 0 4px 10px rgba(0, 86, 210, 0.2); } .hero-plus h1 { font-size: 4rem; font-weight: 800; line-height: 1.1; margin-bottom: 24px; color: #1a1a1a; letter-spacing: -1.5px; } .hero-plus .subtext { font-size: 1.25rem; color: #404040; margin-bottom: 12px; font-weight: 500; } .hero-plus .price { font-size: 1.1rem; color: #404040; margin-bottom: 40px; } .btn-plus-trial { display: inline-block; background: linear-gradient(90deg, #0056d2, #1f6ce6); color: #fff; padding: 18px 40px; border-radius: 8px; font-weight: 700; font-size: 1.1rem; text-decoration: none; margin-bottom: 24px; transition: all 0.3s ease; box-shadow: 0 10px 20px rgba(0, 86, 210, 0.2); } .btn-plus-trial:hover { transform: translateY(-3px); box-shadow: 0 15px 30px rgba(0, 86, 210, 0.3); color: #fff; } .hero-plus .guarantee { font-size: 0.95rem; color: var(--coursera-blue); font-weight: 600; opacity: 0.9; } .hero-plus-image { position: relative; } .hero-plus-image img { width: 100%; position: relative; z-index: 2; /* Floating animation for the person */ animation: float 6s ease-in-out infinite; filter: drop-shadow(0 20px 40px rgba(0, 86, 210, 0.15)); } /* Partners Section - Exact */ .partners-section { padding: 60px 0; border-bottom: 1px solid #ebedef; } .partners-section h2 { font-size: 1.5rem; font-weight: 600; margin-bottom: 48px; } .partner-logos-exact { display: flex; justify-content: space-between; align-items: center; gap: 40px; flex-wrap: wrap; } .partner-logos-exact img { max-height: 40px; filter: grayscale(100%); opacity: 0.8; transition: var(--transition); } .partner-logos-exact img:hover { filter: grayscale(0%); opacity: 1; } /* Invest Section - Exact */ .invest-section { padding: 80px 0; background: #f5f7f8; } .invest-section h2 { font-size: 1.5rem; font-weight: 700; margin-bottom: 60px; } .benefit-item { text-align: left; } .benefit-item .icon { font-size: 2rem; color: var(--text-dark); margin-bottom: 24px; } .benefit-item h3 { font-size: 1.1rem; font-weight: 700; margin-bottom: 12px; } .benefit-item p { font-size: 0.95rem; color: #404040; line-height: 1.5; } /* Course Grid Polish */ .course-grid-modern { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 24px; margin-top: 40px; } .course-card-premium { background: #fff; border: 1px solid var(--border-color); border-radius: 16px; overflow: hidden; transition: var(--transition); display: flex; flex-direction: column; height: 100%; text-decoration: none; color: inherit; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05); } .course-card-premium:hover { transform: translateY(-8px); box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.1); border-color: var(--coursera-blue); } .card-banner-wrap { position: relative; height: 180px; overflow: hidden; } .card-banner-wrap img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s cubic-bezier(0.165, 0.84, 0.44, 1); } .course-card-premium:hover .card-banner-wrap img { transform: scale(1.1); } .card-content { padding: 24px; flex-grow: 1; display: flex; flex-direction: column; } .category-label { font-size: 0.75rem; font-weight: 700; color: var(--coursera-blue); text-transform: uppercase; margin-bottom: 12px; letter-spacing: 1px; display: inline-block; padding: 4px 12px; background: #e8f0fe; border-radius: 50px; width: fit-content; } .course-title-premium { font-size: 1.25rem; font-weight: 700; margin-bottom: 16px; line-height: 1.4; color: var(--text-dark); display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; } .instructor-meta { margin-top: auto; display: flex; align-items: center; font-size: 0.9rem; color: var(--text-muted); padding-top: 16px; border-top: 1px solid #f0f0f0; } .instructor-meta img { width: 32px; height: 32px; border-radius: 50%; margin-right: 12px; object-fit: cover; box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); } /* Testimonials Redesign */ .testimonial-card-premium { background: #fff; border: 1px solid var(--border-color); border-radius: 20px; padding: 40px; height: 100%; display: flex; flex-direction: column; transition: var(--transition); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03); } .testimonial-card-premium:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); border-color: var(--coursera-blue); } .testimonial-text { font-size: 1.1rem; font-style: italic; line-height: 1.7; color: var(--text-dark); margin-bottom: 30px; position: relative; } .testimonial-text::before { content: '"'; position: absolute; top: -20px; left: -10px; font-size: 4rem; color: #e8f0fe; font-family: 'Outfit'; z-index: -1; } .testimonial-author { display: flex; align-items: center; margin-top: auto; } .author-info h5 { margin: 0; font-size: 1.1rem; font-weight: 700; } .author-info span { font-size: 0.9rem; color: var(--text-muted); } /* Value Prop Section */ .value-prop { padding: 100px 0; background: #fff; } .vp-item { margin-bottom: 50px; display: flex; gap: 20px; } .vp-item i { font-size: 2.2rem; color: var(--coursera-blue); flex-shrink: 0; } .vp-item h4 { font-weight: 700; margin-bottom: 10px; font-size: 1.3rem; } .vp-item p { color: var(--text-muted); line-height: 1.6; } /* Skills Cloud */ .skills-cloud { padding: 40px 0; text-align: center; } .skill-tag { display: inline-block; padding: 10px 24px; background: #f5f7f8; border-radius: 50px; margin: 10px; font-size: 1rem; font-weight: 500; color: var(--text-dark); transition: var(--transition); border: 1px solid #ebebeb; } .skill-tag:hover { background: #fff; border-color: var(--coursera-blue); color: var(--coursera-blue); transform: translateY(-3px); } /* Hero Slider Navigation */ .hero-slider .owl-dots { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); display: flex; gap: 12px; z-index: 20; } .hero-slider .owl-dot { width: 12px; height: 12px; background: rgba(0, 86, 210, 0.2) !important; border-radius: 50%; transition: all 0.3s ease; } .hero-slider .owl-dot.active { background: var(--coursera-blue) !important; transform: scale(1.2); } .hero-slider-item { padding: 60px 0; min-height: 450px; display: flex; align-items: center; background-size: cover; background-position: center; background-repeat: no-repeat; } /* Full Width Slider */ .hero-slider { width: 100%; overflow: hidden; } /* Slider Nav Buttons */ .hero-slider .owl-nav button.owl-prev, .hero-slider .owl-nav button.owl-next { position: absolute; top: 50%; transform: translateY(-50%); width: 40px; height: 40px; background: rgba(255, 255, 255, 0.5) !important; border-radius: 50%; color: #0056d2 !important; font-size: 24px !important; display: flex; align-items: center; justify-content: center; transition: all 0.3s ease; } .hero-slider .owl-nav button.owl-prev { left: 20px; } .hero-slider .owl-nav button.owl-next { right: 20px; } .hero-slider .owl-nav button.owl-prev:hover, .hero-slider .owl-nav button.owl-next:hover { background: #fff !important; color: #0056d2 !important; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); } /* Blue Overlay */ .hero-slider-item { position: relative; } .hero-slider-item::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-color: rgb(5 35 77 / 60%); z-index: 1; } .hero-slider-item>.container { position: relative; z-index: 2; } /* Hero Text Content & Typography */ .hero-slider .owl-item.active .hero-text-content .hero-content { animation: fadeInUp 1s ease-out both; } .hero-text-content h1 { font-size: 3.5rem; font-weight: 800; color: #fff !important; margin-bottom: 20px; line-height: 1.2; text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); } .hero-text-content .subtext { font-size: 1.25rem; color: rgba(255, 255, 255, 0.9) !important; font-weight: 500; margin-bottom: 30px; text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2); } .hero-text-content .hero-plus-badge span:first-child { color: #fff !important; /* Make site name white */ text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); } .hero-text-content .hero-plus-badge span:last-child { background: #fff; color: #0056d2; /* Invert badge color */ box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15); } /* Button Polish */ .hero-text-content .btn-plus-trial { background: #fff; color: #0056d2; font-weight: 800; padding: 16px 40px; border-radius: 50px; /* Pillow shape for modern look */ box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2); transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); } .hero-text-content .btn-plus-trial:hover { transform: translateY(-5px) scale(1.05); box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3); color: #0056d2; /* Keep blue text */ } /* Mobile Responsiveness */ @media (max-width: 768px) { .hero-text-content h1 { font-size: 2rem; } .hero-text-content .subtext { font-size: 1rem; } .hero-slider-item { min-height: 400px; /* Slightly shorter on mobile */ } } /* WhatsApp Style Progress Bars */ .slider-progress-container { position: absolute; top: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 8px; width: 90%; max-width: 600px; z-index: 20; } .progress-bar-item { flex: 1; height: 4px; background: rgba(255, 255, 255, 0.3); border-radius: 2px; overflow: hidden; position: relative; } .progress-bar-item .bar-fill { display: block; height: 100%; background: #fff; width: 0; transition: width 0.1s linear; } .progress-bar-item.active .bar-fill { width: 0; /* JS will animate this */ } .progress-bar-item.completed .bar-fill { width: 100%; } </style> <!-- Hero Slider Section --> <section class="hero-plus" style="position: relative;"> <!-- Progress Bars Container --> <div class="slider-progress-container" id="sliderProgressContainer"> <!-- Bars will be injected by JS --> </div> <div class="hero-slider owl-carousel owl-theme"> <div style="position: absolute; top: 0; left: 0; z-index: 9999; background: red; color: white; padding: 10px;"> DEBUG: Slider Count: 4 </div> <div class="item hero-slider-item" style="background-image: url('http://local.zeyobron.com/upload/sliders/images/1770717457349.jpg');"> <div class="container"> <div class="row align-items-center"> <div class="col-lg-8 mx-auto text-center hero-text-content"> <div class="hero-content"> <div class="hero-plus-badge justify-content-center"> <span>zeyobron</span> <span>Welcome to Zeyobron Analytics PVT LTD</span> </div> <h1 class="text-center">adf</h1> <div class="hero-actions text-center"> <a href="" class="btn-plus-trial"> asfasdf </a> </div> </div> </div> </div> </div> </div> <div class="item hero-slider-item" style="background-image: url('http://local.zeyobron.com/upload/sliders/images/1770718363112.jpg');"> <div class="container"> <div class="row align-items-center"> <div class="col-lg-8 mx-auto text-center hero-text-content"> <div class="hero-content"> <div class="hero-plus-badge justify-content-center"> <span>zeyobron</span> <span>Advanced BigData/Spark Analytics Program</span> </div> <h1 class="text-center">Advanced Real time Bigdata/Spark Projects</h1> <div class="hero-actions text-center"> <a href="" class="btn-plus-trial"> </a> </div> </div> </div> </div> </div> </div> <div class="item hero-slider-item" style="background-image: url('http://local.zeyobron.com/upload/sliders/images/1770718420531.jpg');"> <div class="container"> <div class="row align-items-center"> <div class="col-lg-8 mx-auto text-center hero-text-content"> <div class="hero-content"> <div class="hero-plus-badge justify-content-center"> <span>zeyobron</span> <span>BigData Incremental Data Proccessing Using Hive</span> </div> <h1 class="text-center">Beautiful and user-friendly interface for hassle-free booking experience...</h1> <div class="hero-actions text-center"> <a href="" class="btn-plus-trial"> </a> </div> </div> </div> </div> </div> </div> <div class="item hero-slider-item" style="background-image: url('http://local.zeyobron.com/upload/sliders/images/1770718319772.jpg');"> <div class="container"> <div class="row align-items-center"> <div class="col-lg-8 mx-auto text-center hero-text-content"> <div class="hero-content"> <div class="hero-plus-badge justify-content-center"> <span>zeyobron</span> <span>Advanced BigData/Spark Analytics Program</span> </div> <h1 class="text-center">Earn money by organizing events worldwide, manage events bookings, scale your business...</h1> <div class="hero-actions text-center"> <a href="https://google.com" class="btn-plus-trial"> like </a> </div> </div> </div> </div> </div> </div> </div> </section> <!-- Featured Courses --> <section class="section-padding" style="background: #f5f7f8;"> <div class="container"> <div class="section-title" data-aos="fade-up"> <h2>Explore Featured Courses</h2> <p>Over 5,000 courses from leading experts</p> </div> <div class="course-grid-modern"> <div data-aos="fade-up" data-aos-delay="0"> <a href="http://local.zeyobron.com/courses/detail/batch+46" class="course-card-premium"> <div class="card-banner-wrap"> <img src="http://local.zeyobron.com//upload/courses/images/1755829115538_thumb.jpg" alt="batch 46"> </div> <div class="card-content"> <div class="category-label">Professional Certificate</div> <h4 class="course-title-premium"> batch 46 </h4> <div class="instructor-meta"> <img src="http://local.zeyobron.com/upload/expert_mentor_avatar.png" alt="Instructor"> <span>Expert Mentor</span> </div> </div> </a> </div> <div data-aos="fade-up" data-aos-delay="100"> <a href="http://local.zeyobron.com/courses/detail/batch+47+welocme+sd" class="course-card-premium"> <div class="card-banner-wrap"> <img src="http://local.zeyobron.com//upload/courses/images/1763642726716_thumb.jpg" alt="batch 47 welocme sd"> </div> <div class="card-content"> <div class="category-label">Professional Certificate</div> <h4 class="course-title-premium"> batch 47 welocme sd </h4> <div class="instructor-meta"> <img src="http://local.zeyobron.com/upload/expert_mentor_avatar.png" alt="Instructor"> <span>Expert Mentor</span> </div> </div> </a> </div> <div data-aos="fade-up" data-aos-delay="200"> <a href="http://local.zeyobron.com/courses/detail/gold+video" class="course-card-premium"> <div class="card-banner-wrap"> <img src="http://local.zeyobron.com//upload/courses/images/1662525507680_thumb.jpg" alt="gold video"> </div> <div class="card-content"> <div class="category-label">Professional Certificate</div> <h4 class="course-title-premium"> gold video </h4> <div class="instructor-meta"> <img src="http://local.zeyobron.com/upload/expert_mentor_avatar.png" alt="Instructor"> <span>Expert Mentor</span> </div> </div> </a> </div> <div data-aos="fade-up" data-aos-delay="300"> <a href="http://local.zeyobron.com/courses/detail/batch+45" class="course-card-premium"> <div class="card-banner-wrap"> <img src="http://local.zeyobron.com//upload/courses/images/1747982677847_thumb.jpg" alt="batch 45"> </div> <div class="card-content"> <div class="category-label">Professional Certificate</div> <h4 class="course-title-premium"> batch 45 </h4> <div class="instructor-meta"> <img src="http://local.zeyobron.com/upload/expert_mentor_avatar.png" alt="Instructor"> <span>Expert Mentor</span> </div> </div> </a> </div> <div data-aos="fade-up" data-aos-delay="0"> <a href="http://local.zeyobron.com/courses/detail/batch+44" class="course-card-premium"> <div class="card-banner-wrap"> <img src="http://local.zeyobron.com//upload/courses/images/1740030125631_thumb.jpg" alt="batch 44"> </div> <div class="card-content"> <div class="category-label">Professional Certificate</div> <h4 class="course-title-premium"> batch 44 </h4> <div class="instructor-meta"> <img src="http://local.zeyobron.com/upload/expert_mentor_avatar.png" alt="Instructor"> <span>Expert Mentor</span> </div> </div> </a> </div> <div data-aos="fade-up" data-aos-delay="100"> <a href="http://local.zeyobron.com/courses/detail/big+data+real+interview+audios" class="course-card-premium"> <div class="card-banner-wrap"> <img src="http://local.zeyobron.com//upload/courses/images/1627626487486_thumb.png" alt="big data real interview audios"> </div> <div class="card-content"> <div class="category-label">Professional Certificate</div> <h4 class="course-title-premium"> big data real interview audios </h4> <div class="instructor-meta"> <img src="http://local.zeyobron.com/upload/expert_mentor_avatar.png" alt="Instructor"> <span>Expert Mentor</span> </div> </div> </a> </div> <div data-aos="fade-up" data-aos-delay="200"> <a href="http://local.zeyobron.com/courses/detail/batch+43" class="course-card-premium"> <div class="card-banner-wrap"> <img src="http://local.zeyobron.com//upload/courses/images/1732158870298_thumb.jpg" alt="batch 43"> </div> <div class="card-content"> <div class="category-label">Professional Certificate</div> <h4 class="course-title-premium"> batch 43 </h4> <div class="instructor-meta"> <img src="http://local.zeyobron.com/upload/expert_mentor_avatar.png" alt="Instructor"> <span>Expert Mentor</span> </div> </div> </a> </div> <div data-aos="fade-up" data-aos-delay="300"> <a href="http://local.zeyobron.com/courses/detail/batch+42" class="course-card-premium"> <div class="card-banner-wrap"> <img src="http://local.zeyobron.com//upload/courses/images/1724228891120_thumb.jpg" alt="batch 42"> </div> <div class="card-content"> <div class="category-label">Professional Certificate</div> <h4 class="course-title-premium"> batch 42 </h4> <div class="instructor-meta"> <img src="http://local.zeyobron.com/upload/expert_mentor_avatar.png" alt="Instructor"> <span>Expert Mentor</span> </div> </div> </a> </div> </div> <div class="text-center mt-5" data-aos="fade-up"> <a href="http://local.zeyobron.com/courses" class="btn-primary-coursera" style="background: none; border: 1px solid var(--coursera-blue); color: var(--coursera-blue);">View All Courses</a> </div> </div> </section> <!-- Testimonials --> <section class="section-padding bg-white"> <div class="container"> <div class="section-title" data-aos="fade-up"> <h2>From the Zeyobron Community</h2> <p>100+ million people are already learning with us</p> </div> <div class="row"> <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="0"> <div class="testimonial-card-premium"> <div class="testimonial-text"> I was a quite hesitated in joining Big data assuming its Very tough but Zeyobron instilled confidence in me and then I started my wonderful learning experience. Mark my words Aditya is one of the persons who is master in training people in Big data. My con </div> <div class="testimonial-author"> <div class="author-info"> <h5> Midhun </h5> <span> 1 year </span> </div> </div> </div> </div> <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="100"> <div class="testimonial-card-premium"> <div class="testimonial-text"> I have experienced more Practicals and Handson sessions than theory. Trainer(Aditya) believes in explaining theory part as well while doing handon which is the best part of the training. I felt that I am a real time Hadoop/Spark developer while handling </div> <div class="testimonial-author"> <div class="author-info"> <h5> Durai </h5> <span> 3 years </span> </div> </div> </div> </div> <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="200"> <div class="testimonial-card-premium"> <div class="testimonial-text"> Very advanced Training on Big data. The sessions were highly useful and for a NON IT persons like me it is life changing moment after I join at Zeyobron. Trainer (Aditya) explains each topic in detail with good real time examples. Assigns weekly tasks whi </div> <div class="testimonial-author"> <div class="author-info"> <h5> Arunachalam </h5> <span> 6 years </span> </div> </div> </div> </div> </div> </div> </section> <!-- CTA Section --> <section class="section-padding" style="background: var(--coursera-blue); color: #fff; text-align: center;"> <div class="container" data-aos="zoom-in"> <h2 style="font-size: 3rem; font-weight: 700; margin-bottom: 24px;">Take the next step toward your goals.</h2> <p style="font-size: 1.25rem; margin-bottom: 40px; opacity: 0.9;">Join now to receive personalized recommendations from the Zeyobron catalog.</p> <a href="http://local.zeyobron.com/courses" class="btn-primary-coursera" style="background: #fff; color: var(--coursera-blue);">Join for Free</a> </div> </section> <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        // Initializing AOS is handled in template.php
+
+        // Initialize Hero Slider
+        var time = 5000; // Autoplay timeout in milliseconds
+        var $progressBarContainer = $('#sliderProgressContainer'); // Use jQuery selector
+        var $heroSlider = $('.hero-slider');
+
+        $heroSlider.owlCarousel({
+            items: 1,
+            loop: true,
+            margin: 0,
+            autoplay: true,
+            autoplayTimeout: time,
+            autoplayHoverPause: true,
+            nav: true,
+            dots: false, // Hide dots in favor of progress bars
+            smartSpeed: 800,
+            onInitialized: startProgressBar,
+            onTranslate: resetProgressBar,
+            onTranslated: startProgressBar
+        });
+
+        function startProgressBar(event) {
+            // Clear existing bars
+            $progressBarContainer.html('');
+
+            // Calculate current index (Owl Carousel loop adds clones)
+            var items = event.item.count;
+            var item = event.item.index - event.relatedTarget._clones.length / 2;
+            item = item % items; // Normalize index
+            if (item < 0) item += items;
+
+            // Generate progress bars
+            for (var i = 0; i < items; i++) {
+                var $barItem = $('<div class="progress-bar-item"><span class="bar-fill"></span></div>');
+
+                if (i < item) {
+                    $barItem.addClass('completed');
+                    $barItem.find('.bar-fill').css('width', '100%');
+                } else if (i === item) {
+                    $barItem.addClass('active');
+                    // Animate current bar
+                    $barItem.find('.bar-fill').animate({
+                        width: '100%'
+                    }, time, 'linear');
+                }
+
+                $progressBarContainer.append($barItem);
+            }
+        }
+
+        function resetProgressBar() {
+            $progressBarContainer.find('.bar-fill').stop().css('width', '0');
+        }
+
+        // Pause progress bar on hover
+        $heroSlider.on('mouseover', function () {
+            $progressBarContainer.find('.active .bar-fill').stop(true, false); // Pause animation
+        });
+
+        $heroSlider.on('mouseout', function () {
+            // Resume animation (calculate remaining time roughly)
+            var $activeBar = $progressBarContainer.find('.active .bar-fill');
+            var currentWidth = $activeBar.width();
+            var totalWidth = $activeBar.parent().width();
+            var percentComplete = currentWidth / totalWidth;
+            var remainingTime = time * (1 - percentComplete);
+
+            $activeBar.animate({
+                width: '100%'
+            }, remainingTime, 'linear');
+        });
+    });
+</script> <!-- Promotion Modal --> <div id="promoModal" class="modal fade" role="dialog" style="z-index: 100000;"> <div class="modal-dialog modal-md modal-dialog-centered"> <div class="modal-content"> <div class="modal-header relative"> <button type="button" class="close" data-dismiss="modal" onclick="dismissPromo()" style="position: absolute; right: 20px; top: 15px; font-size: 28px; z-index: 10;">&times;</button> <h4 class="modal-title text-center font-weight-bold" style="padding-top: 10px; color: #333;"> Local Dev Special </h4> </div> <div class="modal-body text-center" style="padding: 20px 30px;"> <p style="font-size: 16px; color: #555; line-height: 1.6; margin-bottom: 10px;"> Testing modal on local. </p> </div> <div class="modal-footer text-center" style="text-align: center; border-top: none; padding-bottom: 35px;"> <a href="#" class="btn btn-promo" onclick="dismissPromo()"> Test Button </a> </div> </div> </div> </div> <style> #promoModal .modal-content { border-radius: 16px; overflow: hidden; border: none; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); } .btn-promo { background: linear-gradient(90deg, #0056d2, #1f6ce6); color: white !important; padding: 12px 35px; border-radius: 50px; font-weight: bold; font-size: 16px; border: none; box-shadow: 0 4px 14px 0 rgba(0, 118, 255, 0.39); transition: all 0.2s ease; text-decoration: none; display: inline-block; } .btn-promo:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 118, 255, 0.23); color: white; } </style> <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // Wait for jQuery
+            var checkJqueryPromise = new Promise(function (resolve, reject) {
+                var count = 0;
+                var checkJquery = setInterval(function () {
+                    if (window.jQuery) {
+                        clearInterval(checkJquery);
+                        resolve();
+                    }
+                    if (count > 100) { // Timeout 10s
+                        clearInterval(checkJquery);
+                        resolve(); // Try anyway
+                    }
+                    count++;
+                }, 100);
+            });
+
+            checkJqueryPromise.then(function () {
+                var storageKey = 'promo_modal_dismissed_3f6a820db9f3dd8b091d9166b8039a35';
+
+                // Show modal if not dismissed
+                if (!localStorage.getItem(storageKey)) {
+                    setTimeout(function () {
+                        jQuery('#promoModal').modal('show');
+                    }, 2000);
+                }
+
+                window.dismissPromo = function () {
+                    localStorage.setItem(storageKey, 'true');
+                };
+            });
+        });
+    </script> <!-- End Main Content --> </div><!-- Page Main --> <!-- Footer --> <footer id="footer" class="footer-modern"> <div class="container"> <div class="footer-grid"> <div class="footer-brand"> <h5>zeyobron</h5> <p>ZEYOBRON ANALYTICS PRIVATE LIMITED THIRUVALLUR , Tamil Nadu, India, 602002</p> <div class="footer-contact"> <span style="display:block; margin-bottom: 8px;"><i class="fa fa-phone"></i> +917395899448</span> <span style="display:block;"><i class="fa fa-envelope"></i> zeyobronanalytics@gmail.com</span> </div> </div> <div class="footer-links"> <h6>Navigation</h6> <ul> <li><a href="http://local.zeyobron.com/courses">Browse Courses</a></li> <li><a href="http://local.zeyobron.com/cms/about-us">About Zeyobron</a></li> <li><a href="http://local.zeyobron.com/contact">Contact Support</a></li> </ul> </div> <div class="footer-social"> <h6>Follow Our Journey</h6> <div class="social-icons"> <a href="https://facebook.com" target="_blank"><i class="fa fa-facebook"></i></a> <a href="https://twitter.com" target="_blank"><i class="fa fa-twitter"></i></a> <a href="https://linkedin.com" target="_blank"><i class="fa fa-linkedin"></i></a> </div> </div> </div> <div class="footer-bottom"> <p>&copy; 2026 zeyobron. Empowering learners worldwide.</p> </div> </div> </footer> <!-- Footer --> <script type="text/javascript" src="http://local.zeyobron.com/themes/core/plugins/jquery/jquery.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/core/plugins/bootstrap/js/bootstrap.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/core/plugins/jquery-date-format/jquery-dateFormat.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/core/plugins/sweetalert/sweetalert.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/core/js/core_i18n.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/owl-carousel/owl.carousel.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/pretty-photo/jquery.prettyPhoto.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/theme-lib/jquery.appear.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/theme-lib/jquery.easing.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/theme-lib/menu.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/theme-lib/modernizr.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/js/theme.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/theme-lib/counter.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/theme-lib/isotope.pkgd.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/theme-lib/jquery.mb.YTPlayer.min.js?v=3.3.8"></script> <script type="text/javascript" src="http://local.zeyobron.com/themes/default/plugins/easy-autocomplete/jquery.easy-autocomplete.min.js?v=3.3.8"></script> <script type="text/javascript">
+/**
+ * Configurations
+ */
+var config = {
+    logging : true,
+    baseURL : "http://local.zeyobron.com/"
+};
+
+
+/**
+ * Bootstrap IE10 viewport bug workaround
+ */
+if (navigator.userAgent.match(/IEMobile\/10\.0/)) {
+    var msViewportStyle = document.createElement('style')
+    msViewportStyle.appendChild(
+        document.createTextNode(
+            '@-ms-viewport{width:auto!important}'
+        )
+    )
+    document.querySelector('head').appendChild(msViewportStyle)
+}
+
+
+/**
+ * Execute an AJAX call
+ */
+function executeAjax(url, data, callback) {
+    $.ajax({
+        type     : 'POST',
+        url      : url,
+        data     : data,
+        dataType : 'json',
+        async    : true,
+        success  : function(results) {
+            callback(results);
+        },
+        error    : function(error) {
+            alert("Error " + error.status + ": " + error.statusText);
+        }
+    });
+    // prevent default action
+    return false;
+}
+
+
+/**
+ * Global core functions
+ */
+$(document).ready(function() {
+
+    /**
+     * Session language selected
+     */
+    $('#session-language-dropdown a').click(function(e) {
+        // prevent default behavior
+        if (e.preventDefault) {
+            e.preventDefault();
+        } else {
+            e.returnValue = false;
+        }
+
+        // set up post data
+        var postData = {
+            language : $(this).attr('rel')
+        };
+
+        // define callback function to handle AJAX call result
+        var ajaxResults = function(results) {
+            if (results.success) {
+                location.reload();
+            } else {
+                alert("");
+            }
+        };
+
+        // perform AJAX call
+        executeAjax(config.baseURL + 'ajax/set_session_language', postData, ajaxResults);
+    });
+
+});
+
+</script> <script type="text/javascript">
+(function () {
+    // remove has-error on focus on input 
+    $(document).on('focus', "input, select, textarea", function() {
+      $('.form-line').removeClass('error');
+      $('label').removeClass('text-danger');
+    });
+}());
+
+/* String capitalize */
+String.prototype.textCapitalize = function() {
+  return this.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}
+
+/*getRandomColor random color generator*/
+function getRandomColor() {
+    var items = ['#f44336','#f39c12','#0073b7','#00c0ef','#00a65a','#3c8dbc','#b71c1c','#d81b60','#ad1457',
+                '#9c27b0','#4a148c','#d500f9','#651fff','#304ffe','#26c6da','#00695c','#2e7d32','#00c853',
+                '#ff6f00','#e65100','#ffa726','#ff5722','#bf360c','#bf360c',];
+
+    return items[Math.floor(Math.random()*items.length)];
+}
+
+/*time24To12 convert 24 hours to 12 hours*/
+function time24To12 (time) {
+  // Check correct time format and split into components
+  time = time.toString ().match (/^([01]\d|2[0-3])(:)([0-5]\d)(:[0-5]\d)?$/) || [time];
+
+  if (time.length > 1) { // If time format correct
+    time = time.slice (1);  // Remove full string match value
+    time[5] = +time[0] < 12 ? 'AM' : 'PM'; // Set AM/PM
+    time[0] = +time[0] % 12 || 12; // Adjust hours
+  }
+  return time.join (''); // return adjusted time or original string
+}
+
+
+/* ajaxPostCustom function 
+ * url 		: method name
+ * data 	: data to post
+ * loader 	: loader id
+ * callback : data to return
+*/
+function ajaxPostCustom(url, loader, data, callback) {
+  $.ajax({ 
+      type        : 'POST', 
+      url         : site_url+uri_seg_1+'/'+url, 
+      data        : data, 
+      dataType    : 'JSON',
+      cache       : false,
+      beforeSend  : function() {
+        if(loader != '')
+          $(loader).html('<i class="fa fa-circle-o-notch fa-spin loader"></i>');
+      },
+      success     : function (response) { 
+        if(/<p>/i.test(response)) {
+          swal("Oops!", response, "error");
+        } else if(!response) {
+          swal("Fatal!", response, "warning");
+        } else {
+          callback(response);
+        }
+        
+        if(loader != '')
+         $(loader+' i').remove();
+      },
+      error       : function(response, textStatus, errorThrown){
+        if(/<p>/i.test(response.responseText)) {
+          swal("Fatal!", response.responseText, "warning");
+        }
+        
+        if(loader != '')
+          $(loader+' i').remove();
+      },
+  });
+  
+}
+
+/* ajaxPostMultiPartCustom function 
+ * url    : method name
+ * data   : data to post
+ * loader   : loader id
+ * callback : data to return
+*/
+function ajaxPostMultiPartCustom(url, loader, data, callback) {
+  $.ajax({ 
+      type        : 'POST', 
+      url         : site_url+uri_seg_1+'/'+url, 
+      data        : data, 
+      dataType    : 'JSON',
+      cache       : false,
+      contentType : false,
+      processData : false,
+      beforeSend  : function() {
+        if(loader != '')
+          $(loader).html('<i class="fa fa-circle-o-notch fa-spin loader"></i>');
+      },
+      success     : function (response) { 
+        if(/<p>/i.test(response)) {
+          swal("Oops!", response, "error");
+        } else if(!response) {
+          swal("Fatal!", response, "warning");
+        } else {
+          callback(response);
+        }
+        
+        if(loader != '')
+         $(loader+' i').remove();
+      },
+      error       : function(response, textStatus, errorThrown){
+        if(/<p>/i.test(response.responseText)) {
+          swal("Fatal!", response.responseText, "warning");
+        }
+        
+        if(loader != '')
+          $(loader+' i').remove();
+      },
+  });
+  
+}
+
+
+// Ajax Delete With Sweetalert
+function ajaxDelete(id, text) {
+    text    = text.textCapitalize();
+
+    swal({
+        title               : "Hey! Do You Wanna Delete ",
+        text                : text,
+        type                : "error",
+        showCancelButton    : true,
+        confirmButtonColor  : "#DD6B55",
+        confirmButtonText   : "Delete",
+        cancelButtonText    : "Cancel",
+        closeOnConfirm      : false,
+        closeOnCancel       : false,
+        showLoaderOnConfirm : true,
+        html                : true,
+        allowEscapeKey      : true,
+        timer               : 5000,
+    }, function (isConfirm) {
+        if (isConfirm) {
+            var data    = {
+                csrf_token      : csrf_token,
+                id              : id, 
+            };
+                            
+            ajaxPostCustom('delete', '#blogs_loader', data, function(response) {
+                if(response.flag == 1)
+                    swal(text, " deleted successfully!", "success");
+                else
+                    swal("Delete Failed!", response.msg, "warning");
+
+                if(response.flag == 1) {
+                  setTimeout(function () {
+                      location.reload(true);
+                  }, 500);    
+                }
+            });
+        } else {
+            swal("Delete Cancelled!", "Your data is safe!", "error");
+        }
+    });
+}
+
+
+// Booking Cancellation With Sweetalert
+function bookingCancel(id, text, cont) {
+    text = cont+" : "+text.textCapitalize();
+
+    swal({
+        title               : "Hey! Do You Wanna Cancel ",
+        text                : text,
+        type                : "error",
+        showCancelButton    : true,
+        confirmButtonColor  : "#DD6B55",
+        confirmButtonText   : "Cancel Booking",
+        cancelButtonText    : "No",
+        closeOnConfirm      : false,
+        closeOnCancel       : false,
+        showLoaderOnConfirm : true,
+        html                : true,
+        allowEscapeKey      : true,
+        timer               : 10000,
+    }, function (isConfirm) {
+        if (isConfirm) {
+            var data    = {
+                csrf_token      : csrf_token,
+                id              : id, 
+            };
+                            
+            ajaxPostCustom('cancel_booking', '#blogs_loader', data, function(response) {
+                if(response.flag == 1)
+                    swal(text, " cancellation request placed successfully!", "success");
+                else
+                    swal("Booking Cancellation Failed!", response.msg, "warning");
+
+                if(response.flag == 1) {
+                  setTimeout(function () {
+                      location.reload(true);
+                  }, 3000);    
+                }
+            });
+        } else {
+            swal("Booking Cancellation Cancelled!", "Your booking is safe!", "error");
+        }
+    });
+}
+</script> <script type="text/javascript">
+$(function () {
+  /*easy autocomplete*/
+  var data = {
+    'csrf_token': csrf_token
+  }
+  var options = {
+    url: function (phrase) {
+      return site_url + 'courses' + '/search_categories';
+    },
+    getValue: function (element) {
+      return element.text;
+    },
+    ajaxSettings: {
+      dataType: "JSON",
+      method: "POST",
+      data: {
+        dataType: "json",
+      },
+    },
+    preparePostData: function (data) {
+      data.phrase = $("#search-categories").val();
+      data.csrf_token = csrf_token;
+      return data;
+    },
+    template: {
+      type: "links",
+      fields: {
+        link: "link",
+      }
+    },
+    theme: "square",
+    cssClasses: "sheroes",
+    list: {
+      showAnimation: {
+        type: "slide",
+      },
+      hideAnimation: {
+        type: "slide"
+      }
+    },
+    requestDelay: 500
+  };
+  $("#search-categories").easyAutocomplete(options);
+
+  /* Hero Slider */
+  if ($('.hero-slider').length) {
+    $('.hero-slider').owlCarousel({
+      items: 1,
+      loop: true,
+      margin: 0,
+      nav: false,
+      dots: true,
+      autoplay: true,
+      autoplayTimeout: 5000,
+      autoplayHoverPause: true,
+      animateOut: 'fadeOut',
+      smartSpeed: 450
+    });
+  }
+})
+
+equalheight = function (container) {
+
+  var currentTallest = 0,
+    currentRowStart = 0,
+    rowDivs = new Array(),
+    $el,
+    topPosition = 0;
+  $(container).each(function () {
+
+    $el = $(this);
+    $($el).height('auto')
+    topPostion = $el.position().top;
+
+    if (currentRowStart != topPostion) {
+      for (currentDiv = 0; currentDiv < rowDivs.length; currentDiv++) {
+        rowDivs[currentDiv].height(currentTallest);
+      }
+      rowDivs.length = 0; // empty the array
+      currentRowStart = topPostion;
+      currentTallest = $el.height();
+      rowDivs.push($el);
+    } else {
+      rowDivs.push($el);
+      currentTallest = (currentTallest < $el.height()) ? ($el.height()) : (currentTallest);
+    }
+    for (currentDiv = 0; currentDiv < rowDivs.length; currentDiv++) {
+      rowDivs[currentDiv].height(currentTallest);
+    }
+  });
+}
+
+$(window).on('load', function () {
+  equalheight('.course-detail-wrap');
+});
+$(window).resize(function () {
+  equalheight('.course-detail-wrap');
+});
+
+
+$(window).on('load', function () {
+  equalheight('.event-details');
+});
+$(window).resize(function () {
+  equalheight('.event-details');
+});
+
+$(window).on('load', function () {
+  equalheight('.blog-details');
+});
+$(window).resize(function () {
+  equalheight('.blog-details');
+});
+</script> <!-- Modal --> <div id="secureDevice" class="modal fade" role="dialog"> <div class="modal-dialog"> <!-- Modal content--> <div class="modal-content"> <div class="modal-header"> <button type="button" class="close" data-dismiss="modal">&times;</button> <h6 class="modal-title" id="device-content">Make Sure It's your secure content access device ? </h6> </div> <div class="modal-footer"> <button type="button" class="btn btn-default" data-dismiss="modal" id="success-lab">No</button> <button type="button" class="btn btn-default" id="makeItSecureDevice">Yes! process</button> </div> </div> </div> </div> <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.1.11/client.min.js"></script> <script>
+        var client = new ClientJS(); // Create A New Client Object
+        var fingerprint = client.getFingerprint(); // Get Client's Fingerprint
+        console.log(fingerprint);
+        fingerprint = btoa(fingerprint); 
+    </script> <script>
+        var base_url = 'http://local.zeyobron.com/';
+        var secure_name = 'dXNlcl9zZWNfaWQ=';
+        var secure_val = 'dWVnZGRlY2VvZGRlZXVjcnNjdWM=';
+        
+
+
+    </script> <!-- Core JS --> <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script> <script>
+        AOS.init({
+            duration: 800,
+            once: true,
+            offset: 100
+        });
+    </script> </body> <!-- Load Facebook SDK for JavaScript --> </html>

@@ -23,6 +23,7 @@ class Welcome extends Public_Controller
             'admin/gallaries_model',
             'admin/testimonials_model',
             'admin/blogs_model',
+            'admin/sliders_model',
             'course_model',
             'event_model',
             'users_model',
@@ -110,10 +111,10 @@ class Welcome extends Public_Controller
             'count_events' => $this->event_model->count_events(),
             'count_tutors' => $this->users_model->count_users(),
             'u_events' => $this->event_model->get_u_events(),
+            'sliders' => $this->sliders_model->get_active_sliders(),
             'blogs' => $this->blogs_model->get_blogs(3),
             'my_courses' => $course_access_list
         );
-
         // load views
         $data['content'] = $this->load->view('welcome', $content_data, TRUE);
         $this->load->view($this->template, $data);

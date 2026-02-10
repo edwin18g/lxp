@@ -221,13 +221,44 @@
   <section>
     <!-- Left Sidebar -->
     <aside id="leftsidebar" class="sidebar">
-      <!-- User Info -->
-      <!-- User Info REMOVED -->
-      <!-- #User Info -->
+
+      <!-- Product Bar -->
+      <div class="product-bar">
+        <!-- Branding / Home -->
+        <div class="product-item brand" onclick="window.location.href='<?php echo site_url(); ?>'"
+          title="Visit Website">
+          <div class="brand-content">
+            <i class="material-icons">public</i>
+          </div>
+        </div>
+
+        <div class="product-item active" onclick="switchProduct('lms')" data-toggle="tooltip" data-placement="right"
+          title="LMS">
+          <i class="material-icons">school</i>
+          <span class="product-name">LMS</span>
+        </div>
+        <div class="product-item" onclick="switchProduct('users')" data-toggle="tooltip" data-placement="right"
+          title="Roles Management">
+          <i class="material-icons">people</i>
+          <span class="product-name">Roles</span>
+        </div>
+        <div class="product-item" onclick="switchProduct('cms')" data-toggle="tooltip" data-placement="right"
+          title="CMS">
+          <i class="material-icons">web</i>
+          <span class="product-name">CMS</span>
+        </div>
+        <div class="product-item" onclick="switchProduct('system')" data-toggle="tooltip" data-placement="right"
+          title="System">
+          <i class="material-icons">settings_applications</i>
+          <span class="product-name">System</span>
+        </div>
+      </div>
+
       <!-- Menu -->
       <div class="menu">
-        <ul class="list">
-          <!-- Access Website REMOVED -->
+        <ul class="list" id="menu-lms">
+          <!-- LMS Section -->
+          <li class="header">LMS MOOC</li>
 
           <!-- Dashboard -->
           <li class="<?php echo (uri_string() == 'admin' OR uri_string() == 'admin/dashboard') ? 'active' : ''; ?>">
@@ -238,12 +269,12 @@
           </li>
 
           <!-- Class_categories -->
-          <!--<li class="< ?php echo (strstr(uri_string(), 'admin/categories')) ? ' active' : ''; ?>">-->
-          <!--  <a href="< ?php echo site_url('admin/categories'); ?>">-->
-          <!--    <i class="material-icons">device_hub</i>-->
-          <!--    <span>< ?php echo lang('menu_course_categories'); ?></span>-->
-          <!--  </a>-->
-          <!--</li>-->
+          <li class="<?php echo (strstr(uri_string(), 'admin/categories')) ? ' active' : ''; ?>">
+            <a href="<?php echo site_url('admin/categories'); ?>">
+              <i class="material-icons">device_hub</i>
+              <span><?php echo lang('menu_course_categories'); ?></span>
+            </a>
+          </li>
 
           <!-- Courses -->
           <li class="<?php echo (strstr(uri_string(), 'admin/courses')) ? ' active' : ''; ?>">
@@ -261,117 +292,69 @@
             </a>
           </li>
 
-          <!-- Events -->
-          <!--<li class="< ?php echo (strstr(uri_string(), 'admin/events') || strstr(uri_string(), 'admin/eventtypes')) ? ' active' : ''; ?>">-->
-          <!--  <a href="#" class="menu-toggle">-->
-          <!--    <i class="material-icons">event</i>-->
-          <!--    <span>< ?php echo lang('menu_events'); ?></span>-->
-          <!--  </a>-->
-          <!--  <ul class="ml-menu">-->
-          <!--    <li class="< ?php echo (strstr(uri_string(), 'admin/events')) ? ' active' : ''; ?>">-->
-          <!--      <a href="< ?php echo site_url('/admin/events'); ?>">-->
-          <!--        < ?php echo lang('menu_events'); ?>-->
-          <!--      </a>-->
-          <!--    </li>-->
-          <!--    <li class="< ?php echo (strstr(uri_string(), 'admin/eventtypes')) ? ' active' : ''; ?>">-->
-          <!--      <a href="< ?php echo site_url('/admin/eventtypes'); ?>">-->
-          <!--        < ?php echo lang('menu_event_types'); ?>-->
-          <!--      </a>-->
-          <!--    </li>-->
-          <!--  </ul>          -->
-          <!--</li>-->
+          <!-- Enrolled Users (Moved to LMS) -->
+          <li class="<?php echo (strstr(uri_string(), 'admin/enrolled_users')) ? ' active' : ''; ?>">
+            <a href="<?php echo site_url('admin/enrolled_users'); ?>">
+              <i class="material-icons">class</i>
+              <span>Enrolled Users</span>
+            </a>
+          </li>
+        </ul>
 
-          <!-- Bookings -->
-          <!--<li class="< ?php echo (strstr(uri_string(), 'admin/bbookings') || strstr(uri_string(), 'admin/ebookings')) ? ' active' : ''; ?>">-->
-          <!--  <a href="#" class="menu-toggle">-->
-          <!--    <i class="material-icons">monetization_on</i>-->
-          <!--    <span>< ?php echo lang('menu_bookings'); ?></span>-->
-          <!--  </a>-->
-          <!--  <ul class="ml-menu">-->
-          <!--    <li class="< ?php echo (strstr(uri_string(), 'admin/bbookings')) ? ' active' : ''; ?>">-->
-          <!--      <a href="< ?php echo site_url('/admin/bbookings'); ?>">-->
-          <!--        < ?php echo lang('menu_b_bookings'); ?>-->
-          <!--      </a>-->
-          <!--    </li>-->
-          <!--    <li class="< ?php echo (strstr(uri_string(), 'admin/ebookings')) ? ' active' : ''; ?>">-->
-          <!--      <a href="< ?php echo site_url('/admin/ebookings'); ?>">-->
-          <!--        < ?php echo lang('menu_e_bookings'); ?>-->
-          <!--      </a>-->
-          <!--    </li>-->
-          <!--  </ul>          -->
-          <!--</li>-->
+        <ul class="list" id="menu-users" style="display:none;">
+          <!-- User Roles Management (Renamed) -->
+          <li class="header">USER ROLES MANAGEMENT</li>
 
-          <!-- Users -->
-
-
+          <!-- Learners -->
           <li class="<?php echo (strstr(uri_string(), 'admin/users')) ? ' active' : ''; ?>">
             <a href="<?php echo site_url('admin/users'); ?>">
               <i class="material-icons">account_circle</i>
-              <span>Learners</span>
+              <span>Users</span>
             </a>
           </li>
-          <!--<li class="< ?php echo (strstr(uri_string(), 'admin/users') || strstr(uri_string(), 'admin/groups') || strstr(uri_string(), 'admin/manageacl')) ? ' active' : ''; ?>">-->
-          <!--  <a href="#" class="menu-toggle">-->
-          <!--    <i class="material-icons">face</i>-->
-          <!--    <span>< ?php echo lang('menu_users'); ?></span>-->
-          <!--  </a>-->
-          <!--  <ul class="ml-menu">-->
-          <!--    <li class="< ?php echo (strstr(uri_string(), 'admin/users')) ? ' active' : ''; ?>">-->
-          <!--      <a href="< ?php echo site_url('/admin/users'); ?>">-->
-          <!--        < ?php echo lang('menu_users'); ?>-->
-          <!--      </a>-->
-          <!--    </li>-->
-          <!--    <li class="< ?php echo (strstr(uri_string(), 'admin/groups')) ? ' active' : ''; ?>">-->
-          <!--      <a href="< ?php echo site_url('/admin/groups'); ?>">-->
-          <!--        < ?php echo lang('menu_groups'); ?>-->
-          <!--      </a>-->
-          <!--    </li>-->
-          <!--    <li class="< ?php echo (strstr(uri_string(), 'admin/manageacl')) ? ' active' : ''; ?>">-->
-          <!--      <a href="< ?php echo site_url('/admin/manageacl'); ?>">-->
-          <!--        < ?php echo lang('menu_manage_acl'); ?>-->
-          <!--      </a>-->
-          <!--    </li>-->
-          <!--  </ul>          -->
-          <!--</li>-->
 
+          <!-- User Roles (Groups) -->
+          <li class="<?php echo (strstr(uri_string(), 'admin/groups')) ? ' active' : ''; ?>">
+            <a href="<?php echo site_url('/admin/groups'); ?>">
+              <i class="material-icons">group_work</i>
+              <span>User Roles</span>
+            </a>
+          </li>
 
-          <!-- Contacts -->
-          <!-- Contacts -->
+          <!-- Permissions (ACL) -->
+          <li class="<?php echo (strstr(uri_string(), 'admin/manageacl')) ? ' active' : ''; ?>">
+            <a href="<?php echo site_url('/admin/manageacl'); ?>">
+              <i class="material-icons">security</i>
+              <span>Permissions</span>
+            </a>
+          </li>
+        </ul>
+
+        <ul class="list" id="menu-cms" style="display:none;">
+          <li class="header">CMS</li>
           <li class="<?php echo (strstr(uri_string(), 'admin/contacts')) ? ' active' : ''; ?>">
             <a href="<?php echo site_url('/admin/contacts'); ?>">
               <i class="material-icons">contacts</i>
               <span><?php echo lang('menu_contacts'); ?></span>
             </a>
           </li>
-
-          <!-- Testimonials -->
-          <!--
           <li class="<?php echo (strstr(uri_string(), 'admin/testimonials')) ? ' active' : ''; ?>">
             <a href="<?php echo site_url('/admin/testimonials'); ?>">
               <i class="material-icons">insert_comment</i>
               <span><?php echo lang('menu_testimonials'); ?></span>
             </a>
           </li>
-          -->
-
-          <!-- Blogs -->
-          <!--
-          <li class="<?php echo (strstr(uri_string(), 'admin/blogs')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('/admin/blogs'); ?>">
-              <i class="material-icons">pages</i>
-              <span><?php echo lang('menu_blogs'); ?></span>
+          <li class="<?php echo (strstr(uri_string(), 'admin/sliders')) ? ' active' : ''; ?>">
+            <a href="<?php echo site_url('/admin/sliders'); ?>">
+              <i class="material-icons">view_carousel</i>
+              <span>Sliders</span>
             </a>
           </li>
-          -->
-
-          <!-- CMS -->
-          <!-- CMS -->
-          <!--
           <li
             class="<?php echo (strstr(uri_string(), 'admin/pages') || strstr(uri_string(), 'admin/menus') || strstr(uri_string(), 'admin/faqs')) ? ' active' : ''; ?>">
             <a href="#" class="menu-toggle">
               <i class="material-icons">developer_board</i>
-              <span><?php echo lang('cms'); ?></span>
+              <span>Pages & Menus</span>
             </a>
             <ul class="ml-menu">
               <li class="<?php echo (strstr(uri_string(), 'admin/pages')) ? ' active' : ''; ?>">
@@ -391,54 +374,16 @@
               </li>
             </ul>
           </li>
-          -->
+        </ul>
 
-          <!-- Masters -->
-          <!--
-          <li
-            class="<?php echo (strstr(uri_string(), 'admin/languages') || strstr(uri_string(), 'admin/emailtemplates') || strstr(uri_string(), 'admin/currencies') || strstr(uri_string(), 'admin/customfields') || strstr(uri_string(), 'admin/taxes')) ? ' active' : ''; ?>">
-            <a href="#" class="menu-toggle">
-              <i class="material-icons">lock_outline</i>
-              <span><?php echo lang('menu_admin') ?></span>
-            </a>
-            <ul class="ml-menu">
-              <li class="<?php echo (strstr(uri_string(), 'admin/languages')) ? ' active' : ''; ?>">
-                <a href="<?php echo site_url('/admin/languages'); ?>">
-                  <?php echo lang('menu_languages'); ?>
-                </a>
-              </li>
-              <li class="<?php echo (strstr(uri_string(), 'admin/emailtemplates')) ? ' active' : ''; ?>">
-                <a href="<?php echo site_url('/admin/emailtemplates'); ?>">
-                  <?php echo lang('menu_email_templates'); ?>
-                </a>
-              </li>
-              <li class="<?php echo (strstr(uri_string(), 'admin/currencies')) ? ' active' : ''; ?>">
-                <a href="<?php echo site_url('/admin/currencies'); ?>">
-                  <?php echo lang('menu_currencies'); ?>
-                </a>
-              </li>
-              <li class="<?php echo (strstr(uri_string(), 'admin/customfields')) ? ' active' : ''; ?>">
-                <a href="<?php echo site_url('/admin/customfields'); ?>">
-                  <?php echo lang('menu_custom_fields'); ?>
-                </a>
-              </li>
-              <li class="<?php echo (strstr(uri_string(), 'admin/taxes')) ? ' active' : ''; ?>">
-                <a href="<?php echo site_url('/admin/taxes'); ?>">
-                  <?php echo lang('menu_taxes'); ?>
-                </a>
-              </li>
-            </ul>
-          </li>
-          -->
-
-          <!-- Settings -->
+        <ul class="list" id="menu-system" style="display:none;">
+          <li class="header">SYSTEM</li>
           <li class="<?php echo (strstr(uri_string(), 'admin/settings')) ? ' active' : ''; ?>">
             <a href="<?php echo site_url('/admin/settings'); ?>">
               <i class="material-icons">settings</i>
               <span><?php echo lang('menu_settings'); ?></span>
             </a>
           </li>
-
         </ul>
       </div>
       <!-- #Menu -->
@@ -494,6 +439,165 @@
       if (error != '') show_danger(error);
       if (v_errors != '') show_danger(v_errors);
       if (s_error != '') show_danger(s_error);
+    });
+  </script>
+
+  <style>
+    /* Product Bar Styles */
+    .product-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 80px;
+      height: 100%;
+      background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
+      z-index: 12;
+      padding-top: 0;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-item {
+      width: 100%;
+      height: 80px;
+      /* Increased height for text */
+      cursor: pointer;
+      color: #bdc3c7;
+      border-left: 4px solid transparent;
+      transition: all 0.3s ease;
+      position: relative;
+
+      /* Flex layout for vertical stacking */
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .product-item.brand {
+      height: 80px;
+      background-color: #1a252f;
+      margin-bottom: 10px;
+      color: #fff;
+    }
+
+    .product-item:hover {
+      background-color: rgba(255, 255, 255, 0.05);
+      color: #ecf0f1;
+    }
+
+    .product-item.active {
+      background-color: rgba(0, 150, 136, 0.1);
+      color: #009688;
+      border-left: 4px solid #009688;
+    }
+
+    .product-item i {
+      display: block;
+      font-size: 26px;
+      line-height: 1;
+      margin-bottom: 5px;
+      /* Space between icon and text */
+    }
+
+    .product-name {
+      font-size: 11px;
+      font-weight: 500;
+      line-height: 1.1;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* Sidebar Layout Adjustments */
+    #leftsidebar {
+      width: 330px !important;
+    }
+
+    #leftsidebar .menu,
+    #leftsidebar .legal {
+      margin-left: 80px;
+      width: 250px;
+    }
+
+    section.content {
+      margin-left: 330px !important;
+      transition: margin-left 0.3s;
+    }
+
+    .tooltip {
+      z-index: 1060;
+    }
+
+    @media (max-width: 767px) {
+      #leftsidebar {
+        width: 250px !important;
+        transform: translateX(-100%);
+        transition: transform 0.3s;
+      }
+
+      #leftsidebar.open {
+        transform: translateX(0);
+      }
+
+      .product-bar {
+        width: 60px;
+      }
+
+      .product-name {
+        display: none;
+        /* Hide text on very small screens if space is tight */
+      }
+
+      .product-item i {
+        margin-bottom: 0;
+      }
+
+      #leftsidebar .menu,
+      #leftsidebar .legal {
+        margin-left: 60px;
+        width: 190px;
+      }
+    }
+  </style>
+
+  <script>
+    function switchProduct(productName) {
+      $('.product-item').removeClass('active');
+
+      // Logic to find active item better
+      $('.product-item').each(function () {
+        if ($(this).attr('onclick') && $(this).attr('onclick').includes("'" + productName + "'")) {
+          $(this).addClass('active');
+        }
+      });
+
+      $('#menu-lms, #menu-users, #menu-cms, #menu-system').hide();
+      $('#menu-' + productName).fadeIn(200); // Fade in for smoother transition
+
+      if (typeof (Storage) !== "undefined") {
+        localStorage.setItem("activeProduct", productName);
+      }
+    }
+
+    $(function () {
+      try {
+        $('[data-toggle="tooltip"]').tooltip();
+      } catch (e) { console.log("Tooltip init failed", e); }
+
+      var activeProduct = localStorage.getItem("activeProduct");
+      if (activeProduct) {
+        switchProduct(activeProduct);
+      } else {
+        var url = window.location.href;
+        if (url.includes('admin/users') || url.includes('admin/enrolled_users')) {
+          switchProduct('users');
+        } else if (url.includes('admin/contacts') || url.includes('admin/testimonials') || url.includes('admin/sliders') || url.includes('admin/pages') || url.includes('admin/menus') || url.includes('admin/faqs')) {
+          switchProduct('cms');
+        } else if (url.includes('admin/settings')) {
+          switchProduct('system');
+        } else {
+          switchProduct('lms');
+        }
+      }
     });
   </script>
 

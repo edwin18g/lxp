@@ -177,10 +177,10 @@
     .hero-plus h1 {
         font-size: 4rem;
         font-weight: 800;
-        line-height: 1.1;
+        line-height: 1.05;
         margin-bottom: 24px;
         color: #1a1a1a;
-        letter-spacing: -1.5px;
+        letter-spacing: -0.04em;
     }
 
     .hero-plus .subtext {
@@ -401,58 +401,143 @@
 
     /* Testimonials Redesign */
     .testimonial-card-premium {
-        background: #fff;
-        border: 1px solid var(--border-color);
-        border-radius: 20px;
-        padding: 40px;
-        height: 100%;
+        background: rgba(20, 20, 20, 0.8);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 16px;
+        padding: 40px 30px;
+        height: auto;
+        min-height: 250px;
         display: flex;
         flex-direction: column;
-        transition: var(--transition);
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.03);
+        transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        position: relative;
+        margin-bottom: 60px;
+        /* Space for overlapping profile */
     }
 
     .testimonial-card-premium:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-        border-color: var(--coursera-blue);
+        transform: translateY(-10px) scale(1.02);
+        background: rgba(32, 32, 32, 0.85);
+        border-color: rgba(255, 255, 255, 0.2);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
     }
 
     .testimonial-text {
         font-size: 1.1rem;
         font-style: italic;
         line-height: 1.7;
-        color: var(--text-dark);
-        margin-bottom: 30px;
+        color: #fff;
+        margin-bottom: 25px;
         position: relative;
+        font-weight: 500;
+        z-index: 1;
     }
 
     .testimonial-text::before {
-        content: '"';
+        content: '\201C';
         position: absolute;
-        top: -20px;
-        left: -10px;
-        font-size: 4rem;
-        color: #e8f0fe;
-        font-family: 'Outfit';
+        top: -40px;
+        left: -20px;
+        font-size: 6rem;
+        color: rgba(255, 255, 255, 0.08);
+        font-family: 'Plus Jakarta Sans', sans-serif;
         z-index: -1;
     }
 
     .testimonial-author {
         display: flex;
         align-items: center;
-        margin-top: auto;
+        position: absolute;
+        bottom: -45px;
+        left: 0px;
+        z-index: 10;
+        width: 100%;
+        padding-left: 20px;
+    }
+
+    .testimonial-author img {
+        width: 85px;
+        height: 85px;
+        border-radius: 50%;
+        border: 6px solid #fff;
+        margin-right: 15px;
+        object-fit: cover;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        background: #fff;
+        flex-shrink: 0;
+        transition: transform 0.4s ease;
+    }
+
+    .testimonial-card-premium:hover .testimonial-author img {
+        transform: scale(1.1) rotate(5deg);
     }
 
     .author-info h5 {
         margin: 0;
-        font-size: 1.1rem;
+        font-size: 1.3rem;
         font-weight: 700;
+        color: #333;
+        /* Default dark for outside card */
+        display: inline-block;
+        letter-spacing: -0.02em;
     }
 
     .author-info span {
-        font-size: 0.9rem;
-        color: var(--text-muted);
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #666;
+        margin-left: 5px;
+    }
+
+    /* When inside section with dark overlay background like image */
+    .testimonial-section-dark {
+        background-color: #0c1421;
+        background-image: linear-gradient(rgba(12, 20, 33, 0.85), rgba(12, 20, 33, 0.85)), url('<?php echo base_url('upload/home/banner_image_3.jpg'); ?>');
+        background-size: cover;
+        background-position: center;
+        background-attachment: fixed;
+    }
+
+    .testimonial-author .author-info h5 {
+        color: #fff;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    }
+
+    .testimonial-author .author-info span {
+        color: rgba(255, 255, 255, 0.8);
+    }
+
+    .section-accent-badge {
+        display: inline-block;
+        font-size: 0.8rem;
+        font-weight: 800;
+        color: var(--coursera-blue);
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        margin-bottom: 12px;
+        padding: 4px 16px;
+        background: rgba(0, 86, 210, 0.1);
+        border-radius: 50px;
+    }
+
+    .testimonial-section-dark .section-accent-badge {
+        color: #fff;
+        background: rgba(255, 255, 255, 0.1);
+    }
+
+    /* SVG Wave Divider */
+    .section-divider-wave {
+        width: 100%;
+        height: 80px;
+        margin-top: -1px;
+        display: block;
+    }
+
+    .wave-fill {
+        fill: #f5f7f8;
     }
 
     /* Value Prop Section */
@@ -509,38 +594,265 @@
         color: var(--coursera-blue);
         transform: translateY(-3px);
     }
+
+    /* Hero Slider Navigation */
+    .hero-slider .owl-dots {
+        position: absolute;
+        bottom: 30px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 12px;
+        z-index: 20;
+    }
+
+    .hero-slider .owl-dot {
+        width: 12px;
+        height: 12px;
+        background: rgba(0, 86, 210, 0.2) !important;
+        border-radius: 50%;
+        transition: all 0.3s ease;
+    }
+
+    .hero-slider .owl-dot.active {
+        background: var(--coursera-blue) !important;
+        transform: scale(1.2);
+    }
+
+    .hero-slider-item {
+        padding: 60px 0;
+        min-height: 450px;
+        display: flex;
+        align-items: center;
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+    }
+
+    /* Full Width Slider */
+    .hero-slider {
+        width: 100%;
+        overflow: hidden;
+    }
+
+    /* Blue Overlay */
+    .hero-slider-item {
+        position: relative;
+    }
+
+    .hero-slider-item::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(135deg, rgba(5, 35, 77, 0.8) 0%, rgba(2, 12, 27, 0.9) 100%);
+        z-index: 1;
+    }
+
+    .hero-slider-item>.container {
+        position: relative;
+        z-index: 2;
+    }
+
+    /* Fix for preventDefault console intervention */
+    .hero-slider {
+        touch-action: pan-y;
+        -webkit-user-drag: none;
+    }
+
+
+    /* Hero Text Content & Typography */
+    /* Staggered Animations */
+    .hero-slider .owl-item.active .hero-plus-badge {
+        animation: fadeInUp 0.8s ease-out 0.2s both;
+    }
+
+    .hero-slider .owl-item.active .hero-text-content h1 {
+        animation: fadeInUp 0.8s ease-out 0.4s both;
+    }
+
+    .hero-slider .owl-item.active .hero-text-content .subtext {
+        animation: fadeInUp 0.8s ease-out 0.6s both;
+    }
+
+    .hero-slider .owl-item.active .hero-actions {
+        animation: fadeInUp 0.8s ease-out 0.8s both;
+    }
+
+    .hero-text-content h1 {
+        font-size: 4.5rem;
+        font-weight: 800;
+        color: #fff !important;
+        margin-bottom: 24px;
+        line-height: 1;
+        text-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+        letter-spacing: -0.05em;
+    }
+
+    .hero-text-content .subtext {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.9) !important;
+        font-weight: 500;
+        margin-bottom: 30px;
+        text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-text-content .hero-plus-badge span:first-child {
+        color: #fff !important;
+        /* Make site name white */
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+    }
+
+    .hero-text-content .hero-plus-badge span:last-child {
+        background: rgba(255, 255, 255, 0.15);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        color: #fff;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Button Polish */
+    .hero-text-content .btn-plus-trial {
+        background: #fff;
+        color: #0056d2;
+        font-weight: 800;
+        padding: 18px 50px;
+        border-radius: 60px;
+        /* Pill shape */
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 2px solid transparent;
+    }
+
+    .hero-text-content .btn-plus-trial:hover {
+        transform: translateY(-6px) scale(1.05);
+        box-shadow: 0 20px 45px rgba(0, 86, 210, 0.4);
+        background: #0056d2;
+        color: #fff;
+        border-color: #fff;
+    }
+
+    /* Mobile Responsiveness */
+    @media (max-width: 768px) {
+        .hero-text-content h1 {
+            font-size: 2rem;
+        }
+
+        .hero-text-content .subtext {
+            font-size: 1rem;
+        }
+
+        .hero-slider-item {
+            min-height: 400px;
+            /* Slightly shorter on mobile */
+        }
+    }
+
+    /* WhatsApp Style Progress Bars */
+    .slider-progress-container {
+        position: absolute;
+        top: 20px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+        width: 90%;
+        max-width: 600px;
+        z-index: 20;
+    }
+
+    .progress-bar-item {
+        flex: 1;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .progress-bar-item .bar-fill {
+        display: block;
+        height: 100%;
+        background: #fff;
+        width: 0;
+        transition: width 0.1s linear;
+    }
+
+    .progress-bar-item.active .bar-fill {
+        width: 0;
+        /* JS will animate this */
+    }
+
+    .progress-bar-item.completed .bar-fill {
+        width: 100%;
+    }
 </style>
 
-<!-- Hero Section -->
-<section class="hero-plus">
-    <div class="container">
-        <div class="row align-items-center">
-            <div class="col-lg-6 margin-top-100">
-                <div class="hero-content">
-                    <div class="hero-plus-badge">
-                        <span>zeyobron</span> <span>analytics</span>
-                    </div>
-                    <h1>Achieve your career goals with Zeyobron Plus</h1>
-                    <p class="subtext">Subscribe to build job-ready skills from world-class institutions.</p>
+<!-- Hero Slider Section -->
+<section class="hero-plus" style="position: relative;">
+    <!-- Progress Bars Container -->
+    <div class="slider-progress-container" id="sliderProgressContainer">
+        <!-- Bars will be injected by JS -->
+    </div>
 
-                    <div class="hero-actions">
-                        <a href="<?php echo site_url('courses') ?>" class="btn-plus-trial">Explore courses</a>
-                    </div>
+    <div class="hero-slider owl-theme">
+        <?php if (!empty($sliders)): ?>
+            <?php foreach ($sliders as $slider): ?>
+                <div class="item hero-slider-item"
+                    style="background-image: url('<?php echo (!empty($slider->image)) ? base_url('upload/sliders/images/' . $slider->image) : base_url('themes/default/images/zeyobron_plus_hero_transparent.png'); ?>');">
+                    <div class="container">
+                        <div class="row align-items-center">
+                            <div class="col-lg-8 mx-auto text-center hero-text-content">
+                                <div class="hero-content">
+                                    <div class="hero-plus-badge justify-content-center">
+                                        <span><?php echo $this->settings->site_name; ?></span>
+                                        <span><?php echo $slider->title; ?></span>
+                                    </div>
+                                    <h1 class="text-center"><?php echo $slider->subtitle; ?></h1>
 
+                                    <div class="hero-actions text-center">
+                                        <a href="<?php echo $slider->button_link; ?>" class="btn-plus-trial">
+                                            <?php echo $slider->button_text; ?>
+                                        </a>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <!-- Fallback Static Slide if no dynamic sliders found -->
+            <div class="item hero-slider-item"
+                style="background-image: url('<?php echo base_url('themes/default/images/zeyobron_plus_hero_transparent.png'); ?>');">
+                <div class="container">
+                    <div class="row align-items-center">
+                        <div class="col-lg-8 mx-auto text-center hero-text-content">
+                            <div class="hero-content">
+                                <div class="hero-plus-badge justify-content-center">
+                                    <span>zeyobron</span> <span>analytics</span>
+                                </div>
+                                <h1 class="text-center">Achieve your career goals with Zeyobron Plus</h1>
+                                <p class="subtext text-center">Subscribe to build job-ready skills from world-class
+                                    institutions.</p>
+
+                                <div class="hero-actions text-center">
+                                    <a href="<?php echo site_url('courses') ?>" class="btn-plus-trial">Explore courses</a>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
                 </div>
             </div>
-            <div class="col-lg-6">
-                <div class="hero-plus-image">
-                    <div class="blue-fan-bg">
-                        <div class="fan-blade fan-blade-1"></div>
-                        <div class="fan-blade fan-blade-2"></div>
-                        <div class="fan-blade fan-blade-3"></div>
-                    </div>
-                    <img src="<?php echo base_url('upload/zeyobron_plus_hero_transparent.png') ?>"
-                        alt="Big Data Professional">
-                </div>
-            </div>
-        </div>
+        <?php endif; ?>
     </div>
 </section>
 
@@ -591,11 +903,19 @@
 
 <!-- Testimonials -->
 <?php if (!empty($testimonials)): ?>
-    <section class="section-padding bg-white">
+    <section class="section-padding testimonial-section-dark" style="position: relative; padding-top: 100px;">
+        <!-- Wave Transition -->
+        <svg class="section-divider-wave" style="position: absolute; top: 0; left: 0;" viewBox="0 0 1440 320"
+            preserveAspectRatio="none">
+            <path class="wave-fill"
+                d="M0,160L80,176C160,192,320,224,480,213.3C640,203,800,149,960,128C1120,107,1280,117,1360,122.7L1440,128L1440,0L1360,0C1280,0,1120,0,960,0C800,0,640,0,480,0C320,0,160,0,80,0L0,0Z">
+            </path>
+        </svg>
         <div class="container">
-            <div class="section-title" data-aos="fade-up">
-                <h2>From the Zeyobron Community</h2>
-                <p>100+ million people are already learning with us</p>
+            <div class="section-title text-center mb-5" data-aos="fade-up">
+                <span class="section-accent-badge">Customer Stories</span>
+                <h2 style="color: #fff;">From the Zeyobron Community</h2>
+                <p style="color: rgba(255, 255, 255, 0.8);">100+ million people are already learning with us</p>
             </div>
             <div class="row">
                 <?php foreach (array_slice($testimonials, 0, 3) as $key => $val): ?>
@@ -605,11 +925,14 @@
                                 <?php echo $val->t_feedback; ?>
                             </div>
                             <div class="testimonial-author">
+                                <img src="<?php echo base_url('upload/testimonials/images/' . ($val->image ? $val->image : 'default_avatar.png')) ?>"
+                                    alt="<?php echo $val->t_name ?>"
+                                    onerror="this.src='<?php echo base_url('upload/expert_mentor_avatar.png'); ?>'">
                                 <div class="author-info">
                                     <h5>
                                         <?php echo $val->t_name ?>
                                     </h5>
-                                    <span>
+                                    <span> /
                                         <?php echo $val->t_type ?>
                                     </span>
                                 </div>
@@ -623,20 +946,101 @@
 <?php endif; ?>
 
 
-<!-- CTA Section -->
-<section class="section-padding" style="background: var(--coursera-blue); color: #fff; text-align: center;">
-    <div class="container" data-aos="zoom-in">
-        <h2 style="font-size: 3rem; font-weight: 700; margin-bottom: 24px;">Take the next step toward your goals.</h2>
-        <p style="font-size: 1.25rem; margin-bottom: 40px; opacity: 0.9;">Join now to receive personalized
-            recommendations from the Zeyobron catalog.</p>
-        <a href="<?php echo site_url('courses') ?>" class="btn-primary-coursera"
-            style="background: #fff; color: var(--coursera-blue);">Join for Free</a>
-    </div>
-</section>
 
 <script>
     document.addEventListener('DOMContentLoaded', function () {
-        // Initializing AOS is handled in template.php
+        // Initialize Hero Slider (Owl 1.x compatibility)
+        var time = 5000;
+        var $heroSlider = $('.hero-slider');
+        var $progressBarContainer = $('#sliderProgressContainer');
+
+        $heroSlider.owlCarousel({
+            singleItem: true,
+            autoPlay: time,
+            stopOnHover: true,
+            navigation: false,
+            pagination: false,
+            slideSpeed: 800,
+            paginationSpeed: 800,
+            rewindSpeed: 1000,
+            afterInit: function () {
+                initProgressBars(this);
+            },
+            afterMove: function () {
+                updateProgressBars(this);
+            },
+            afterAction: function () {
+                // Ensure bars are initialized if afterInit was missed
+                if ($progressBarContainer.children().length === 0) {
+                    initProgressBars(this);
+                }
+            }
+        });
+
+        // Explicit call in case afterInit didn't fire due to already being initialized
+        var owlInstance = $heroSlider.data('owlCarousel');
+        if (owlInstance && $progressBarContainer.children().length === 0) {
+            initProgressBars(owlInstance);
+        }
+
+        function initProgressBars(owl) {
+            $progressBarContainer.html('');
+            // Use $owlItems as it's the primary storage for items in Owl 1.x
+            var $items = owl.$owlItems || (owl.owl && owl.owl.owlItems);
+            if (!$items) return;
+
+            var itemsCount = $items.length;
+            for (var i = 0; i < itemsCount; i++) {
+                var $barItem = $('<div class="progress-bar-item"><span class="bar-fill"></span></div>');
+                $progressBarContainer.append($barItem);
+            }
+            updateProgressBars(owl);
+        }
+
+        function updateProgressBars(owl) {
+            var current = owl.currentItem;
+            var $items = owl.$owlItems || (owl.owl && owl.owl.owlItems);
+            if (!$items) return;
+
+            var itemsCount = $items.length;
+
+            $progressBarContainer.find('.progress-bar-item').each(function (index) {
+                var $bar = $(this);
+                var $fill = $bar.find('.bar-fill');
+
+                $fill.stop(true, true);
+                $bar.removeClass('active completed');
+
+                if (index < current) {
+                    $bar.addClass('completed');
+                    $fill.css('width', '100%');
+                } else if (index === current) {
+                    $bar.addClass('active');
+                    $fill.css('width', '0').animate({
+                        width: '100%'
+                    }, time, 'linear');
+                } else {
+                    $fill.css('width', '0');
+                }
+            });
+        }
+
+        // Handle Hover Pause for Progress Bar Animation
+        $heroSlider.on('mouseover', function () {
+            var $activeFill = $progressBarContainer.find('.active .bar-fill');
+            $activeFill.stop(true, false);
+        });
+
+        $heroSlider.on('mouseout', function () {
+            var $activeFill = $progressBarContainer.find('.active .bar-fill');
+            var currentWidth = $activeFill.width();
+            var totalWidth = $activeFill.parent().width();
+            var remainingTime = time * (1 - (currentWidth / totalWidth));
+
+            $activeFill.animate({
+                width: '100%'
+            }, remainingTime, 'linear');
+        });
     });
 </script>
 
