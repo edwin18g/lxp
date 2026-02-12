@@ -213,6 +213,8 @@ $.AdminBSB.search = {
         $searchBar.find('input[type="text"]').on('keyup', function (e) {
             if (e.keyCode == 27) {
                 _this.hideSearchBar();
+            } else {
+                _this.filterMenu($(this).val());
             }
         });
     },
@@ -223,6 +225,35 @@ $.AdminBSB.search = {
     hideSearchBar: function () {
         $searchBar.removeClass('open');
         $searchBar.find('input[type="text"]').val('');
+        this.filterMenu(''); // Reset menu
+    },
+    filterMenu: function (query) {
+        query = query.toLowerCase();
+        var $menuItems = $('.sidebar .menu .list li:not(.header)');
+
+        if (query === "") {
+            $menuItems.show();
+            $('.sidebar .menu .list .header').show();
+            return;
+        }
+
+        $('.sidebar .menu .list .header').hide();
+
+        $menuItems.each(function () {
+            var $item = $(this);
+            var text = $item.find('span').text().toLowerCase();
+            if (text.indexOf(query) > -1) {
+                $item.show();
+                // If it's a sub-item, show the parent .ml-menu and its toggle
+                if ($item.parents('.ml-menu').length > 0) {
+                    $item.parents('.ml-menu').show();
+                    $item.parents('.ml-menu').prev('.menu-toggle').addClass('toggled');
+                    $item.parents('li').show();
+                }
+            } else {
+                $item.hide();
+            }
+        });
     }
 }
 //==========================================================================================================================

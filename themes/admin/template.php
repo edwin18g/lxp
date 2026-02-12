@@ -18,14 +18,10 @@
   <title><?php echo $page_title; ?> - <?php echo $this->settings->site_name; ?></title>
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css?family=Roboto:400,700&subset=latin,cyrillic-ext" rel="stylesheet"
-    type="text/css">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
-
-  <!-- Modern Admin CSS -->
   <link
-    href="<?php echo base_url('themes/admin/css/modern_admin.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
-    rel="stylesheet" type="text/css">
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+    rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" type="text/css">
 
 
   <?php // CSS files ?>
@@ -54,11 +50,11 @@
       <?php endif; ?>
     <?php endforeach; ?>
   <?php endif; ?>
-  <style>
-    .navbar-nav>li>a>i {
-      color: #160404 !important;
-    }
-  </style>
+
+  <!-- Modern Admin CSS (Global Overrides) -->
+  <link
+    href="<?php echo base_url('themes/admin/css/modern_admin.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
+    rel="stylesheet" type="text/css">
 </head>
 
 <body class="theme-<?php echo $this->settings->admin_theme; ?>">
@@ -238,9 +234,9 @@
           <span class="product-name">LMS</span>
         </div>
         <div class="product-item" onclick="switchProduct('users')" data-toggle="tooltip" data-placement="right"
-          title="Roles Management">
+          title="Administration">
           <i class="material-icons">people</i>
-          <span class="product-name">Roles</span>
+          <span class="product-name">Manage</span>
         </div>
         <div class="product-item" onclick="switchProduct('cms')" data-toggle="tooltip" data-placement="right"
           title="CMS">
@@ -258,7 +254,7 @@
       <div class="menu">
         <ul class="list" id="menu-lms">
           <!-- LMS Section -->
-          <li class="header">LMS MOOC</li>
+          <li class="header">LMS</li>
 
           <!-- Dashboard -->
           <li class="<?php echo (uri_string() == 'admin' OR uri_string() == 'admin/dashboard') ? 'active' : ''; ?>">
@@ -402,6 +398,25 @@
   <section class="content">
     <div class="container-fluid">
 
+      <!-- Breadcrumbs -->
+      <?php if (isset($breadcrumb) && !empty($breadcrumb)): ?>
+        <ol class="breadcrumb">
+          <?php foreach ($breadcrumb as $key => $crumb): ?>
+            <?php if (isset($crumb['route_path'])): ?>
+              <li>
+                <a href="<?php echo $crumb['route_path']; ?>">
+                  <?php if (isset($crumb['icon'])): ?>
+                    <i class="material-icons"><?php echo $crumb['icon']; ?></i>
+                  <?php endif; ?>
+                  <?php echo $crumb['route_name']; ?>
+                </a>
+              </li>
+            <?php else: ?>
+              <li class="active"><?php echo $crumb['route_name']; ?></li>
+            <?php endif; ?>
+          <?php endforeach; ?>
+        </ol>
+      <?php endif; ?>
 
       <!-- Ajax validation error -->
       <div class="alert alert-danger alert-dismissable" id="validation-error">
@@ -428,6 +443,26 @@
     var csrf_name = "<?php echo $this->security->get_csrf_token_name(); ?>";
     var csrf_token = "<?php echo $this->security->get_csrf_hash(); ?>";
 
+    /* Global DataTable Defaults */
+    if ($.fn.dataTable) {
+      $.extend(true, $.fn.dataTable.defaults, {
+        "dom": 'rt<"dt-bottom-actions"ipl>', // Removed f (search) from here
+        "pageLength": 10,
+        "language": {
+          "lengthMenu": "_MENU_",
+          "search": "",
+          "searchPlaceholder": "Search..."
+        }
+      });
+
+      // Global External Search Binding
+      $(document).on('keyup', '.global-dt-search', function () {
+        var tableId = $(this).data('table') || 'table';
+        var table = $('#' + tableId).DataTable();
+        table.search($(this).val()).draw();
+      });
+    }
+
     /*System Notification*/
     $(function () {
       var message = `<?php echo null !== $this->session->flashdata('message') ? $this->session->flashdata('message') : null ?>`;
@@ -442,122 +477,6 @@
     });
   </script>
 
-  <style>
-    /* Product Bar Styles */
-    .product-bar {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 80px;
-      height: 100%;
-      background: linear-gradient(180deg, #2c3e50 0%, #34495e 100%);
-      z-index: 12;
-      padding-top: 0;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
-    }
-
-    .product-item {
-      width: 100%;
-      height: 80px;
-      /* Increased height for text */
-      cursor: pointer;
-      color: #bdc3c7;
-      border-left: 4px solid transparent;
-      transition: all 0.3s ease;
-      position: relative;
-
-      /* Flex layout for vertical stacking */
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .product-item.brand {
-      height: 80px;
-      background-color: #1a252f;
-      margin-bottom: 10px;
-      color: #fff;
-    }
-
-    .product-item:hover {
-      background-color: rgba(255, 255, 255, 0.05);
-      color: #ecf0f1;
-    }
-
-    .product-item.active {
-      background-color: rgba(0, 150, 136, 0.1);
-      color: #009688;
-      border-left: 4px solid #009688;
-    }
-
-    .product-item i {
-      display: block;
-      font-size: 26px;
-      line-height: 1;
-      margin-bottom: 5px;
-      /* Space between icon and text */
-    }
-
-    .product-name {
-      font-size: 11px;
-      font-weight: 500;
-      line-height: 1.1;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-
-    /* Sidebar Layout Adjustments */
-    #leftsidebar {
-      width: 330px !important;
-    }
-
-    #leftsidebar .menu,
-    #leftsidebar .legal {
-      margin-left: 80px;
-      width: 250px;
-    }
-
-    section.content {
-      margin-left: 330px !important;
-      transition: margin-left 0.3s;
-    }
-
-    .tooltip {
-      z-index: 1060;
-    }
-
-    @media (max-width: 767px) {
-      #leftsidebar {
-        width: 250px !important;
-        transform: translateX(-100%);
-        transition: transform 0.3s;
-      }
-
-      #leftsidebar.open {
-        transform: translateX(0);
-      }
-
-      .product-bar {
-        width: 60px;
-      }
-
-      .product-name {
-        display: none;
-        /* Hide text on very small screens if space is tight */
-      }
-
-      .product-item i {
-        margin-bottom: 0;
-      }
-
-      #leftsidebar .menu,
-      #leftsidebar .legal {
-        margin-left: 60px;
-        width: 190px;
-      }
-    }
-  </style>
 
   <script>
     function switchProduct(productName) {
@@ -601,7 +520,20 @@
     });
   </script>
 
+  <!-- User Details Offcanvas (Global) -->
+  <div id="userSidebar" class="right-sidebar">
+    <div class="sidebar-header">
+      <h4 style="margin:0;"><span id="userSidebarTitle">User Details</span></h4>
+      <button class="btn btn-link btn-circle waves-effect waves-circle waves-float close-sidebar"
+        onclick="closeUserSidebar()">
+        <i class="material-icons">close</i>
+      </button>
+    </div>
+    <div class="offcanvas-body-premium" id="userSidebarBody">
+      <!-- Content loaded via Ajax -->
+    </div>
+  </div>
+
 </body>
 
 </html>
-<?php die(' '); ?>

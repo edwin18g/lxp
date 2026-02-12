@@ -62,8 +62,40 @@ class MY_Controller extends CI_Controller
 
         // get current user
         $this->user = $this->session->userdata('logged_in');
+        // --- Learning Lock Logic ---
+        if ($this->user) {
+            // Check if device_locked is set in session or DB
+            // Note: Fetch from DB to ensure it's not stale
+            $user_db = $this->db->select('device_locked, role, last_session_id')->get_where('users', array('id' => $this->user['id']))->row();
 
-        // Single Device Login check REMOVED
+            if ($user_db) {
+                // Auto-lock logic for learners (role 3)
+                if ($user_db->role == 3 && strpos($this->current_uri, '/courses/lecture') === 0) {
+                    // If session ID mismatch, it means they logged in elsewhere and returned to an old session
+                    if ($user_db->last_session_id && $user_db->last_session_id != session_id()) {
+                        $this->db->where('id', $this->user['id'])->update('users', array('device_locked' => 1));
+                        $user_db->device_locked = 1; // Mark as locked for the immediate check below
+                    }
+                }
+
+                $is_locked = $user_db->device_locked ? 1 : 0;
+
+                // If locked and trying to access courses
+                if ($is_locked && strpos($this->current_uri, '/courses') === 0) {
+                    $error_msg = 'Your learning access is currently locked. Please contact support.';
+
+                    // Specific message for lectures
+                    if (strpos($this->current_uri, '/courses/lecture') === 0) {
+                        $error_msg = '<div style="text-align: center;font-size: 20px;">learing locked due to multiple device login <br> back to home <a href="' . base_url() . '">here</a></div>';
+                    }
+
+                    // Instead of redirect, show message on the same page
+                    show_error($error_msg, 403, 'Learning Locked');
+                    exit;
+                }
+            }
+        }
+        // ------------------------------------------------
 
         // get languages
         $this->languages = get_languages();

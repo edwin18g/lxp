@@ -58,7 +58,19 @@ $route['language/(:any)'] = 'ajax/change_language/$1';
 
 // Admin Routes
 $route['logout'] = 'auth/logout';
-$route['admin'] = 'admin/dashboard';
+$route['admin'] = 'admin/system/dashboard';
+
+// Product-wise Admin Routing
+// LMS
+$route['admin/(courses|categories|batches|bbookings|enrolled_users)(.*)'] = 'admin/lms/$1$2';
+// CMS
+$route['admin/(blogs|pages|faqs|testimonials|sliders|gallaries|menus)(.*)'] = 'admin/cms/$1$2';
+// System
+$route['admin/(users|groups|manageacl|settings|languages|currencies|taxes|dashboard)(.*)'] = 'admin/system/$1$2';
+// Events
+$route['admin/(events|eventtypes|ebookings)(.*)'] = 'admin/events/$1$2';
+// Common
+$route['admin/(contacts|customfields|emailtemplates)(.*)'] = 'admin/common/$1$2';
 
 // Frontend Routes
 $route['cms/about-us'] = 'cms/about_us';

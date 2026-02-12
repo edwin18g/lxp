@@ -90,13 +90,15 @@ class Auth extends Public_Controller
                 $group = $this->ion_auth->get_users_groups($result['id'])->row();
                 $_SESSION['groups_id'] = $group ? $group->id : NULL;
 
-                // --- Single Device Login Logic (Group 3 - Learners) ---
+                // --- Single Device Login Logic (Group 3 - Learners) REMOVED ---
+                /*
                 if (!$this->_verify_device_lock($result['id'], $group ? $group->id : NULL, $result['secure_key'])) {
                     $this->ion_auth->logout();
                     $this->session->set_flashdata('error', 'Login not allowed from this device. Your account is locked to another device.');
                     redirect('auth/login', 'refresh');
                     return;
                 }
+                */
                 // ------------------------------------------------------
 
                 $this->session->set_userdata('logged_in', $result);
@@ -442,13 +444,15 @@ class Auth extends Public_Controller
 
             $_SESSION['groups_id'] = $this->ion_auth->get_users_groups($result['id'])->row()->id;
 
-            // --- Single Device Login Logic ---
+            // --- Single Device Login Logic REMOVED ---
+            /*
             if (!$this->_verify_device_lock($result['id'], $_SESSION['groups_id'], $result['secure_key'])) {
                 $this->ion_auth->logout();
                 $this->session->set_flashdata('error', 'Login not allowed from this device. Your account is locked to another device.');
                 redirect('auth/login', 'refresh');
                 return;
             }
+            */
             // ---------------------------------
 
             $this->session->set_userdata('logged_in', $result);
@@ -572,13 +576,15 @@ class Auth extends Public_Controller
 
                 $_SESSION['groups_id'] = $this->ion_auth->get_users_groups($flag)->row()->id;
 
-                // --- Single Device Login Logic ---
+                // --- Single Device Login Logic REMOVED ---
+                /*
                 if (!$this->_verify_device_lock($result['id'], $_SESSION['groups_id'], $result['secure_key'])) {
                     $this->ion_auth->logout();
                     $this->session->set_flashdata('error', 'Login not allowed from this device. Your account is locked to another device.');
                     redirect('auth/login', 'refresh');
                     return;
                 }
+                */
                 // ---------------------------------
 
                 $this->session->set_userdata('logged_in', $result);

@@ -61,6 +61,7 @@ class Users_model extends CI_Model
             "$this->table.date_added",
             "$this->table.date_updated",
             "$this->table.secure_key",
+            "$this->table.device_locked",
             "(SELECT gr.name FROM `groups` gr WHERE gr.id = (SELECT ug.group_id FROM users_groups ug WHERE ug.user_id = $this->table.id)) group_name",
         ))
             ->where(array('id' => $id));
@@ -296,6 +297,7 @@ class Users_model extends CI_Model
             users.mobile,
             users.image,
             users.active,
+            users.device_locked,
             COUNT(course_subscription.id) as course_count
         ");
         $this->db->from('users');
@@ -309,6 +311,33 @@ class Users_model extends CI_Model
             $this->db->or_like('users.last_name', $search);
             $this->db->or_like('users.email', $search);
             $this->db->group_end();
+        }
+
+        // Global Column Search (Google Sheets style)
+        $columns = $this->input->post('columns');
+        if ($columns) {
+            foreach ($columns as $key => $column) {
+                if (!empty($column['search']['value'])) {
+                    $val = $column['search']['value'];
+                    switch ($key) {
+                        case 2:
+                            $this->db->like('users.first_name', $val);
+                            break;
+                        case 3:
+                            $this->db->like('users.last_name', $val);
+                            break;
+                        case 4:
+                            $this->db->like('users.email', $val);
+                            break;
+                        case 5:
+                            $this->db->having("course_count = $val");
+                            break;
+                        case 6:
+                            $this->db->where('users.active', $val);
+                            break;
+                    }
+                }
+            }
         }
 
         if ($orders) {
@@ -346,6 +375,33 @@ class Users_model extends CI_Model
             $this->db->group_end();
         }
 
+        // Global Column Search (Google Sheets style)
+        $columns = $this->input->post('columns');
+        if ($columns) {
+            foreach ($columns as $key => $column) {
+                if (!empty($column['search']['value'])) {
+                    $val = $column['search']['value'];
+                    switch ($key) {
+                        case 2:
+                            $this->db->like('users.first_name', $val);
+                            break;
+                        case 3:
+                            $this->db->like('users.last_name', $val);
+                            break;
+                        case 4:
+                            $this->db->like('users.email', $val);
+                            break;
+                        case 5:
+                            $this->db->where("(SELECT COUNT(cs.id) FROM course_subscription cs WHERE cs.cs_user_id = users.id AND cs.cs_status = '1') = $val");
+                            break;
+                        case 6:
+                            $this->db->where('users.active', $val);
+                            break;
+                    }
+                }
+            }
+        }
+
         return $this->db->get()->row()->count;
     }
 
@@ -362,6 +418,7 @@ class Users_model extends CI_Model
             courses.title,
             courses.images,
             courses.status,
+            course_subscription.id as cs_id,
             course_subscription.cs_start_date,
             course_subscription.cs_end_date
         ");
@@ -372,6 +429,22 @@ class Users_model extends CI_Model
         $this->db->order_by('courses.title', 'ASC');
 
         return $this->db->get()->result();
+    }
+
+    public function remove_enrollment($cs_id)
+    {
+        return $this->db->delete('course_subscription', array('id' => $cs_id));
+    }
+
+    public function remove_all_user_enrollments($user_id)
+    {
+        return $this->db->delete('course_subscription', array('cs_user_id' => $user_id));
+    }
+
+    public function bulk_remove_user_enrollments($user_ids)
+    {
+        $this->db->where_in('cs_user_id', $user_ids);
+        return $this->db->delete('course_subscription');
     }
 
 
@@ -404,12 +477,45 @@ class Users_model extends CI_Model
             $this->db->group_end();
         }
 
+        // Global Column Search (Google Sheets style)
+        $columns = $this->input->post('columns');
+        if ($columns) {
+            foreach ($columns as $key => $column) {
+                if (!empty($column['search']['value'])) {
+                    $val = $column['search']['value'];
+                    switch ($key) {
+                        case 2:
+                            $this->db->like('users.first_name', $val);
+                            break;
+                        case 3:
+                            $this->db->like('users.last_name', $val);
+                            break;
+                        case 4:
+                            $this->db->like('users.username', $val);
+                            break;
+                        case 5:
+                            $this->db->like('users.email', $val);
+                            break;
+                        case 6:
+                            $this->db->like('users.mobile', $val);
+                            break;
+                        case 7:
+                            $this->db->having("group_name LIKE '%$val%'");
+                            break;
+                        case 8:
+                            $this->db->where('users.active', $val);
+                            break;
+                    }
+                }
+            }
+        }
+
         if ($orders) {
             foreach ($orders as $key => $val) {
-                 $this->db->order_by($key, $val);
+                $this->db->order_by($key, $val);
             }
         } else {
-             $this->db->order_by('users.id', 'DESC');
+            $this->db->order_by('users.id', 'DESC');
         }
 
         if ($limit != -1) {
@@ -442,7 +548,53 @@ class Users_model extends CI_Model
             $this->db->or_like('users.mobile', $search);
             $this->db->group_end();
         }
+
+        // Global Column Search (Google Sheets style)
+        $columns = $this->input->post('columns');
+        if ($columns) {
+            foreach ($columns as $key => $column) {
+                if (!empty($column['search']['value'])) {
+                    $val = $column['search']['value'];
+                    switch ($key) {
+                        case 2:
+                            $this->db->like('users.first_name', $val);
+                            break;
+                        case 3:
+                            $this->db->like('users.last_name', $val);
+                            break;
+                        case 4:
+                            $this->db->like('users.username', $val);
+                            break;
+                        case 5:
+                            $this->db->like('users.email', $val);
+                            break;
+                        case 6:
+                            $this->db->like('users.mobile', $val);
+                            break;
+                        case 7:
+                            $this->db->where("(SELECT gr.name FROM `groups` gr WHERE gr.id = (SELECT ug.group_id FROM users_groups ug WHERE ug.user_id = users.id LIMIT 1)) LIKE '%$val%'");
+                            break;
+                        case 8:
+                            $this->db->where('users.active', $val);
+                            break;
+                    }
+                }
+            }
+        }
+
         return $this->db->count_all_results();
+    }
+
+    /**
+     * get_recent_users
+     */
+    public function get_recent_users($limit = 5)
+    {
+        $this->db->select("id, first_name, last_name, username, email, image, date_added");
+        $this->db->from($this->table);
+        $this->db->order_by('date_added', 'DESC');
+        $this->db->limit($limit);
+        return $this->db->get()->result();
     }
 
 }
