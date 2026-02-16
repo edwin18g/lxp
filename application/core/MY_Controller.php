@@ -86,7 +86,7 @@ class MY_Controller extends CI_Controller
 
                     // Specific message for lectures
                     if (strpos($this->current_uri, '/courses/lecture') === 0) {
-                        $error_msg = '<div style="text-align: center;font-size: 20px;">learing locked due to multiple device login <br> back to home <a href="' . base_url() . '">here</a></div>';
+                        $error_msg = '<div style="text-align: center;font-size: 20px;">learning locked due to multiple device login <br> back to home <a href="' . base_url() . '">here</a></div>';
                     }
 
                     // Instead of redirect, show message on the same page
