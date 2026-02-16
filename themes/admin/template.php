@@ -330,7 +330,7 @@
           <li class="header">CMS</li>
           <li class="<?php echo (strstr(uri_string(), 'admin/contacts')) ? ' active' : ''; ?>">
             <a href="<?php echo site_url('/admin/contacts'); ?>">
-              <i class="material-icons">contacts</i>
+              <i class="material-icons">inbox</i>
               <span><?php echo lang('menu_contacts'); ?></span>
             </a>
           </li>
@@ -489,8 +489,31 @@
         }
       });
 
-      $('#menu-lms, #menu-users, #menu-cms, #menu-system').hide();
-      $('#menu-' + productName).fadeIn(200); // Fade in for smoother transition
+      // Target all menu lists
+      var $allLists = $('.list');
+
+      // First, Hide all lists AND their wrappers
+      $allLists.each(function () {
+        var $list = $(this);
+        $list.hide(); // Hide the list itself
+        if ($list.parent().hasClass('slimScrollDiv')) {
+          $list.parent().hide(); // Hide the wrapper
+        }
+      });
+
+      // Second, Show the selected menu list
+      var $activeList = $('#menu-' + productName);
+      $activeList.show(); // CRITICAL: Ensure the inner UL is visible
+
+      // Third, Show its wrapper (if it has one) or the list itself
+      var $activeContainer = $activeList.parent().hasClass('slimScrollDiv') ? $activeList.parent() : $activeList;
+
+      $activeContainer.fadeIn(200, function () {
+        if (typeof $.fn.slimScroll != 'undefined') {
+          // Reset scroll position and trigger a refresh
+          $activeList.slimscroll({ scrollTo: '0px' });
+        }
+      });
 
       if (typeof (Storage) !== "undefined") {
         localStorage.setItem("activeProduct", productName);

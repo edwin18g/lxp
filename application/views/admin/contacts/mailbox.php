@@ -22,7 +22,8 @@
         flex: 1;
         padding: 0;
         background: #fff;
-        min-width: 0; /* Fix flex child overflow */
+        min-width: 0;
+        /* Fix flex child overflow */
     }
 
     /* Responsive Design */
@@ -30,6 +31,7 @@
         .mailbox-wrapper {
             flex-direction: column;
         }
+
         .mailbox-sidebar {
             width: 100%;
             border-right: none;
@@ -109,10 +111,11 @@
 
     .email-item:hover {
         background: #fcfcfc;
-        box-shadow: inset 2px 0 0 #03A9F4; /* Using theme blue */
+        box-shadow: inset 2px 0 0 #03A9F4;
+        /* Using theme blue */
         z-index: 1;
         position: relative;
-        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
     }
 
     .email-item.unread {
@@ -128,7 +131,8 @@
 
     .email-checkbox {
         width: 40px;
-        padding-top: 5px; /* Alignment fix */
+        padding-top: 5px;
+        /* Alignment fix */
     }
 
     .email-star {
@@ -187,11 +191,11 @@
         display: none;
         margin-left: auto;
     }
-    
+
     .email-item:hover .email-actions {
         display: block;
     }
-    
+
     .email-avatar {
         width: 35px;
         height: 35px;
@@ -205,13 +209,27 @@
         margin-right: 15px;
         font-size: 14px;
     }
-    
-    /* Random colors for avatars (using nth-child for simplicity) */
-    .email-item:nth-child(4n+1) .email-avatar { background-color: #FFEBEE; color: #D32F2F; }
-    .email-item:nth-child(4n+2) .email-avatar { background-color: #E3F2FD; color: #1976D2; }
-    .email-item:nth-child(4n+3) .email-avatar { background-color: #E8F5E9; color: #388E3C; }
-    .email-item:nth-child(4n+4) .email-avatar { background-color: #FFF3E0; color: #F57C00; }
 
+    /* Random colors for avatars (using nth-child for simplicity) */
+    .email-item:nth-child(4n+1) .email-avatar {
+        background-color: #FFEBEE;
+        color: #D32F2F;
+    }
+
+    .email-item:nth-child(4n+2) .email-avatar {
+        background-color: #E3F2FD;
+        color: #1976D2;
+    }
+
+    .email-item:nth-child(4n+3) .email-avatar {
+        background-color: #E8F5E9;
+        color: #388E3C;
+    }
+
+    .email-item:nth-child(4n+4) .email-avatar {
+        background-color: #FFF3E0;
+        color: #F57C00;
+    }
 </style>
 
 <div class="row clearfix">
@@ -228,10 +246,6 @@
                 <div class="mailbox-wrapper">
                     <!-- Sidebar -->
                     <div class="mailbox-sidebar">
-                        <div class="compose-btn-wrapper">
-                             <a href="#" class="btn btn-danger btn-block btn-lg waves-effect" data-toggle="modal" data-target="#composeModal">Compose</a>
-                        </div>
-
                         <ul class="folder-list">
                             <li class="active">
                                 <a href="<?php echo site_url('admin/contacts'); ?>">
@@ -243,27 +257,6 @@
                                     <?php endif; ?>
                                 </a>
                             </li>
-                            <!-- Mock folders for UI completeness -->
-                            <li>
-                                <a href="#">
-                                    <i class="material-icons">send</i> Sent Mail
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    <i class="material-icons">star</i> Important
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    <i class="material-icons">drafts</i> Drafts
-                                </a>
-                            </li>
-                            <li>
-                                <a href="#">
-                                    <i class="material-icons">delete</i> Trash
-                                </a>
-                            </li>
                         </ul>
                     </div>
 
@@ -271,33 +264,19 @@
                     <div class="mailbox-content">
                         <!-- Toolbar -->
                         <div class="mailbox-toolbar">
-                            <div class="email-checkbox" style="margin-right: 15px;">
-                                <input type="checkbox" id="chk_all" class="filled-in chk-col-blue">
-                                <label for="chk_all" style="margin-bottom: 0;"></label>
-                            </div>
-                            
                             <div class="btn-group">
                                 <button type="button"
                                     class="btn btn-default btn-circle waves-effect waves-circle waves-float"
                                     data-toggle="tooltip" title="Refresh" onclick="location.reload();">
                                     <i class="material-icons">refresh</i>
                                 </button>
-                                <button type="button"
-                                    class="btn btn-default btn-circle waves-effect waves-circle waves-float"
-                                    data-toggle="tooltip" title="Archive">
-                                    <i class="material-icons">archive</i>
-                                </button>
-                                <button type="button"
-                                    class="btn btn-default btn-circle waves-effect waves-circle waves-float"
-                                    data-toggle="tooltip" title="Delete">
-                                    <i class="material-icons">delete</i>
-                                </button>
                             </div>
 
                             <!-- Search -->
                             <div class="input-group" style="width: 300px; margin-left: auto; margin-bottom: 0;">
                                 <div class="form-line">
-                                    <input type="text" id="emailSearch" class="form-control" placeholder="Search mail...">
+                                    <input type="text" id="emailSearch" class="form-control"
+                                        placeholder="Search mail...">
                                 </div>
                                 <span class="input-group-addon">
                                     <i class="material-icons">search</i>
@@ -315,19 +294,11 @@
                                     ?>
                                     <li class="email-item <?php echo $row_class; ?>"
                                         onclick="openEmailModal(<?php echo $email['id']; ?>)">
-                                        <div class="email-checkbox">
-                                            <input type="checkbox" id="chk_<?php echo $email['id']; ?>"
-                                                class="filled-in chk-col-blue email-chk" onclick="event.stopPropagation();">
-                                            <label for="chk_<?php echo $email['id']; ?>"></label>
-                                        </div>
-                                        <div class="email-star">
-                                            <i class="material-icons" style="font-size: 20px;">star_border</i>
-                                        </div>
-                                        
+
                                         <div class="email-avatar">
                                             <?php echo strtoupper($initial); ?>
                                         </div>
-                                        
+
                                         <div class="email-sender">
                                             <?php echo html_escape($email['name']); ?>
                                         </div>
@@ -337,11 +308,8 @@
                                                 <?php echo html_escape(substr(strip_tags($email['message']), 0, 50)) . '...'; ?>
                                             </span>
                                         </div>
-                                        
-                                        <div class="email-actions">
-                                            <button type="button" class="btn btn-default btn-xs waves-effect btn-circle" title="Archive" onclick="event.stopPropagation();"><i class="material-icons" style="font-size: 16px;">archive</i></button>
-                                            <button type="button" class="btn btn-default btn-xs waves-effect btn-circle" title="Delete" onclick="event.stopPropagation();"><i class="material-icons" style="font-size: 16px;">delete</i></button>
-                                        </div>
+
+
 
                                         <div class="email-date">
                                             <?php
@@ -414,39 +382,7 @@
     </div>
 </div>
 
-<!-- Compose Modal -->
-<div class="modal fade" id="composeModal" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title" id="defaultModalLabel">New Message</h4>
-            </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group">
-                        <div class="form-line">
-                            <input type="email" class="form-control" placeholder="To">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-line">
-                            <input type="text" class="form-control" placeholder="Subject">
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <div class="form-line">
-                            <textarea rows="10" class="form-control no-resize" placeholder="Message..."></textarea>
-                        </div>
-                    </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-primary waves-effect">SEND</button>
-                <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CLOSE</button>
-            </div>
-        </div>
-    </div>
-</div>
+
 
 <script>
     function openEmailModal(id) {
@@ -468,16 +404,12 @@
         }
     }
 
-    $(document).ready(function() {
-        // Select All Checkbox
-        $('#chk_all').on('change', function() {
-            $('.email-chk').prop('checked', this.checked);
-        });
-        
+    $(document).ready(function () {
+
         // Search Filter
-        $('#emailSearch').on('keyup', function() {
+        $('#emailSearch').on('keyup', function () {
             var value = $(this).val().toLowerCase();
-            $("#emailList li.email-item").filter(function() {
+            $("#emailList li.email-item").filter(function () {
                 $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
             });
         });

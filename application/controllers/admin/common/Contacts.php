@@ -50,65 +50,7 @@ class Contacts extends Admin_Controller
         $this->load->view($this->template, $content);
     }
 
-    /**
-     * ajax_list
-     */
-    public function ajax_list()
-    {
-        $this->load->library('datatables');
 
-        $table = 'emails';
-        $columns = array(
-            "$table.id",
-            "$table.name",
-            "$table.email",
-            "$table.title",
-            "$table.message",
-            "$table.created",
-            "$table.read",
-            "$table.read_by",
-        );
-        $columns_order = array(
-            "#",
-            "$table.name",
-            "$table.email",
-            "$table.title",
-            "$table.created",
-        );
-        $columns_search = array(
-            'name',
-            'email',
-            'title',
-        );
-        $order = array('created' => 'DESC');
-
-        $result = $this->datatables->get_datatables($table, $columns, $columns_order, $columns_search, $order);
-        $data = array();
-        $no = $_POST['start'];
-
-        foreach ($result as $val) {
-            $no++;
-            $row = array();
-            $row[] = $no;
-            $row[] = mb_substr($val->name, 0, 30, 'utf-8');
-            $row[] = $val->email;
-            $row[] = mb_substr($val->title, 0, 30, 'utf-8');
-            $row[] = date('g:iA j/m/y ', strtotime($val->created));
-            $row[] = modal_contact($val);
-            $data[] = $row;
-        }
-
-        $output = array(
-            "draw" => $_POST['draw'],
-            "recordsTotal" => $this->datatables->count_all(),
-            "recordsFiltered" => $this->datatables->count_filtered(),
-            "data" => $data,
-        );
-
-        //output to json format
-        echo json_encode($output);
-        exit;
-    }
 
     /**
      * Marks email message as read

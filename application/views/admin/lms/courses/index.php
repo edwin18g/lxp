@@ -155,24 +155,25 @@
     });
 </script>
 
-/* Gradient Colors */
-.bg-gradient-pink {
-background: linear-gradient(45deg, #FF5370, #ff869a) !important;
-}
+<style>
+    /* Gradient Colors */
+    .bg-gradient-pink {
+        background: linear-gradient(45deg, #FF5370, #ff869a) !important;
+    }
 
-.bg-gradient-cyan {
-background: linear-gradient(45deg, #00BCD4, #4dd6e7) !important;
-}
+    .bg-gradient-cyan {
+        background: linear-gradient(45deg, #00BCD4, #4dd6e7) !important;
+    }
 
-.bg-gradient-light-green {
-background: linear-gradient(45deg, #8BC34A, #aed581) !important;
-}
+    .bg-gradient-light-green {
+        background: linear-gradient(45deg, #8BC34A, #aed581) !important;
+    }
 
-.col-white {
-color: #fff !important;
-}
+    .col-white {
+        color: #fff !important;
+    }
 
-.info-box-2 .icon i {
-color: #fff !important;
-}
+    .info-box-2 .icon i {
+        color: #fff !important;
+    }
 </style>

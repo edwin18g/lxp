@@ -4,7 +4,7 @@
  **/
 
 // Multiple images preview in browser
-var imagesPreview = function(input, placeToInsertImagePreview) {
+var imagesPreview = function (input, placeToInsertImagePreview) {
 
     if (input.files) {
         var filesAmount = input.files.length;
@@ -12,7 +12,7 @@ var imagesPreview = function(input, placeToInsertImagePreview) {
         for (i = 0; i < filesAmount; i++) {
             var reader = new FileReader();
 
-            reader.onload = function(event) {
+            reader.onload = function (event) {
                 $($.parseHTML('<img class="col-sm-2 img-responsive thumbnail">')).attr('src', event.target.result).appendTo(placeToInsertImagePreview);
             }
 
@@ -25,7 +25,7 @@ var imagesPreview = function(input, placeToInsertImagePreview) {
 
 function finishAjax(id, response) {
     $('.loader').remove();
-    $('#'+id).append(unescape(response));
+    $('#' + id).append(unescape(response));
 }
 
 
@@ -34,14 +34,14 @@ $(function () {
     "use strict";
 
     // N level categories
-    $(document).on('change', '.parent', function() { // different syntax for livequery
+    $(document).on('change', '.parent', function () { // different syntax for livequery
         $(this).closest('div.parent').nextAll('select.parent').remove();
         $(this).nextAll('select.parent').remove();
         $(this).nextAll('label').remove();
         $(this).nextAll('p').remove();
- 
+
         $('#show_sub_categories').append(`<div class="loader preloader pl-size-xs">
-                              <div class="spinner-layer pl-`+admin_theme+`">
+                              <div class="spinner-layer pl-`+ admin_theme + `">
                                   <div class="circle-clipper left">
                                       <div class="circle"></div>
                                   </div>
@@ -50,55 +50,80 @@ $(function () {
                                   </div>
                               </div>
                           </div>`);
- 
-        $.post(site_url+uri_seg_1+'/'+uri_seg_2+'/get_course_categories_levels', {
-            csrf_token : csrf_token,
+
+        $.post(site_url + uri_seg_1 + '/' + uri_seg_2 + '/get_course_categories_levels', {
+            csrf_token: csrf_token,
             category_id: $(this).val(),
-        }, function(response){
-            if(response)
-                setTimeout("finishAjax('show_sub_categories', '"+escape(response)+"')", 400);
+        }, function (response) {
+            if (response)
+                setTimeout("finishAjax('show_sub_categories', '" + escape(response) + "')", 400);
             else
                 $('.loader').remove();
         });
- 
+
         return false;
     });
 
     // Ajax form submit with validation errors
     var post_flag = 1;
-    $('form#form-create').on('submit', function(e) {
+    $('form#form-create').on('submit', function (e) {
         e.preventDefault();
-        
-        if(post_flag == 1) {
+
+        if (post_flag == 1) {
             post_flag = 0;
-            
-            $('.form-line').removeClass('error');    
-            $('label').removeClass('text-danger');    
-            
+
+            $('.form-line').removeClass('error');
+            $('label').removeClass('text-danger');
+
             var formData = new FormData($(this)[0]);
-            ajaxPostMultiPart('save', '#submit_loader', formData, function(response) {
-                if(response.flag == 0) {   
-                    $('#validation-error').show();
-                    $('#validation-error p').html(response.msg);
+            var submitBtn = $(this).find('button[type="submit"]');
+            var originalText = submitBtn.html();
 
-                    $.each(JSON.parse(response.error_fields), (index, item) => {
-                        $("input[name*='"+item+"'], select[name*='"+item+"'], textarea[name*='"+item+"']").closest('.form-line').addClass('error');
-                        $('label.'+item).addClass('text-danger');
-                    });
+            submitBtn.prop('disabled', true).html('<i class="material-icons" style="font-size: 18px; vertical-align: middle;">refresh</i> SAVING...');
 
+            $.ajax({
+                url: $(this).attr('action'),
+                type: 'POST',
+                data: formData,
+                contentType: false,
+                processData: false,
+                dataType: 'json',
+                success: function (response) {
+                    if (response.flag == 0) {
+                        swal('Validation Error', response.msg.replace(/<\/?[^>]+(>|$)/g, ""), 'error');
+
+                        if (response.error_fields) {
+                            $.each(JSON.parse(response.error_fields), (index, item) => {
+                                $("input[name*='" + item + "'], select[name*='" + item + "'], textarea[name*='" + item + "']").closest('.form-line').addClass('error');
+                                $('label.' + item).addClass('text-danger');
+                            });
+                        }
+                        post_flag = 1;
+                        submitBtn.prop('disabled', false).html(originalText);
+                    } else {
+                        swal({
+                            title: 'Success',
+                            text: response.msg,
+                            type: 'success',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                        setTimeout(function () {
+                            window.location.href = site_url + uri_seg_1 + '/' + uri_seg_2;
+                        }, 1600);
+                    }
+                },
+                error: function () {
+                    swal('Error', 'An internal error occurred', 'error');
                     post_flag = 1;
-                    $('#submit_loader').remove();
-                } else {
-                    setTimeout(function() {
-                        window.location.href = site_url+uri_seg_1+'/'+uri_seg_2;
-                    }, 1000);
+                    submitBtn.prop('disabled', false).html(originalText);
                 }
             });
         }
-        return false;           
+        return false;
     });
 
-    $('#images').on('change', function() {
+    $('#images').on('change', function () {
         imagesPreview(this, 'div.gallery');
     });
 
@@ -124,6 +149,6 @@ $(function () {
         }
     });
     tinymce.suffix = ".min";
-    tinyMCE.baseURL = base_url+'/themes/admin/plugins/tinymce';
+    tinyMCE.baseURL = base_url + '/themes/admin/plugins/tinymce';
 
- });
+});

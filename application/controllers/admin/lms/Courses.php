@@ -135,7 +135,7 @@ class Courses extends Admin_Controller
             $row[] = date('g:iA d/m/y', strtotime($val->date_updated));
             $row[] = featured_switch($val->featured, $val->id);
             $row[] = status_switch($val->status, $val->id);
-            $row[] = action_buttons('courses', $val->id, mb_substr($val->title, 0, 20, 'utf-8'), lang('menu_course'));
+            $row[] = '<a href="' . site_url('admin/courses/form/') . $val->id . '" target="_blank">manage</a>';
             $data[] = $row;
         }
 
@@ -223,8 +223,8 @@ class Courses extends Admin_Controller
 
         $output = array(
             "draw" => $_POST['draw'],
-            "recordsTotal" => $this->datatables->count_all(),
-            "recordsFiltered" => $this->datatables->count_filtered(),
+            "recordsTotal" => $this->datatables->count_all($where),
+            "recordsFiltered" => $this->datatables->count_filtered($where),
             "data" => $data,
         );
 
@@ -251,6 +251,15 @@ class Courses extends Admin_Controller
         $sections = $this->input->post('sections');
         $this->courses_model->update_section_order($sections);
         echo json_encode(['flag' => 1, 'msg' => 'Section order updated successfully']);
+    }
+
+    public function ajax_get_sections($course_id)
+    {
+        if (!$this->input->is_ajax_request()) {
+            exit('No direct script access allowed');
+        }
+        $sections = $this->courses_model->get_sections((int) $course_id);
+        echo json_encode(['flag' => 1, 'data' => $sections]);
     }
 
     public function render_curriculum($course_id)
@@ -312,7 +321,7 @@ class Courses extends Admin_Controller
             }
         }
 
-        if ($title !== '' && !preg_match('/^[\p{L}\p{N}\s\-\(\)\.,]+$/u', $title)) {
+        if ($title !== '' && !preg_match('/^[\p{L}\p{N}\s\-\(\)\.,:;!&\'"\?\/]+$/u', $title)) {
             $errors['title'] = 'Title contains invalid characters';
         }
 
@@ -914,12 +923,13 @@ class Courses extends Admin_Controller
 
         // data to insert in db table
         $data = array();
-        $data['cl_name'] = strtolower($this->input->post('title'));
+        $data['cl_name'] = $this->input->post('title');
         $data['cl_decsription'] = $this->input->post('description');
         $data['cl_file_name'] = $this->input->post('meta_title');
-        $data['cl_status'] = $this->input->post('featured');
-        $data['cl_secure'] = $this->input->post('status');
+        $data['cl_status'] = $this->input->post('status');
+        $data['cl_secure'] = $this->input->post('featured');
         $data['cl_course_id'] = $this->input->post('course_id');
+        $data['section_id'] = (int) $this->input->post('section_id');
         $data['cl_type'] = $this->input->post('category');
         if ($data['cl_type'] == 3) {
             $data['cl_file_name'] = $this->generate_youtube_url($this->input->post('meta_title'));
@@ -993,18 +1003,15 @@ class Courses extends Admin_Controller
                 foreach ($user_ids as $key => $user_id) {
                     // data to insert in db table
                     $data = array();
-                    $data['cs_user_id'] = strtolower($user_id);
+                    $data['cs_user_id'] = $user_id;
                     $data['cs_course_id'] = $this->input->post('course_id');
-                    $flag = $this->courses_model->save_suscription($data, $user_id);
+                    $flag = $this->courses_model->save_suscription($data, NULL);
                 }
             }
         }
 
         if ($flag) {
-            if (!empty($id))
-                $this->session->set_flashdata('message', 'user  to course updated successfully');
-            else
-                $this->session->set_flashdata('message', 'user  to course updated successfully');
+            $this->session->set_flashdata('message', 'Learners enrolled successfully');
 
             echo json_encode(array(
                 'flag' => 1,
@@ -1181,10 +1188,10 @@ class Courses extends Admin_Controller
 
         // data to insert in db table
         $data = array();
-        $data['title'] = strtolower($this->input->post('title'));
+        $data['title'] = $this->input->post('title');
         $data['description'] = $this->input->post('description');
         $data['meta_title'] = $this->input->post('meta_title');
-        $data['meta_tags'] = strtolower($this->input->post('meta_title'));
+        $data['meta_tags'] = $this->input->post('meta_tags');
         $data['meta_description'] = $this->input->post('meta_description');
         $data['featured'] = $this->input->post('featured');
         $data['status'] = $this->input->post('status');
@@ -1606,6 +1613,37 @@ class Courses extends Admin_Controller
         exit;
     }
 
+    public function ajax_get_unrolled_users($course_id)
+    {
+        $keyword = $this->input->post('keyword');
+        $params = array(
+            'course_id' => $course_id,
+            'keyword' => $keyword,
+            'limit' => 50
+        );
+        $users = $this->courses_model->get_user_dropdown($params);
+
+        if (!empty($users)) {
+            echo '<table class="table table-hover" style="margin: 0;">';
+            echo '<tbody>';
+            foreach ($users as $user) {
+                echo '<tr>';
+                echo '<td style="width: 40px; vertical-align: middle;">';
+                echo '<input type="checkbox" id="user_' . $user['id'] . '" class="user-enroll-check filled-in chk-col-blue" value="' . $user['id'] . '">';
+                echo '<label for="user_' . $user['id'] . '" style="height: 20px;"></label>';
+                echo '</td>';
+                echo '<td style="vertical-align: middle;">';
+                echo '<div style="font-weight: 600; color: #333;">' . $user['first_name'] . ' ' . $user['last_name'] . '</div>';
+                echo '<div style="font-size: 11px; color: #888;">' . $user['email'] . ' | ' . $user['mobile'] . '</div>';
+                echo '</td>';
+                echo '</tr>';
+            }
+            echo '</tbody>';
+            echo '</table>';
+        } else {
+            echo '<div class="text-center" style="padding: 50px; color: #888;">No learners found.</div>';
+        }
+    }
 }
 
 /* CLasses controller ends */

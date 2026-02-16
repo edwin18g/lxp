@@ -375,7 +375,7 @@ class File_uploads
         $config['file_ext_tolower'] = TRUE;
         $config['overwrite'] = TRUE;
         $config['remove_spaces'] = TRUE;
-        $config['upload_path'] = './upload/' . $data['folder'] . '/';
+        $config['upload_path'] = FCPATH . 'upload/' . $data['folder'] . '/';
 
         if (!is_dir($config['upload_path']))
             mkdir($config['upload_path'], 0777, TRUE);
@@ -482,7 +482,7 @@ class File_uploads
         $config['file_ext_tolower'] = TRUE;
         $config['overwrite'] = TRUE;
         $config['remove_spaces'] = TRUE;
-        $config['upload_path'] = './upload/' . $data['folder'] . '/';
+        $config['upload_path'] = FCPATH . 'upload/' . $data['folder'] . '/';
 
         if (!is_dir($config['upload_path']))
             mkdir($config['upload_path'], 0777, TRUE);
@@ -577,7 +577,7 @@ class File_uploads
         $config['file_ext_tolower'] = TRUE;
         $config['overwrite'] = TRUE;
         $config['remove_spaces'] = TRUE;
-        $config['upload_path'] = './upload/' . $data['folder'] . '/';
+        $config['upload_path'] = FCPATH . 'upload/' . $data['folder'] . '/';
 
         if (!is_dir($config['upload_path']))
             mkdir($config['upload_path'], 0777, TRUE);

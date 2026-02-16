@@ -615,8 +615,36 @@ function user_detials($id)
     if (!$result) {
         return '';
     }
-    return '<span><img src="' . base_url('upload/users/images/' . str_replace('.jpg', '', ($result['image'] ?? '')) . '_thumb.jpg') . '" width="48" height="48" alt="User Image" style="    border-radius: 50%;
-    margin: 0px 17px;"></span><span>' . ($result['username'] ?? '') . '<span>';
+
+    $image_name = $result['image'] ?? '';
+    $username = $result['username'] ?? ($result['first_name'] ?? 'User');
+
+    // Fallback Avatar using UI Avatars
+    $default_avatar = 'https://ui-avatars.com/api/?name=' . urlencode($username) . '&background=random&color=fff';
+    $image_url = $default_avatar;
+
+    if (!empty($image_name)) {
+        $clean_name = preg_replace('/\.(jpg|jpeg|png)$/i', '', $image_name);
+        $ext = pathinfo($image_name, PATHINFO_EXTENSION) ?: 'jpg';
+
+        $thumb_path = 'upload/users/images/' . $clean_name . '_thumb.' . $ext;
+
+        if (file_exists(FCPATH . $thumb_path)) {
+            $image_url = base_url($thumb_path);
+        } else {
+            // Try original if thumb missing
+            $original_path = 'upload/users/images/' . $image_name;
+            if (file_exists(FCPATH . $original_path)) {
+                $image_url = base_url($original_path);
+            }
+        }
+    }
+
+    return '<div style="display: flex; align-items: center; gap: 12px;">
+                <img src="' . $image_url . '" width="38" height="38" alt="User Image" 
+                     style="border-radius: 50%; object-fit: cover; border: 2px solid #f1f5f9; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <span style="font-weight: 500; color: #334155;">' . $username . '</span>
+            </div>';
 }
 function status_switch_lecture($status = NULL, $id = NULL)
 {

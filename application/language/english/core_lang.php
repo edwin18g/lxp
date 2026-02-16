@@ -246,8 +246,8 @@ $lang['menu_manage_acl'] = 'Manage ACL';
 $lang['menu_tutors'] = 'Tutors';
 $lang['menu_tutor'] = 'Tutor';
 
-$lang['menu_contacts'] = 'Contacts';
-$lang['menu_contact'] = 'Contact';
+$lang['menu_contacts'] = 'Inbox';
+$lang['menu_contact'] = 'Message';
 
 $lang['menu_settings'] = 'Settings';
 $lang['menu_setting'] = 'Setting';

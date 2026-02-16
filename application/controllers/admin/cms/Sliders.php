@@ -88,11 +88,11 @@ class Sliders extends Admin_Controller
             $no++;
             $row = array();
             $row[] = $no;
-            $row[] = $val->title;
+            $row[] = '<strong>' . $val->title . '</strong>';
             $row[] = $val->subtitle;
-            $row[] = $val->order_index;
+            $row[] = '<span class="label bg-blue">' . $val->order_index . '</span>';
             $row[] = status_switch($val->status, $val->id);
-            $row[] = '<img src="' . base_url('upload/sliders/images/' . $val->image) . '" class="img-responsive" width="60" >';
+            $row[] = '<a href="' . base_url('upload/sliders/images/' . $val->image) . '" target="_blank"><img src="' . base_url('upload/sliders/images/' . $val->image) . '" class="img-responsive img-thumbnail" width="120" style="max-height: 60px; object-fit: cover;"></a>';
             $row[] = action_buttons('sliders', $val->id, $val->title, 'Slider');
             $data[] = $row;
         }
@@ -116,7 +116,7 @@ class Sliders extends Admin_Controller
     public function form($id = NULL)
     {
         /* Initialize assets */
-        // $this->add_js_theme( "pages/sliders/form_i18n.js", TRUE ); // TODO: Create JS validation file if needed
+        $this->add_js_theme("pages/sliders/form_i18n.js", TRUE);
         $data = $this->includes;
 
         $id = (int) $id;
@@ -142,6 +142,7 @@ class Sliders extends Admin_Controller
             'id' => 'title',
             'type' => 'text',
             'class' => 'form-control',
+            'placeholder' => 'Enter slider title',
             'value' => $this->form_validation->set_value('title', !empty($result->title) ? $result->title : ''),
         );
         $data['subtitle'] = array(
@@ -149,6 +150,7 @@ class Sliders extends Admin_Controller
             'id' => 'subtitle',
             'type' => 'text',
             'class' => 'form-control',
+            'placeholder' => 'Enter slider subtitle',
             'value' => $this->form_validation->set_value('subtitle', !empty($result->subtitle) ? $result->subtitle : ''),
         );
         $data['button_text'] = array(
@@ -156,6 +158,7 @@ class Sliders extends Admin_Controller
             'id' => 'button_text',
             'type' => 'text',
             'class' => 'form-control',
+            'placeholder' => 'e.g. Learn More',
             'value' => $this->form_validation->set_value('button_text', !empty($result->button_text) ? $result->button_text : ''),
         );
         $data['button_link'] = array(
@@ -163,6 +166,7 @@ class Sliders extends Admin_Controller
             'id' => 'button_link',
             'type' => 'text',
             'class' => 'form-control',
+            'placeholder' => 'e.g. # or https://...',
             'value' => $this->form_validation->set_value('button_link', !empty($result->button_link) ? $result->button_link : ''),
         );
         $data['order_index'] = array(
@@ -203,9 +207,13 @@ class Sliders extends Admin_Controller
     {
         $id = NULL;
         if (!empty($_POST['id'])) {
-            if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'testimonials', 'p_edit')) // Using existing permission for now or create new
-            {
-                // echo '<p>'.sprintf(lang('manage_acl_permission_no'), lang('manage_acl_edit')).'</p>';exit;
+            if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'sliders', 'p_edit')) {
+                echo json_encode(array(
+                    'flag' => 0,
+                    'msg' => sprintf(lang('manage_acl_permission_no'), lang('manage_acl_edit')),
+                    'type' => 'fail',
+                ));
+                exit;
             }
             $id = (int) $this->input->post('id');
 
@@ -221,8 +229,13 @@ class Sliders extends Admin_Controller
                 exit;
             }
         } else {
-            if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'testimonials', 'p_add')) {
-                // echo '<p>'.sprintf(lang('manage_acl_permission_no'), lang('manage_acl_add')).'</p>';exit;
+            if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'sliders', 'p_add')) {
+                echo json_encode(array(
+                    'flag' => 0,
+                    'msg' => sprintf(lang('manage_acl_permission_no'), lang('manage_acl_add')),
+                    'type' => 'fail',
+                ));
+                exit;
             }
         }
 

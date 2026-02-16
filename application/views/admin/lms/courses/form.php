@@ -4,13 +4,7 @@
 <div class="row clearfix">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
         <!-- Page Header -->
-        <div class="block-header">
-            <h2 class="text-uppercase" style="margin-bottom: 20px;">
-                <?php echo !empty($id) ? lang('action_edit') : lang('action_create'); ?>
-                <a href="<?php echo site_url($this->uri->segment(1).'/'.$this->uri->segment(2)) ?>" class="btn btn-default btn-circle waves-effect waves-circle waves-float pull-right"><i class="material-icons">arrow_back</i></a>
-                <?php if(!empty($id)) { echo '<a role="button" onclick="ajaxDelete('.$id.', ``, `'.lang('menu_course').'`)" class="btn btn-danger btn-circle waves-effect waves-circle waves-float pull-right" style="margin-right: 10px;"><i class="material-icons">delete_forever</i></a>'; } ?>
-            </h2>
-        </div>
+       
 
         <!-- Tabs -->
         <div class="card">
@@ -43,13 +37,13 @@
                                 <input type="hidden" name="id" value="<?php echo $id; ?>">
                             <?php } ?>
 
-                            <div class="row clearfix">
+                            <div class="row clearfix" style="display: flex; flex-wrap: wrap;">
                                 <!-- Left Column: Main Information -->
-                                <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12">
-                                    <div class="card">
-                                        <div class="header">
+                                <div class="col-lg-8 col-md-8 col-sm-12 col-xs-12" style="display: flex;">
+                                    <div class="card" style="width: 100%;">
+                                        <div class="header bg-blue-grey">
                                             <h2>
-                                                <i class="material-icons" style="vertical-align: middle; margin-right: 5px;">title</i> Basic Information
+                                                <i class="material-icons" style="vertical-align: middle; margin-right: 5px;">info</i> Course Details
                                             </h2>
                                         </div>
                                         <div class="body">
@@ -134,7 +128,7 @@
 
                                     <!-- Media Card -->
                                     <div class="card">
-                                        <div class="header">
+                                        <div class="header bg-blue-grey">
                                             <h2>
                                                 <i class="material-icons" style="vertical-align: middle; margin-right: 5px;">image</i> Course Media
                                             </h2>
@@ -151,9 +145,11 @@
                                                 <?php if(! empty($c_images)) { ?>
                                                     <div class="row">
                                                         <div class="col-sm-12">
-                                                            <div class="gallery">
+                                                            <div class="gallery" style="display: flex; flex-wrap: wrap; gap: 10px; margin-top: 15px;">
                                                                 <?php foreach($c_images as $val) { ?> 
-                                                                    <img src="<?php echo base_url('upload/courses/images/'.image_to_thumb($val)); ?>" class="col-sm-4 img-responsive thumbnail" style="margin-top: 10px;">            
+                                                                    <div style="position: relative; width: 80px; height: 80px;">
+                                                                        <img src="<?php echo base_url('upload/courses/images/'.image_to_thumb($val)); ?>" class="img-responsive img-thumbnail" style="width: 100%; height: 100%; object-fit: cover;">
+                                                                    </div>
                                                                 <?php } ?>
                                                             </div>                                
                                                         </div>
@@ -203,22 +199,18 @@
                         <div class="row clearfix">
                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                 <div class="card">
-                                    <div class="header">
-                                        <h2 id="curriculum_header_title">
-                                            COURSE CURRICULUM
+                                    <div class="header" style="background: #fcfcfc;">
+                                        <h2 id="curriculum_header_title" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                            <span>COURSE CURRICULUM</span>
+                                            <?php if(!empty($id)) { ?>
+                                            <button type="button" id="btn_add_lecture" class="btn btn-primary waves-effect btn-sm">
+                                                <i class="material-icons" style="font-size: 18px;">add</i> ADD LECTURE
+                                            </button>
+                                            <button type="button" id="btn_cancel_lecture" class="btn btn-default waves-effect btn-sm" style="display: none;">
+                                                <i class="material-icons" style="font-size: 18px;">close</i> CANCEL
+                                            </button>
+                                            <?php } ?>
                                         </h2>
-                                        <ul class="header-dropdown m-r--5">
-                                            <li class="dropdown">
-                                                <?php if(!empty($id)) { ?>
-                                                <button type="button" id="btn_add_lecture" class="btn btn-primary waves-effect">
-                                                    <i class="material-icons">add</i> ADD NEW LECTURE
-                                                </button>
-                                                <button type="button" id="btn_cancel_lecture" class="btn btn-default waves-effect" style="display: none;">
-                                                    <i class="material-icons">close</i> CANCEL
-                                                </button>
-                                                <?php } ?>
-                                            </li>
-                                        </ul>
                                     </div>
                                     <div class="body">
                                         <?php if(empty($id)) { ?>
@@ -241,116 +233,118 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Embedded Lecture Form -->
-                                            <div id="lecture_form_container" style="display: none; margin-top: 20px;">
-                                                <?php echo form_open_multipart(site_url('admin/courses/lecture_save'), array('class' => 'form-horizontal', 'id' => 'form-lecture-create', 'role'=>"form")); ?>
-                                                    <input type="hidden" name="course_id" value="<?php echo $id; ?>">
-                                                    <input type="hidden" name="id" id="lecture_id" value=""> <!-- For Edit -->
+                                             <!-- Offcanvas Lecture Form -->
+                                             <div class="offcanvas-backdrop" id="lecture-offcanvas-backdrop"></div>
+                                             <div class="offcanvas-sidebar" id="lecture-offcanvas">
+                                                 <div class="offcanvas-header">
+                                                     <h4 style="margin: 0; font-weight: 700; color: #333;" id="offcanvas_lecture_title">ADD NEW LECTURE</h4>
+                                                     <button type="button" class="btn btn-default btn-circle waves-effect" id="close-lecture-offcanvas">
+                                                         <i class="material-icons">close</i>
+                                                     </button>
+                                                 </div>
+                                                 <div class="offcanvas-body">
+                                                     <?php echo form_open_multipart(site_url('admin/courses/lecture_save'), array('class' => 'form-horizontal', 'id' => 'form-lecture-create', 'role'=>"form")); ?>
+                                                         <input type="hidden" name="course_id" value="<?php echo $id; ?>">
+                                                         <input type="hidden" name="id" id="lecture_id" value=""> <!-- For Edit -->
 
-                                                    <div class="row clearfix">
-                                                        <div class="col-md-2 form-control-label">
-                                                            <label>Content Type</label>
-                                                        </div>
-                                                        <div class="col-md-10">
-                                                            <div class="form-group">
-                                                                <div class="form-line">
-                                                                    <?php 
-                                                                    $lecture_types = array(
-                                                                        '' => '-- Select Content Type --',
-                                                                        '1' => 'Google Drive',
-                                                                        '2' => 'PDF Document',
-                                                                        '3' => 'YouTube / Vimeo'
-                                                                    );
-                                                                    echo form_dropdown('category', $lecture_types, '', 'id="lecture_category" class="form-control" required'); 
-                                                                    ?>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                         <div class="row clearfix m-b-20">
+                                                             <div class="col-sm-12">
+                                                                 <label class="form-label">Section</label>
+                                                                 <div class="form-group">
+                                                                     <div class="form-line">
+                                                                         <select name="section_id" id="lecture_section_id_select" class="form-control show-tick" required>
+                                                                             <option value="0">Uncategorized</option>
+                                                                         </select>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
 
-                                                    <div class="row clearfix">
-                                                        <div class="col-md-2 form-control-label">
-                                                            <label>Title</label>
-                                                        </div>
-                                                        <div class="col-md-10">
-                                                            <div class="form-group">
-                                                                <div class="form-line">
-                                                                    <input type="text" name="title" id="lecture_title" class="form-control" required>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                         <div class="row clearfix m-b-20">
+                                                             <div class="col-sm-12">
+                                                                 <label class="form-label">Content Type</label>
+                                                                 <div class="form-group">
+                                                                     <div class="form-line">
+                                                                         <?php 
+                                                                         $lecture_types = array(
+                                                                             '' => '-- Select Content Type --',
+                                                                             '1' => 'Google Drive',
+                                                                             '2' => 'PDF Document',
+                                                                             '3' => 'YouTube / Vimeo'
+                                                                         );
+                                                                         echo form_dropdown('category', $lecture_types, '', 'id="lecture_category" class="form-control" required'); 
+                                                                         ?>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
 
-                                                    <div class="row clearfix">
-                                                        <div class="col-md-2 form-control-label">
-                                                            <label>URL / File ID</label>
-                                                        </div>
-                                                        <div class="col-md-10">
-                                                            <div class="form-group">
-                                                                <div class="form-line">
-                                                                    <input type="text" name="meta_title" id="lecture_meta_title" class="form-control" required placeholder="Enter Video URL or File ID">
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                         <div class="row clearfix m-b-20">
+                                                             <div class="col-sm-12">
+                                                                 <label class="form-label">Title</label>
+                                                                 <div class="form-group">
+                                                                     <div class="form-line">
+                                                                         <input type="text" name="title" id="lecture_title" class="form-control" required>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
 
-                                                    <div class="row clearfix">
-                                                        <div class="col-md-2 form-control-label">
-                                                            <label>Description</label>
-                                                        </div>
-                                                        <div class="col-md-10">
-                                                            <div class="form-group">
-                                                                <div class="form-line">
-                                                                    <textarea name="description" id="lecture_description" class="form-control" rows="3"></textarea>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
+                                                         <div class="row clearfix m-b-20">
+                                                             <div class="col-sm-12">
+                                                                 <label class="form-label">URL / File ID</label>
+                                                                 <div class="form-group">
+                                                                     <div class="form-line">
+                                                                         <input type="text" name="meta_title" id="lecture_meta_title" class="form-control" required placeholder="Enter Video URL or File ID">
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
 
-                                                    <div class="row clearfix">
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-4 form-control-label">
-                                                                    <label>Status</label>
-                                                                </div>
-                                                                <div class="col-md-8">
-                                                                    <div class="form-group">
-                                                                        <div class="form-line">
-                                                                            <select name="status" id="lecture_status" class="form-control">
-                                                                                <option value="1">Active</option>
-                                                                                <option value="0">Inactive</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>      
-                                                        </div>
-                                                        <div class="col-md-6">
-                                                            <div class="row">
-                                                                <div class="col-md-4 form-control-label">
-                                                                    <label>Secure</label>
-                                                                </div>
-                                                                <div class="col-md-8">
-                                                                    <div class="form-group">
-                                                                        <div class="form-line">
-                                                                            <select name="featured" id="lecture_featured" class="form-control"> <!-- mapped to 'featured'/cl_secure in controller -->
-                                                                                <option value="1">Yes</option>
-                                                                                <option value="0">No</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>      
-                                                        </div>
-                                                    </div>
+                                                         <div class="row clearfix m-b-20">
+                                                             <div class="col-sm-12">
+                                                                 <label class="form-label">Description</label>
+                                                                 <div class="form-group">
+                                                                     <div class="form-line">
+                                                                         <textarea name="description" id="lecture_description" class="form-control" rows="3"></textarea>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
 
-                                                    <div class="row clearfix">
-                                                        <div class="col-lg-offset-2 col-md-offset-2 col-sm-offset-4 col-xs-offset-5">
-                                                            <button type="submit" class="btn btn-primary m-t-15 waves-effect">SAVE LECTURE</button>
-                                                        </div>
-                                                    </div>
-                                                <?php echo form_close(); ?>
-                                            </div>
+                                                         <div class="row clearfix m-b-20">
+                                                             <div class="col-sm-6">
+                                                                 <label class="form-label">Status</label>
+                                                                 <div class="form-group">
+                                                                     <div class="form-line">
+                                                                         <select name="status" id="lecture_status" class="form-control">
+                                                                             <option value="1">Active</option>
+                                                                             <option value="0">Inactive</option>
+                                                                         </select>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                             <div class="col-sm-6">
+                                                                 <label class="form-label">Secure Content</label>
+                                                                 <div class="form-group">
+                                                                     <div class="form-line">
+                                                                         <select name="featured" id="lecture_featured" class="form-control">
+                                                                             <option value="1">Yes (Secure)</option>
+                                                                             <option value="0">No (Public)</option>
+                                                                         </select>
+                                                                     </div>
+                                                                 </div>
+                                                             </div>
+                                                         </div>
+
+                                                         <div class="row clearfix m-t-20">
+                                                             <div class="col-sm-12">
+                                                                 <button type="submit" class="btn btn-primary btn-lg btn-block waves-effect">SAVE LECTURE</button>
+                                                             </div>
+                                                         </div>
+                                                     <?php echo form_close(); ?>
+                                                 </div>
+                                             </div>
 
                                         <?php } ?>
                                     </div>
@@ -365,8 +359,11 @@
                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                 <div class="card">
                                     <div class="header">
-                                        <h2>
-                                            ENROLLED LEARNERS
+                                        <h2 style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
+                                            <span>ENROLLED LEARNERS</span>
+                                            <button type="button" class="btn btn-primary waves-effect btn-sm" onclick="enrollLearners()">
+                                                <i class="material-icons" style="font-size: 18px;">person_add</i> ENROLL LEARNERS
+                                            </button>
                                         </h2>
                                     </div>
                                     <div class="body">
@@ -402,39 +399,129 @@
 
 <style>
     /* Styling for the new form layout */
+    .nav-tabs {
+        border-bottom: none;
+        background: #f8f9fa;
+        padding: 0;
+        border-radius: 12px 12px 0 0;
+        margin-bottom: 25px;
+        display: flex;
+        width: 100%;
+    }
+    .nav-tabs > li {
+        flex: 1;
+        display: flex;
+    }
+    .nav-tabs > li > a {
+        font-weight: 600;
+        color: #777;
+        border: none !important;
+        padding: 18px 25px;
+        transition: all 0.3s;
+        font-size: 13px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+        border-radius: 0;
+    }
+    .nav-tabs > li:first-child > a {
+        border-radius: 12px 0 0 0;
+    }
+    .nav-tabs > li:last-child > a {
+        border-radius: 0 12px 0 0;
+    }
+    .nav-tabs > li > a i {
+        margin-right: 8px;
+        font-size: 20px !important;
+    }
+    .nav-tabs > li.active > a {
+        color: #2196F3 !important;
+        background: #fff !important;
+        border-bottom: 3px solid #2196F3 !important;
+        box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
+    }
+    .card {
+        border: none;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
+        margin-bottom: 30px;
+        transition: transform 0.2s;
+    }
     .card .header {
-        padding: 15px 20px;
-        border-bottom: 1px solid rgba(204, 204, 204, 0.35);
+        border-radius: 12px 12px 0 0 !important;
+        padding: 18px 25px !important;
+        border-bottom: 1px solid #f5f5f5;
     }
     .card .header h2 {
-        font-size: 16px;
-        color: #555;
+        font-size: 15px !important;
         font-weight: 600;
+        color: #333;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .form-group .form-line {
+        border-bottom: 1px solid #eee !important;
+    }
+    .form-line.focused {
+        border-bottom: 2px solid #2196F3 !important;
+    }
+    .form-label {
+        font-weight: 600;
+        color: #888;
+        font-size: 12px;
+        text-transform: uppercase;
+        margin-bottom: 8px;
+    }
+    .btn-circle {
+        border-radius: 50% !important;
+    }
+
+    /* Offcanvas Sidebar */
+    .offcanvas-sidebar {
+        position: fixed;
+        right: -100%;
+        top: 0;
+        width: 50%;
+        height: 100%;
+        background: #fff;
+        z-index: 1050;
+        box-shadow: -5px 0 25px rgba(0,0,0,0.1);
+        transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+        display: flex;
+        flex-direction: column;
+    }
+    .offcanvas-sidebar.active {
+        right: 0;
+    }
+    .offcanvas-header {
+        padding: 20px 25px;
+        background: #f8f9fa;
+        border-bottom: 1px solid #eee;
         display: flex;
         align-items: center;
         justify-content: space-between;
     }
-    .form-group .form-line {
-        border-bottom: 1px solid #ddd;
+    .offcanvas-body {
+        padding: 30px 25px;
+        overflow-y: auto;
+        flex-grow: 1;
     }
-    .form-group .form-line:after {
-        border-bottom: 2px solid #2196F3;
+    .offcanvas-backdrop {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.4);
+        z-index: 1040;
+        display: none;
+        backdrop-filter: blur(2px);
     }
-    .form-label {
-        font-weight: normal;
-        color: #aaa;
-        font-size: 12px;
-        text-transform: uppercase;
-    }
-    .nav-tabs > li > a {
-        font-weight: 600;
-        color: #555;
-    }
-    .nav-tabs > li.active > a, 
-    .nav-tabs > li.active > a:hover, 
-    .nav-tabs > li.active > a:focus {
-        color: #2196F3;
-        font-weight: 700;
+    .offcanvas-backdrop.active {
+        display: block;
     }
 </style>
 
@@ -444,15 +531,18 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
 
 <script>
-    document.addEventListener("DOMContentLoaded", function() {
-        var courseId = "<?php echo $id; ?>";
-
-        // Load Curriculum
-        loadCurriculum();
-
-        function loadCurriculum() {
+// Global variables and functions
+    var courseId = "<?php echo $id; ?>";
+    
+    window.loadCurriculum = function() {
+        if(courseId) {
             $('#curriculum_container').load("<?php echo site_url('admin/courses/render_curriculum/'); ?>" + courseId);
         }
+    }
+
+    document.addEventListener("DOMContentLoaded", function() {
+        // Load Curriculum
+        loadCurriculum();
 
         // Initialize Students Table
         $('#students_table').DataTable({
@@ -471,27 +561,63 @@
                 { "data": 2 }, 
                 { "data": 3 },
             ],
-             "order": [[ 0, "desc" ]]
+            "order": [[ 0, "desc" ]],
+            "language": {
+                "search": "",
+                "searchPlaceholder": "Search learners..."
+            }
         });
 
-        // Toggle "Add Lecture" Form
-        $('#btn_add_lecture').on('click', function() {
-            $('#curriculum_container').slideUp();
-            $('#lecture_form_container').slideDown();
-            $(this).hide();
-            $('#btn_cancel_lecture').show();
-            $('#curriculum_header_title').text('ADD NEW LECTURE');
+        // Toggle Offcanvas Form
+        window.openLectureOffcanvas = function(title = 'ADD NEW LECTURE', selectedSectionId = 0) {
+            $('#offcanvas_lecture_title').text(title);
+            
+            // Load sections
+            $.ajax({
+                url: "<?php echo site_url('admin/courses/ajax_get_sections/'); ?>" + courseId,
+                type: "GET",
+                dataType: 'json',
+                success: function(response) {
+                    if(response.flag == 1) {
+                        var html = '<option value="0">Uncategorized</option>';
+                        $.each(response.data, function(i, section) {
+                            html += '<option value="'+section.id+'">'+section.title+'</option>';
+                        });
+                        $('#lecture_section_id_select').html(html).val(selectedSectionId);
+                        
+                        // Refresh selectpicker
+                        if ($('#lecture_section_id_select').parents('.bootstrap-select').length > 0) {
+                            $('#lecture_section_id_select').selectpicker('refresh');
+                        } else if ($.fn.selectpicker) {
+                            $('#lecture_section_id_select').selectpicker();
+                        }
+                    }
+                },
+                error: function(xhr) {
+                    console.error('AJAX Error:', xhr);
+                }
+            });
+
+            $('#lecture-offcanvas, #lecture-offcanvas-backdrop').addClass('active');
+            $('body').css('overflow', 'hidden'); // Lock scroll
+        }
+
+        window.closeLectureOffcanvas = function() {
+            $('#lecture-offcanvas, #lecture-offcanvas-backdrop').removeClass('active');
+            $('body').css('overflow', ''); // Unlock scroll
             // Reset form
             $('#form-lecture-create')[0].reset();
             $('#lecture_id').val('');
+            if($('#lecture_section_id').length > 0) $('#lecture_section_id').val('');
+        }
+
+        $('#btn_add_lecture').on('click', function() {
+            closeLectureOffcanvas(); // Clear any existing state
+            openLectureOffcanvas('ADD NEW LECTURE');
         });
 
-        $('#btn_cancel_lecture').on('click', function() {
-            $('#lecture_form_container').slideUp();
-            $('#curriculum_container').slideDown();
-            $(this).hide();
-            $('#btn_add_lecture').show();
-            $('#curriculum_header_title').text('COURSE CURRICULUM');
+        $('#close-lecture-offcanvas, #lecture-offcanvas-backdrop').on('click', function() {
+            closeLectureOffcanvas();
         });
 
         // Handle AJAX Form Submission for Lectures
@@ -516,8 +642,8 @@
                         // Success
                         swal('Success', response.msg, 'success');
                         
-                        // Reset and switch view
-                        $('#btn_cancel_lecture').trigger('click');
+                        // Close offcanvas and reload
+                        closeLectureOffcanvas();
                         loadCurriculum();
                     } else {
                         // Error
@@ -580,19 +706,11 @@
                         $('#lecture_meta_title').val(row.cl_file_name);
                         $('#lecture_description').val(row.cl_decsription);
                         
-                        $('#lecture_status').val(row.cl_secure).change(); 
-                        $('#lecture_featured').val(row.cl_status).change();
+                        $('#lecture_status').val(row.cl_status).change(); 
+                        $('#lecture_featured').val(row.cl_secure).change();
                         
                         // UI Transitions
-                        $('#curriculum_header_title').text('EDIT LECTURE');
-                        $('#curriculum_container').slideUp();
-                        $('#lecture_form_container').slideDown();
-                        $('#btn_add_lecture').hide();
-                        $('#btn_cancel_lecture').show();
-                        
-                        $('html, body').animate({
-                            scrollTop: $("#lecture_form_container").offset().top - 100
-                        }, 500);
+                        openLectureOffcanvas('EDIT LECTURE', row.section_id);
                     } else {
                          swal("Error", response.msg, "error");
                     }
@@ -609,7 +727,11 @@
         $.ajax({
             url: "<?php echo site_url('admin/courses/status_lecture'); ?>",
             type: "POST",
-            data: {id: id, status: status},
+            data: {
+                id: id, 
+                status: status,
+                csrf_token: '<?php echo $this->security->get_csrf_hash(); ?>'
+            },
             dataType: 'json',
             success: function (response) {
                 if (response.flag == 1) {
@@ -626,6 +748,123 @@
             }
         });
     }
+
+    window.enrollLearners = function() {
+        $('#enrollmentModal').modal('show');
+        loadUsersForEnrollment();
+    }
+</script>
+
+<!-- Enrollment Modal -->
+<div class="modal fade" id="enrollmentModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 12px;">
+            <div class="modal-header" style="padding: 20px 25px; border-bottom: 1px solid #f0f0f0;">
+                <h4 class="modal-title" style="font-weight: 700; color: #333;">ENROLL LEARNERS</h4>
+            </div>
+            <div class="modal-body" style="padding: 0;">
+                <div class="search-bar" style="padding: 15px 25px; background: #f8f9fa; display: flex; align-items: center;">
+                    <div class="form-group" style="margin: 0; flex-grow: 1;">
+                        <div class="form-line">
+                            <input type="text" id="user_search" class="form-control" placeholder="Search by name, email or mobile...">
+                        </div>
+                    </div>
+                    <i class="material-icons" style="color: #aaa; margin-left: 10px;">search</i>
+                </div>
+                <div id="users_list_container" style="height: 400px; overflow-y: auto; padding: 10px 25px;">
+                    <!-- Users will be loaded here via AJAX -->
+                    <div class="text-center" style="padding: 50px;">
+                        <div class="preloader pl-size-md">
+                            <div class="spinner-layer pl-blue">
+                                <div class="circle-clipper left"><div class="circle"></div></div>
+                                <div class="circle-clipper right"><div class="circle"></div></div>
+                            </div>
+                        </div>
+                        <p style="margin-top: 15px; color: #888;">Loading learners...</p>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 15px 25px; border-top: 1px solid #f0f0f0;">
+                <div class="pull-left" id="selected_count_wrapper" style="display: none; align-items: center;">
+                    <span class="label label-primary" id="selected_user_count_badge" style="padding: 5px 10px; border-radius: 20px;">0 SELECTED</span>
+                </div>
+                <button type="button" class="btn btn-primary waves-effect" id="confirm_enrollment" disabled>ENROLL SELECTED</button>
+                <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CANCEL</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var selectedUsers = [];
+    
+    function loadUsersForEnrollment() {
+        var keyword = $('#user_search').val();
+        $.ajax({
+            url: "<?php echo site_url('admin/courses/ajax_get_unrolled_users/'); ?>" + courseId,
+            type: "POST",
+            data: {
+                keyword: keyword,
+                csrf_token: '<?php echo $this->security->get_csrf_hash(); ?>'
+            },
+            success: function(html) {
+                $('#users_list_container').html(html);
+                updateSelectedView();
+            }
+        });
+    }
+
+    $(document).on('keyup', '#user_search', function() {
+        clearTimeout(window.userSearchTimer);
+        window.userSearchTimer = setTimeout(loadUsersForEnrollment, 500);
+    });
+
+    $(document).on('change', '.user-enroll-check', function() {
+        var userId = $(this).val();
+        if($(this).is(':checked')) {
+            if(!selectedUsers.includes(userId)) selectedUsers.push(userId);
+        } else {
+            selectedUsers = selectedUsers.filter(id => id !== userId);
+        }
+        updateSelectedView();
+    });
+
+    function updateSelectedView() {
+        if(selectedUsers.length > 0) {
+            $('#selected_count_wrapper').css('display', 'flex');
+            $('#selected_user_count_badge').text(selectedUsers.length + ' SELECTED');
+            $('#confirm_enrollment').prop('disabled', false);
+        } else {
+            $('#selected_count_wrapper').hide();
+            $('#confirm_enrollment').prop('disabled', true);
+        }
+    }
+
+    $('#confirm_enrollment').on('click', function() {
+        var btn = $(this);
+        btn.prop('disabled', true).text('ENROLLING...');
+        
+        $.ajax({
+            url: "<?php echo site_url('admin/courses/user_save_beta'); ?>",
+            type: "POST",
+            data: {
+                user_id: selectedUsers.join(','),
+                course_id: courseId,
+                csrf_token: '<?php echo $this->security->get_csrf_hash(); ?>'
+            },
+            dataType: 'json',
+            success: function(response) {
+                swal("Success", "Learners enrolled successfully", "success");
+                $('#enrollmentModal').modal('hide');
+                $('#students_table').DataTable().ajax.reload();
+                selectedUsers = [];
+            },
+            error: function() {
+                swal("Error", "Failed to enroll learners", "error");
+                btn.prop('disabled', false).text('ENROLL SELECTED');
+            }
+        });
+    });
 </script>
 
 <!-- Section Modal -->
@@ -750,27 +989,8 @@
 
     // Add Lecture (Modified to handle Section ID)
     window.addLectureToSection = function(sectionId) {
-        // ... switch to form ...
-        $('#curriculum_container').slideUp();
-        $('#lecture_form_container').slideDown();
-        $('#btn_add_lecture').hide();
-        $('#btn_cancel_lecture').show();
-        $('#curriculum_header_title').text('ADD NEW LECTURE');
-        
-        $('#form-lecture-create')[0].reset();
-        $('#lecture_id').val('');
-        
-        // Set Section ID hidden field (need to add this to form)
-        if($('#lecture_section_id').length == 0) {
-            $('<input>').attr({
-                type: 'hidden',
-                id: 'lecture_section_id',
-                name: 'section_id',
-                value: sectionId
-            }).appendTo('#form-lecture-create');
-        } else {
-            $('#lecture_section_id').val(sectionId);
-        }
+        // Open offcanvas with pre-selected section
+        openLectureOffcanvas('ADD LECTURE TO SECTION', sectionId);
     }
 </script>
 <?php } ?>
