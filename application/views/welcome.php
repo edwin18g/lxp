@@ -401,94 +401,92 @@
 
     /* Testimonials Redesign */
     .testimonial-card-premium {
-        background: rgba(20, 20, 20, 0.8);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        border-radius: 16px;
-        padding: 40px 30px;
+        background: #2c2c2c;
+        border: none;
+        border-radius: 4px;
+        /* subtle rounding */
+        padding: 40px 40px 80px 40px;
         height: auto;
         min-height: 250px;
         display: flex;
         flex-direction: column;
         transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
         position: relative;
         margin-bottom: 60px;
         /* Space for overlapping profile */
+        margin-right: 15px;
+        margin-left: 15px;
     }
 
     .testimonial-card-premium:hover {
-        transform: translateY(-10px) scale(1.02);
-        background: rgba(32, 32, 32, 0.85);
-        border-color: rgba(255, 255, 255, 0.2);
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.4);
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.6);
     }
 
     .testimonial-text {
-        font-size: 1.1rem;
+        font-size: 1.5rem;
         font-style: italic;
-        line-height: 1.7;
-        color: #fff;
-        margin-bottom: 25px;
+        line-height: 1.8;
+        color: #ddd;
+        margin-bottom: 0px;
         position: relative;
-        font-weight: 500;
+        font-weight: 300;
         z-index: 1;
     }
 
     .testimonial-text::before {
         content: '\201C';
-        position: absolute;
-        top: -40px;
-        left: -20px;
-        font-size: 6rem;
-        color: rgba(255, 255, 255, 0.08);
-        font-family: 'Plus Jakarta Sans', sans-serif;
-        z-index: -1;
+        display: block;
+        font-size: 4rem;
+        color: #555;
+        font-family: Georgia, serif;
+        line-height: 0.5;
+        margin-bottom: 15px;
+        margin-left: -5px;
     }
 
     .testimonial-author {
         display: flex;
         align-items: center;
         position: absolute;
-        bottom: -45px;
-        left: 0px;
+        bottom: -40px;
+        left: 20px;
         z-index: 10;
         width: 100%;
-        padding-left: 20px;
     }
 
     .testimonial-author img {
-        width: 85px;
-        height: 85px;
+        width: 80px;
+        height: 80px;
         border-radius: 50%;
-        border: 6px solid #fff;
+        border: 4px solid #fff;
         margin-right: 15px;
         object-fit: cover;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
         background: #fff;
         flex-shrink: 0;
         transition: transform 0.4s ease;
     }
 
     .testimonial-card-premium:hover .testimonial-author img {
-        transform: scale(1.1) rotate(5deg);
+        transform: scale(1.05);
     }
 
     .author-info h5 {
         margin: 0;
-        font-size: 1.3rem;
-        font-weight: 700;
-        color: #333;
-        /* Default dark for outside card */
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #fff;
+        /* White text for dark mode */
         display: inline-block;
-        letter-spacing: -0.02em;
+        letter-spacing: 0.5px;
     }
 
     .author-info span {
-        font-size: 0.95rem;
-        font-weight: 600;
-        color: #666;
+        font-size: 0.85rem;
+        font-weight: 500;
+        color: #aaa;
         margin-left: 5px;
     }
 
@@ -503,11 +501,10 @@
 
     .testimonial-author .author-info h5 {
         color: #fff;
-        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
     }
 
     .testimonial-author .author-info span {
-        color: rgba(255, 255, 255, 0.8);
+        color: #aaa;
     }
 
     .section-accent-badge {
@@ -871,7 +868,7 @@
                     $course_url = site_url('courses/detail/') . str_replace(' ', '+', $val->title);
                     ?>
                     <div data-aos="fade-up" data-aos-delay="<?php echo ($key % 4) * 100; ?>">
-                        <a href="<?php echo $course_url; ?>" class="course-card-premium">
+                        <div class="course-card-premium">
                             <div class="card-banner-wrap">
                                 <img src="<?php echo base_url() . ($val->images ? '/upload/courses/images/' . image_to_thumb(json_decode($val->images)[0]) : 'upload/default_course_banner.png') ?>"
                                     alt="<?php echo $val->title ?>">
@@ -881,12 +878,18 @@
                                 <h4 class="course-title-premium">
                                     <?php echo $val->title ?>
                                 </h4>
-                                <div class="instructor-meta">
-                                    <img src="<?php echo base_url('upload/expert_mentor_avatar.png'); ?>" alt="Instructor">
-                                    <span>Expert Mentor</span>
+                                <div class="course-actions mt-auto"
+                                    style="display: flex; gap: 12px; margin-top: auto; padding-top: 20px;">
+                                    <button class="btn btn-primary"
+                                        style="flex: 1; border-radius: 6px; font-weight: 600; font-size: 1.2rem; padding: 10px 0; text-align: center; display: flex; align-items: center; justify-content: center; background: var(--coursera-blue); border-color: var(--coursera-blue);"
+                                        onclick="event.preventDefault(); window.location.href='<?php echo site_url('auth/register'); ?>'">Enroll
+                                        Now</button>
+                                    <button class="btn btn-outline-primary"
+                                        style="flex: 1; border-radius: 6px; font-weight: 600; font-size: 1.2rem; padding: 10px 0; text-align: center; display: flex; align-items: center; justify-content: center; border-color: var(--coursera-blue);"
+                                        onclick="event.preventDefault(); window.location.href='<?php echo $course_url; ?>'">Videos</button>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
                 <?php endforeach; ?>
             </div>
@@ -913,13 +916,14 @@
         </svg>
         <div class="container">
             <div class="section-title text-center mb-5" data-aos="fade-up">
-                <span class="section-accent-badge">Customer Stories</span>
-                <h2 style="color: #fff;">From the Zeyobron Community</h2>
-                <p style="color: rgba(255, 255, 255, 0.8);">100+ million people are already learning with us</p>
+                <span class="section-accent-badge" style="color: #fff; background: rgba(255, 255, 255, 0.1);">Users
+                    Stories</span>
+
             </div>
-            <div class="row">
-                <?php foreach (array_slice($testimonials, 0, 3) as $key => $val): ?>
-                    <div class="col-md-4 mb-4" data-aos="fade-up" data-aos-delay="<?php echo $key * 100; ?>">
+            <div class="owl-carousel" data-items="2" data-desktop="2" data-desktopsmall="2" data-tablet="1" data-mobile="1"
+                data-margin="30" data-loop="true" data-autoplay="true" data-nav="false" data-dots="true">
+                <?php foreach ($testimonials as $key => $val): ?>
+                    <div class="item" data-aos="fade-up" data-aos-delay="<?php echo ($key % 2) * 100; ?>">
                         <div class="testimonial-card-premium">
                             <div class="testimonial-text">
                                 <?php echo $val->t_feedback; ?>

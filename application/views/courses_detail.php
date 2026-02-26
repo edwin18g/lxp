@@ -20,28 +20,56 @@
 
     /* Course Header Area */
     .course-hero-banner {
-        background: #1f1f1f;
+        background: linear-gradient(135deg, var(--coursera-blue) 0%, #003c8f 100%);
         color: #fff;
-        padding: 60px 0;
+        padding: 80px 0 100px 0;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .course-hero-banner::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 48px;
+        background: var(--bg-light);
+        border-radius: 48px 48px 0 0;
     }
 
     .course-hero-banner h1 {
-        font-weight: 700;
-        font-size: 36px;
-        margin-bottom: 16px;
+        font-weight: 800;
+        font-size: 46px;
+        margin-bottom: 24px;
+        line-height: 1.2;
+        letter-spacing: -1px;
+        text-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
     }
 
     .course-meta-top {
         display: flex;
-        gap: 24px;
-        font-size: 14px;
-        opacity: 0.9;
+        gap: 16px;
+        font-size: 15px;
+        opacity: 0.95;
+        font-weight: 500;
+        flex-wrap: wrap;
     }
 
     .course-meta-top span {
-        display: flex;
+        display: inline-flex;
         align-items: center;
-        gap: 6px;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.15);
+        padding: 8px 16px;
+        border-radius: 50px;
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+    
+    .course-meta-top span i {
+        font-size: 16px;
     }
 
     /* Main Content Layout */

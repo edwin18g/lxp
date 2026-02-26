@@ -544,6 +544,7 @@ class Auth extends Public_Controller
             $additional_data = array(
                 'first_name' => $this->input->post('first_name'),
                 'last_name' => $this->input->post('last_name'),
+                'mobile' => $this->input->post('mobile'),
                 'image' => $this->input->post('image'),
                 'language' => $this->input->post('language'),
             );

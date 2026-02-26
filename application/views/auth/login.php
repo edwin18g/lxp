@@ -131,7 +131,7 @@
 
   .form-group-modern label {
     display: block;
-    font-size: 0.95rem;
+    font-size: 1.2rem;
     /* Increased from 0.85rem */
     font-weight: 600;
     color: var(--text-color);
@@ -144,7 +144,7 @@
     /* Increased padding */
     border: 1px solid var(--border-color);
     border-radius: 6px;
-    font-size: 1rem;
+    font-size: 1.2rem;
     /* Increased from 0.9rem */
     transition: all 0.2s;
     background: #fcfcfc;

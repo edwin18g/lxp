@@ -90,7 +90,7 @@ $is_logged_in = $this->session->userdata('logged_in');
 
     .form-group-modern label {
       display: block;
-      font-size: 0.9rem;
+      font-size: 1.2rem;
       font-weight: 600;
       color: var(--text-color);
       margin-bottom: 8px;
@@ -101,7 +101,7 @@ $is_logged_in = $this->session->userdata('logged_in');
       padding: 12px 16px;
       border: 1.5px solid #e1e5eb;
       border-radius: 10px;
-      font-size: 1rem;
+      font-size: 1.2rem;
       transition: all 0.3s;
       background: rgba(255, 255, 255, 0.5);
       color: var(--text-color);
@@ -222,7 +222,7 @@ $is_logged_in = $this->session->userdata('logged_in');
       display: flex;
       align-items: flex-start;
       gap: 12px;
-      font-size: 0.85rem;
+      font-size: 1rem;
       color: var(--text-muted);
       line-height: 1.5;
       margin-bottom: 25px;
@@ -273,6 +273,13 @@ $is_logged_in = $this->session->userdata('logged_in');
             class="text-danger small mt-1 d-block"><?php echo form_error('email'); ?></span><?php endif; ?>
       </div>
 
+      <div class="form-group-modern">
+        <label>Mobile Number</label>
+        <?php echo form_input(array('name' => 'mobile', 'type' => 'tel', 'placeholder' => 'Mobile Number', 'value' => set_value('mobile'), 'class' => 'form-control-modern', 'required' => 'required')); ?>
+        <?php if (form_error('mobile')): ?><span
+            class="text-danger small mt-1 d-block"><?php echo form_error('mobile'); ?></span><?php endif; ?>
+      </div>
+
       <div class="row-grid">
         <div class="form-group-modern">
           <label>Password</label>
@@ -290,8 +297,10 @@ $is_logged_in = $this->session->userdata('logged_in');
 
       <label class="checkbox-modern">
         <input type="checkbox" name="terms" value="1" required>
-        <span>I agree to the Terms and Conditions. The content, videos, and materials belong to Z-eyobron. Unauthorized
-          sharing is subject to penalties.</span>
+        <span>I agree to the Terms and Conditions
+          The content,videos, and materials belongs to the Z-eyobron. If you involve in sharing any of these videos or
+          content will be subjected to pay the Penalty of 1 lakh rupees. Also, once the access is provided cannot be
+          revoked and will not be subjected to any refund.</span>
       </label>
 
       <button type="submit" name="submit_form" class="btn-primary-modern"><?php echo lang('users_register'); ?></button>

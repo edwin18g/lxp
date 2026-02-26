@@ -429,7 +429,7 @@ if (
                 <div class="header-right">
                     <?php if (!$this->ion_auth->logged_in()): ?>
                         <a href="<?php echo site_url('auth/login') ?>" class="btn-login">Log In</a>
-                        <a href="<?php echo site_url('auth/register') ?>" class="btn-join">Join for Free</a>
+                        <a href="<?php echo site_url('auth/register') ?>" class="btn-join">Sign Up</a>
                     <?php else: ?>
                         <div class="dropdown">
                             <a class="dropdown-toggle" id="userMenu" data-toggle="dropdown" aria-haspopup="true"
