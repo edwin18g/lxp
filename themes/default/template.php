@@ -69,23 +69,28 @@ if (
     <!-- Page Loader -->
 
     <style>
+        /* ============================================
+           GLOBAL DESIGN SYSTEM
+           ============================================ */
         :root {
-            --coursera-blue: #0056d2;
-            --coursera-hover: #0041a3;
-            --text-dark: #1f1f1f;
-            --text-muted: #6a6a6a;
-            --border-color: #d1d7dc;
-            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
-
-            /* Premium Palette */
-            --glass-bg: rgba(255, 255, 255, 0.8);
-            --glass-border: rgba(255, 255, 255, 0.3);
-            --accent-gradient: linear-gradient(135deg, #0056d2 0%, #00a2ff 100%);
-            --mesh-gradient: radial-gradient(at 0% 0%, hsla(216, 100%, 95%, 1) 0, transparent 50%),
-                radial-gradient(at 50% 0%, hsla(202, 100%, 98%, 1) 0, transparent 50%),
-                radial-gradient(at 100% 0%, hsla(190, 100%, 96%, 1) 0, transparent 50%);
+            /* Legacy compat vars */
+            --coursera-blue: #4F46E5;
+            --coursera-hover: #4338CA;
+            --text-dark: #1F2937;
+            --text-muted: #6B7280;
+            --border-color: #E5E7EB;
+            --shadow: 0 4px 6px -1px rgba(0,0,0,0.07), 0 2px 4px -1px rgba(0,0,0,0.04);
+            --transition: all 0.3s cubic-bezier(0.165,0.84,0.44,1);
+            /* Modern palette */
+            --lp-primary: #4F46E5;
+            --lp-secondary: #7C3AED;
+            --lp-accent: #06B6D4;
+            --lp-gradient: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06B6D4 100%);
+            --glass-bg: rgba(255,255,255,0.85);
+            --glass-border: rgba(255,255,255,0.4);
         }
+
+        *, *::before, *::after { box-sizing: border-box; }
 
         body {
             font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -94,31 +99,41 @@ if (
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
             text-rendering: optimizeLegibility;
+            margin: 0;
         }
 
-        h1,
-        h2,
-        h3,
-        h4,
-        h5,
-        h6 {
+        h1, h2, h3, h4, h5, h6 {
             font-family: 'Plus Jakarta Sans', 'Outfit', sans-serif;
             font-weight: 700;
             letter-spacing: -0.02em;
         }
 
-        /* Minimal Header */
+        /* ============================================
+           HEADER — GLASSMORPHISM STICKY
+           ============================================ */
         #header {
             background: #fff;
-            border-bottom: 1px solid var(--border-color);
-            box-shadow: var(--shadow);
-            height: 72px;
+            border-bottom: 1px solid rgba(229,231,235,0.9);
+            box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 4px 20px rgba(79,70,229,0.06);
+            height: 70px;
             display: flex;
             align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 1000;
+            position: relative;
+            z-index: 100;
             padding: 0;
+            overflow: hidden;
+        }
+        /* Ensure header is never taller than 70px even with legacy padding overrides */
+        #header > * { flex-shrink: 0; }
+        #header .container { width: 100%; min-width: 0; }
+
+        /* Gradient accent line at top of header */
+        #header::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #4F46E5, #7C3AED, #06B6D4);
         }
 
         #header .container {
@@ -130,57 +145,12 @@ if (
         .header-left {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 24px;
             flex-grow: 1;
-        }
-
-        .header-search {
-            position: relative;
-            flex-grow: 1;
-            max-width: 600px;
-            margin-left: 12px;
-            display: flex;
-            align-items: center;
-        }
-
-        .header-search input {
-            width: 100%;
-            padding: 10px 50px 10px 16px;
-            border: 1px solid #747474;
-            border-radius: 4px;
-            font-size: 14px;
-            background: #fff;
-            transition: all 0.3s ease;
-        }
-
-        .header-search button {
-            position: absolute;
-            right: 4px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: var(--coursera-blue);
-            color: #fff;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 4px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-        }
-
-        .header-search button:hover {
-            background: var(--coursera-hover);
-        }
-
-        .nav--main {
-            display: flex;
-            align-items: center;
         }
 
         .logo img {
-            height: 30px;
+            height: 32px;
             width: auto;
             vertical-align: middle;
         }
@@ -188,8 +158,7 @@ if (
         .header-links {
             display: flex;
             align-items: center;
-            gap: 24px;
-            margin-right: 24px;
+            gap: 4px;
         }
 
         .header-links a {
@@ -197,82 +166,99 @@ if (
             text-decoration: none;
             font-weight: 500;
             font-size: 14px;
+            padding: 6px 14px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        .header-links a:hover {
+            background: rgba(79,70,229,0.07);
+            color: var(--lp-primary);
+        }
+
+        .header-search {
+            position: relative;
+            flex-grow: 1;
+            max-width: 500px;
+            display: flex;
+            align-items: center;
+        }
+
+        .header-search input {
+            width: 100%;
+            padding: 9px 48px 9px 18px;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 50px;
+            font-size: 13.5px;
+            background: #F9FAFB;
+            transition: all 0.3s ease;
+            outline: none;
+            color: var(--text-dark);
+        }
+        .header-search input:focus {
+            border-color: var(--lp-primary);
+            background: #fff;
+            box-shadow: 0 0 0 3px rgba(79,70,229,0.1);
+        }
+        .header-search input::placeholder { color: #9CA3AF; }
+
+        .header-search button {
+            position: absolute;
+            right: 6px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--lp-gradient);
+            color: #fff;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 13px;
+        }
+        .header-search button:hover {
+            transform: translateY(-50%) scale(1.1);
+            box-shadow: 0 4px 12px rgba(79,70,229,0.4);
         }
 
         .header-right {
             display: flex;
             align-items: center;
-            gap: 16px;
+            gap: 12px;
+            margin-left: 16px;
+            flex-shrink: 0;
         }
 
         .btn-login {
-            color: var(--coursera-blue);
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        .btn-join {
-            border: 1px solid var(--coursera-blue);
-            color: var(--coursera-blue);
-            padding: 8px 16px;
-            border-radius: 4px;
-            font-weight: 600;
-            text-decoration: none;
-            font-size: 14px;
-            transition: var(--transition);
-        }
-
-        .btn-join:hover {
-            background: rgba(0, 86, 210, 0.05);
-        }
-
-        .nav-main {
-            margin: 0;
-        }
-
-        .nav-main>ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-            align-items: center;
-        }
-
-        .nav-main>ul>li {
-            margin-left: 24px;
-        }
-
-        .nav-main>ul>li>a {
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-dark);
-            text-decoration: none;
-            transition: color 0.2s;
-        }
-
-        .nav-main>ul>li>a:hover {
-            color: var(--coursera-blue);
-        }
-
-        /* Auth Buttons */
-        .btn-login {
-            color: var(--coursera-blue) !important;
+            color: var(--lp-primary) !important;
             font-weight: 600 !important;
-        }
-
-        .btn-register-header {
-            background: var(--coursera-blue);
-            color: #fff !important;
-            padding: 8px 20px;
-            border-radius: 4px;
-            font-weight: 600;
+            text-decoration: none !important;
+            font-size: 14px;
+            padding: 7px 16px;
+            border-radius: 8px;
             transition: background 0.2s;
         }
+        .btn-login:hover { background: rgba(79,70,229,0.07); }
 
-        .btn-register-header:hover {
-            background: var(--coursera-hover);
-            text-decoration: none;
+        .btn-join {
+            background: var(--lp-gradient);
+            color: #fff !important;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: 600;
+            text-decoration: none !important;
+            font-size: 13.5px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 12px rgba(79,70,229,0.3);
+            border: none;
+        }
+        .btn-join:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 24px rgba(79,70,229,0.4);
+            color: #fff !important;
         }
 
         .user-nav .dropdown-toggle {
@@ -280,126 +266,233 @@ if (
             align-items: center;
             gap: 10px;
             font-weight: 500;
-            padding: 4px 8px;
-            border-radius: 20px;
+            padding: 5px 12px;
+            border-radius: 50px;
             transition: background 0.2s;
+            border: 1.5px solid transparent;
         }
-
         .user-nav .dropdown-toggle:hover {
-            background: #f1f3f4;
+            background: rgba(79,70,229,0.07);
+            border-color: rgba(79,70,229,0.15);
             text-decoration: none;
         }
 
         .header-avatar {
-            width: 34px;
-            height: 34px;
+            width: 36px; height: 36px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid #fff;
-            box-shadow: 0 0 0 1px var(--border-color);
+            border: 2px solid rgba(79,70,229,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
 
         .avatar-placeholder {
-            width: 34px;
-            height: 34px;
+            width: 36px; height: 36px;
             border-radius: 50%;
-            background: #e8f0fe;
-            color: var(--coursera-blue);
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 16px;
+            font-size: 15px;
         }
 
-        /* Footer Improvements */
-        .footer-modern {
-            background: #fff;
-            border-top: 1px solid var(--border-color);
-            padding: 64px 0 32px;
+        /* Dropdown polish */
+        .dropdown-menu {
+            border: 1px solid #E5E7EB;
+            border-radius: 12px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            padding: 8px;
+            margin-top: 8px;
+        }
+        .dropdown-menu > li > a {
+            border-radius: 8px;
+            padding: 9px 14px;
+            font-size: 14px;
             color: var(--text-dark);
+            transition: background 0.2s;
+        }
+        .dropdown-menu > li > a:hover {
+            background: rgba(79,70,229,0.07);
+            color: var(--lp-primary);
+        }
+
+        /* Mobile nav hamburger */
+        .mobile-toggle {
+            display: none;
+            background: none;
+            border: 1.5px solid #E5E7EB;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            color: var(--text-dark);
+            font-size: 16px;
+            transition: all 0.2s;
+        }
+        .mobile-toggle:hover {
+            border-color: var(--lp-primary);
+            color: var(--lp-primary);
+        }
+
+        /* ============================================
+           FOOTER — MODERN DARK
+           ============================================ */
+        .footer-modern {
+            background: #0F0C29;
+            border-top: 3px solid transparent;
+            border-image: linear-gradient(90deg, #4F46E5, #7C3AED, #06B6D4) 1;
+            padding: 72px 0 32px;
+            color: rgba(255,255,255,0.7);
         }
 
         .footer-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: 48px;
-            margin-bottom: 48px;
+            grid-template-columns: 2.2fr 1fr 1fr;
+            gap: 56px;
+            margin-bottom: 56px;
         }
 
-        .footer-brand h5 {
-            font-weight: 700;
+        .footer-brand img {
+            height: 34px; width: auto;
             margin-bottom: 16px;
+            filter: brightness(0) invert(1);
+        }
+        .footer-brand h5 {
+            font-weight: 800;
+            color: #fff;
+            font-size: 1.2rem;
+            margin-bottom: 12px;
+        }
+        .footer-brand p {
+            font-size: 14px;
+            line-height: 1.7;
+            color: rgba(255,255,255,0.55);
+            margin-bottom: 20px;
+            max-width: 300px;
+        }
+        .footer-contact span {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 13.5px;
+            color: rgba(255,255,255,0.6);
+            margin-bottom: 10px;
+        }
+        .footer-contact i {
+            width: 28px; height: 28px;
+            background: rgba(79,70,229,0.3);
+            border-radius: 6px;
+            display: flex; align-items: center; justify-content: center;
+            color: #a5b4fc;
+            font-size: 12px;
+            flex-shrink: 0;
         }
 
-        .footer-links h6,
-        .footer-social h6 {
+        .footer-links h6, .footer-social h6 {
             font-weight: 700;
             margin-bottom: 20px;
             text-transform: uppercase;
-            font-size: 13px;
-            letter-spacing: 1px;
+            font-size: 11px;
+            letter-spacing: 2px;
+            color: rgba(255,255,255,0.4);
         }
 
         .footer-links ul {
             list-style: none;
-            padding: 0;
+            padding: 0; margin: 0;
         }
-
-        .footer-links li {
-            margin-bottom: 12px;
-        }
-
+        .footer-links li { margin-bottom: 14px; }
         .footer-links a {
-            color: var(--text-muted);
+            color: rgba(255,255,255,0.6);
             text-decoration: none;
             font-size: 14px;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .footer-links a:hover {
+            color: #a5b4fc;
+            transform: translateX(4px);
         }
 
-        .footer-links a:hover {
-            color: var(--coursera-blue);
-            text-decoration: underline;
+        .social-icons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .social-icons a {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            color: rgba(255,255,255,0.6);
+            text-decoration: none;
+            font-size: 14px;
+            transition: all 0.2s;
+        }
+        .social-icons a .s-icon {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            background: rgba(255,255,255,0.08);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+        .social-icons a:hover { color: #fff; }
+        .social-icons a:hover .s-icon {
+            background: linear-gradient(135deg, #4F46E5, #7C3AED);
+            transform: scale(1.1);
         }
 
         .footer-bottom {
-            border-top: 1px solid var(--border-color);
-            padding-top: 32px;
-            text-align: center;
-            color: var(--text-muted);
+            border-top: 1px solid rgba(255,255,255,0.08);
+            padding-top: 28px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .footer-bottom p {
+            color: rgba(255,255,255,0.35);
             font-size: 13px;
+            margin: 0;
+        }
+        .footer-bottom-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(79,70,229,0.2);
+            border: 1px solid rgba(79,70,229,0.3);
+            color: #a5b4fc;
+            font-size: 12px;
+            font-weight: 600;
+            padding: 4px 14px;
+            border-radius: 50px;
         }
 
-        .social-icons a {
-            color: var(--text-muted);
-            font-size: 20px;
-            margin-right: 20px;
-            transition: color 0.2s;
-        }
-
-        .social-icons a:hover {
-            color: var(--coursera-blue);
-        }
-
-        /* Desktop/Mobile handling */
+        /* ============================================
+           RESPONSIVE HEADER
+           ============================================ */
         @media (max-width: 991px) {
-            .navbar-collapse {
-                background: #fff;
-                position: absolute;
-                top: 72px;
-                left: 0;
-                right: 0;
-                padding: 20px;
-                box-shadow: var(--shadow);
-            }
-
-            .nav-main>ul {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .nav-main>ul>li {
-                margin: 10px 0;
-            }
+            .header-search { max-width: 300px; }
         }
+        @media (max-width: 768px) {
+            #header { height: auto; padding: 12px 0; }
+            .header-left { gap: 12px; }
+            .header-links { display: none; }
+            .header-search { display: none; }
+            .mobile-toggle { display: flex; }
+            .footer-grid { grid-template-columns: 1fr; gap: 36px; }
+            .footer-bottom { flex-direction: column; text-align: center; }
+        }
+        @media (max-width: 480px) {
+            .header-right .btn-login { display: none; }
+        }
+
+        /* ============================================
+           SECTION UTILITY
+           ============================================ */
+        .section-padding { padding: 80px 0; }
     </style>
 
     <!-- Header Begins -->
@@ -407,57 +500,64 @@ if (
         <header id="header">
             <div class="container">
                 <div class="header-left">
+                    <!-- Logo -->
                     <div class="logo">
                         <a href="<?php echo site_url(); ?>">
-                            <img src="<?php echo base_url('/upload/institute/logo.png') ?>" alt="Logo">
+                            <img src="<?php echo base_url('/upload/institute/logo.png') ?>" alt="<?php echo $this->settings->site_name; ?> Logo">
                         </a>
                     </div>
 
-                    <div class="header-links">
-                        <a href="<?php echo site_url('courses') ?>"> Courses </a>
+                    <!-- Nav Links -->
+                    <nav class="header-links" aria-label="Main navigation">
+                        <a href="<?php echo site_url('courses') ?>"><i class="fa fa-graduation-cap"></i> Courses</a>
+                        <?php if (!empty($this->settings->events_enabled)): ?>
+                        <a href="<?php echo site_url('events') ?>">Events</a>
+                        <?php endif; ?>
+                        <a href="<?php echo site_url('cms/about-us') ?>">About</a>
+                        <a href="<?php echo site_url('contact') ?>">Contact</a>
+                    </nav>
 
-                    </div>
-
-                    <form class="header-search" action="<?php echo site_url('courses') ?>" method="get">
-                        <input type="text" name="search" placeholder="What do you want to learn?">
-                        <button type="submit">
+                    <!-- Search -->
+                    <form class="header-search" action="<?php echo site_url('courses') ?>" method="get" role="search">
+                        <input type="text" name="search" placeholder="Search courses..." aria-label="Search courses">
+                        <button type="submit" aria-label="Search">
                             <i class="fa fa-search"></i>
                         </button>
                     </form>
                 </div>
 
+                <!-- Mobile Toggle -->
+                <button class="mobile-toggle" id="mobileMenuToggle" aria-label="Toggle menu" aria-expanded="false">
+                    <i class="fa fa-bars"></i>
+                </button>
+
                 <div class="header-right">
                     <?php if (!$this->ion_auth->logged_in()): ?>
                         <a href="<?php echo site_url('auth/login') ?>" class="btn-login">Log In</a>
-                        <a href="<?php echo site_url('auth/register') ?>" class="btn-join">Sign Up</a>
+                        <a href="<?php echo site_url('auth/register') ?>" class="btn-join">Get Started</a>
                     <?php else: ?>
-                        <div class="dropdown">
+                        <div class="dropdown user-nav">
                             <a class="dropdown-toggle" id="userMenu" data-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="true" style="cursor: pointer;">
-                                <span class="header-username">
-                                    <?php echo $this->session->userdata('logged_in')['username']; ?>
-                                </span>
+                                aria-expanded="false" style="cursor: pointer; text-decoration:none; display:flex; align-items:center; gap:10px;">
                                 <?php if (!empty($this->session->userdata('logged_in')['image'])): ?>
-                                    <div class="header-avatar">
-                                        <img src="<?php echo base_url('upload/users/images/' . $this->session->userdata('logged_in')['image']); ?>"
-                                            alt="Profile" style="
-    width: 100%;
-">
-                                    </div>
+                                    <img class="header-avatar"
+                                        src="<?php echo base_url('upload/users/images/' . $this->session->userdata('logged_in')['image']); ?>"
+                                        alt="Profile">
                                 <?php else: ?>
                                     <div class="avatar-placeholder">
                                         <i class="fa fa-user"></i>
                                     </div>
                                 <?php endif; ?>
+                                <span style="font-size:13.5px; font-weight:600; color:var(--text-dark);">
+                                    <?php echo $this->session->userdata('logged_in')['username']; ?>
+                                </span>
+                                <i class="fa fa-chevron-down" style="font-size:10px; color:var(--text-muted);"></i>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
-                                <li><a href="<?php echo site_url('profile') ?>"><i class="fa fa-user-circle"></i> Profile</a>
-                                </li>
-                                <li><a href="<?php echo site_url('my_courses') ?>"><i class="fa fa-book"></i> My Learning</a>
-                                </li>
-                                <li role="separator" class="divider"></li>
-                                <li><a href="<?php echo site_url('auth/logout') ?>"><i class="fa fa-sign-out"></i> Logout</a>
-                                </li>
+                                <li><a href="<?php echo site_url('profile') ?>"><i class="fa fa-user-circle"></i> My Profile</a></li>
+                                <li><a href="<?php echo site_url('my_courses') ?>"><i class="fa fa-book"></i> My Learning</a></li>
+                                <li role="separator" class="divider" style="border-color:#F3F4F6;"></li>
+                                <li><a href="<?php echo site_url('auth/logout') ?>" style="color:#EF4444 !important;"><i class="fa fa-sign-out"></i> Logout</a></li>
                             </ul>
                         </div>
                     <?php endif; ?>
@@ -522,45 +622,70 @@ if (
         <footer id="footer" class="footer-modern">
             <div class="container">
                 <div class="footer-grid">
+                    <!-- Brand Column -->
                     <div class="footer-brand">
+                        <img src="<?php echo base_url('/upload/institute/logo.png') ?>" alt="<?php echo $this->settings->site_name; ?>">
                         <h5><?php echo $this->settings->site_name ?></h5>
-                        <p><?php echo $this->settings->institute_address ?></p>
+                        <p><?php echo !empty($this->settings->institute_address) ? $this->settings->institute_address : 'Empowering learners with world-class education and flexible learning paths.'; ?></p>
                         <div class="footer-contact">
-                            <span style="display:block; margin-bottom: 8px;"><i class="fa fa-phone"></i>
-                                <?php echo $this->settings->institute_phone; ?></span>
-                            <span style="display:block;"><i class="fa fa-envelope"></i>
-                                <?php echo $this->settings->site_email; ?></span>
+                            <?php if (!empty($this->settings->institute_phone)): ?>
+                            <span>
+                                <i class="fa fa-phone"></i>
+                                <?php echo $this->settings->institute_phone; ?>
+                            </span>
+                            <?php endif; ?>
+                            <?php if (!empty($this->settings->site_email)): ?>
+                            <span>
+                                <i class="fa fa-envelope"></i>
+                                <?php echo $this->settings->site_email; ?>
+                            </span>
+                            <?php endif; ?>
                         </div>
                     </div>
 
+                    <!-- Navigation -->
                     <div class="footer-links">
-                        <h6>Navigation</h6>
+                        <h6>Explore</h6>
                         <ul>
-                            <li><a href="<?php echo site_url('courses'); ?>">Browse Courses</a></li>
-                            <li><a href="<?php echo site_url('cms/about-us'); ?>">About Zeyobron</a></li>
-                            <li><a href="<?php echo site_url('contact'); ?>">Contact Support</a></li>
+                            <li><a href="<?php echo site_url('courses'); ?>"><i class="fa fa-chevron-right" style="font-size:10px;"></i> Browse Courses</a></li>
+                            <li><a href="<?php echo site_url('cms/about-us'); ?>"><i class="fa fa-chevron-right" style="font-size:10px;"></i> About Us</a></li>
+                            <li><a href="<?php echo site_url('contact'); ?>"><i class="fa fa-chevron-right" style="font-size:10px;"></i> Contact Support</a></li>
+                            <li><a href="<?php echo site_url('auth/register'); ?>"><i class="fa fa-chevron-right" style="font-size:10px;"></i> Get Started Free</a></li>
                         </ul>
                     </div>
 
+                    <!-- Social -->
                     <div class="footer-social">
-                        <h6>Follow Our Journey</h6>
+                        <h6>Follow Us</h6>
                         <div class="social-icons">
-                            <?php if ($this->settings->social_facebook): ?><a
-                                    href="<?php echo $this->settings->social_facebook ?>" target="_blank"><i
-                                        class="fa fa-facebook"></i></a><?php endif; ?>
-                            <?php if ($this->settings->social_twitter): ?><a
-                                    href="<?php echo $this->settings->social_twitter ?>" target="_blank"><i
-                                        class="fa fa-twitter"></i></a><?php endif; ?>
-                            <?php if ($this->settings->social_linkedin): ?><a
-                                    href="<?php echo $this->settings->social_linkedin ?>" target="_blank"><i
-                                        class="fa fa-linkedin"></i></a><?php endif; ?>
+                            <?php if (!empty($this->settings->social_facebook)): ?>
+                            <a href="<?php echo $this->settings->social_facebook ?>" target="_blank" rel="noopener">
+                                <span class="s-icon"><i class="fa fa-facebook"></i></span>
+                                <span>Facebook</span>
+                            </a>
+                            <?php endif; ?>
+                            <?php if (!empty($this->settings->social_twitter)): ?>
+                            <a href="<?php echo $this->settings->social_twitter ?>" target="_blank" rel="noopener">
+                                <span class="s-icon"><i class="fa fa-twitter"></i></span>
+                                <span>Twitter / X</span>
+                            </a>
+                            <?php endif; ?>
+                            <?php if (!empty($this->settings->social_linkedin)): ?>
+                            <a href="<?php echo $this->settings->social_linkedin ?>" target="_blank" rel="noopener">
+                                <span class="s-icon"><i class="fa fa-linkedin"></i></span>
+                                <span>LinkedIn</span>
+                            </a>
+                            <?php endif; ?>
                         </div>
                     </div>
                 </div>
 
                 <div class="footer-bottom">
-                    <p>&copy; <?php echo date('Y') ?>     <?php echo $this->settings->site_name ?>. Empowering learners
-                        worldwide.</p>
+                    <p>&copy; <?php echo date('Y'); ?> <?php echo $this->settings->site_name; ?>. All rights reserved.</p>
+                    <div class="footer-bottom-badge">
+                        <i class="fa fa-heart" style="color:#F472B6;"></i>
+                        Built for Learners
+                    </div>
                 </div>
             </div>
         </footer>

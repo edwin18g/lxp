@@ -28,11 +28,14 @@ h4 {
 }
 
 #header .logo img {
-  top: auto;
+  /* Reset legacy forced sizing — let template.php control this */
+  width: auto !important;
+  height: 32px !important;
+  max-width: none !important;
+  top: auto !important;
+  position: static !important;
   display: inline-block;
-  width: 143px !important;
-  height: auto !important;
-  top: 28px;
+  vertical-align: middle;
 }
 
 /*Institute Name*/
@@ -111,8 +114,9 @@ h4 {
 
 /*header*/
 #header .header-top {
-  min-height: 40px;
-  margin-top: -16px !important;
+  /* Reset legacy negative margin that pushed header content out of place */
+  min-height: auto;
+  margin-top: 0 !important;
 }
 
 /*Helper Text*/
@@ -210,16 +214,16 @@ h4 {
 }
 
 #header.default-header .logo {
-  padding: 16px 0;
+  padding: 0;
 }
 
 body.sticky-menu-active #header.default-header.colored .logo {
-  padding-top: 12px;
+  padding-top: 0;
 }
 
 body.sticky-menu-active #header.single-menu .logo,
 body.sticky-menu-active #header.single-menu.valign .logo {
-  padding-top: 22px;
+  padding-top: 0;
 }
 
 a.a-hover {
@@ -800,4 +804,91 @@ small.small {
 
 .ls-2 {
   letter-spacing: 2px;
+}
+
+/* ======================================================
+   GLOBAL SITE-WIDE BALANCED TYPOGRAPHY (TUNED ACCORDING TO PREFERENCE)
+   ====================================================== */
+html {
+  font-size: 16.5px !important;
+}
+
+body {
+  font-size: 1.05rem !important; /* ~17.3px comfortable base font size */
+  line-height: 1.65 !important;
+  color: #1e293b;
+}
+
+p, li, span, td, th, label, input, select, textarea, button, a {
+  font-size: inherit;
+}
+
+/* Headings scale */
+h1, .h1 {
+  font-size: 2.35rem !important;
+  font-weight: 800 !important;
+  line-height: 1.2 !important;
+}
+
+h2, .h2 {
+  font-size: 1.95rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25 !important;
+}
+
+h3, .h3 {
+  font-size: 1.6rem !important;
+  font-weight: 700 !important;
+}
+
+h4, .h4 {
+  font-size: 1.35rem !important;
+  font-weight: 700 !important;
+}
+
+h5, .h5 {
+  font-size: 1.18rem !important;
+  font-weight: 600 !important;
+}
+
+h6, .h6 {
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+}
+
+/* Global Navigation & Menu Links */
+#header nav.mega-menu ul.nav-main > li > a {
+  font-size: 1.05rem !important;
+  font-weight: 600 !important;
+  padding: 10px 15px !important;
+}
+
+#header .header-btn, #header .btn {
+  font-size: 1.02rem !important;
+  padding: 9px 18px !important;
+}
+
+/* Course cards & titles */
+.course-title, .card-title, .title {
+  font-size: 1.25rem !important;
+  font-weight: 700 !important;
+}
+
+.course-desc, .card-text, .description {
+  font-size: 1.02rem !important;
+  line-height: 1.6 !important;
+}
+
+/* Footer links and typography */
+footer, .footer-modern {
+  font-size: 1.02rem !important;
+}
+
+footer h5, footer h6 {
+  font-size: 1.18rem !important;
+  font-weight: 700 !important;
+}
+
+footer p, footer li a {
+  font-size: 0.98rem !important;
 }
