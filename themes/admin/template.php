@@ -214,6 +214,96 @@
     </div>
   </nav>
   <!-- #Top Bar -->
+
+  <!-- ======================================================
+       PAGE TAB BAR — Horizontal submenu tabs per product section
+       ====================================================== -->
+  <div class="page-tab-bar" id="pageTabBar">
+
+    <!-- LMS Tabs -->
+    <div class="page-tab-group" id="tabs-lms">
+      <a class="page-tab-item <?php echo (uri_string() == 'admin' || uri_string() == 'admin/dashboard') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('/admin'); ?>">
+        <i class="material-icons">dashboard</i> Dashboard
+      </a>
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/categories') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('admin/categories'); ?>">
+        <i class="material-icons">device_hub</i> <?php echo lang('menu_course_categories'); ?>
+      </a>
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/courses') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('admin/courses'); ?>">
+        <i class="material-icons">account_balance</i> <?php echo lang('menu_courses'); ?>
+      </a>
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/batches') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('admin/batches'); ?>">
+        <i class="material-icons">event_note</i> <?php echo lang('menu_batches'); ?>
+      </a>
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/enrolled_users') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('admin/enrolled_users'); ?>">
+        <i class="material-icons">class</i> Enrolled Users
+      </a>
+    </div>
+
+    <!-- Manage / Users Tabs -->
+    <div class="page-tab-group" id="tabs-users">
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/users') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('admin/users'); ?>">
+        <i class="material-icons">account_circle</i> Users
+      </a>
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/groups') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('/admin/groups'); ?>">
+        <i class="material-icons">group_work</i> User Roles
+      </a>
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/manageacl') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('/admin/manageacl'); ?>">
+        <i class="material-icons">security</i> Permissions
+      </a>
+    </div>
+
+    <!-- CMS Tabs -->
+    <div class="page-tab-group" id="tabs-cms">
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/contacts') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('/admin/contacts'); ?>">
+        <i class="material-icons">inbox</i> <?php echo lang('menu_contacts'); ?>
+      </a>
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/testimonials') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('/admin/testimonials'); ?>">
+        <i class="material-icons">insert_comment</i> <?php echo lang('menu_testimonials'); ?>
+      </a>
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/sliders') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('/admin/sliders'); ?>">
+        <i class="material-icons">view_carousel</i> Sliders
+      </a>
+      <!-- Pages & Menus dropdown -->
+      <div class="page-tab-dropdown">
+        <a class="page-tab-item <?php echo (strstr(uri_string(), 'admin/pages') || strstr(uri_string(), 'admin/menus') || strstr(uri_string(), 'admin/faqs')) ? 'is-active' : ''; ?>">
+          <i class="material-icons">developer_board</i> Pages &amp; Menus <i class="material-icons" style="font-size:14px;margin-left:2px;">expand_more</i>
+        </a>
+        <div class="page-tab-submenu">
+          <a href="<?php echo site_url('/admin/pages'); ?>" class="<?php echo strstr(uri_string(), 'admin/pages') ? 'is-active' : ''; ?>">
+            <i class="material-icons" style="font-size:16px;">pages</i> <?php echo lang('menu_pages'); ?>
+          </a>
+          <a href="<?php echo site_url('/admin/menus'); ?>" class="<?php echo strstr(uri_string(), 'admin/menus') ? 'is-active' : ''; ?>">
+            <i class="material-icons" style="font-size:16px;">menu</i> <?php echo lang('menu_menus'); ?>
+          </a>
+          <a href="<?php echo site_url('/admin/faqs'); ?>" class="<?php echo strstr(uri_string(), 'admin/faqs') ? 'is-active' : ''; ?>">
+            <i class="material-icons" style="font-size:16px;">help_outline</i> <?php echo lang('menu_faqs'); ?>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- System Tabs -->
+    <div class="page-tab-group" id="tabs-system">
+      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/settings') ? 'is-active' : ''; ?>"
+         href="<?php echo site_url('/admin/settings'); ?>">
+        <i class="material-icons">settings</i> <?php echo lang('menu_settings'); ?>
+      </a>
+    </div>
+
+  </div>
+  <!-- #END# Page Tab Bar -->
+
   <section>
     <!-- Left Sidebar -->
     <aside id="leftsidebar" class="sidebar">
@@ -250,139 +340,8 @@
         </div>
       </div>
 
-      <!-- Menu -->
-      <div class="menu">
-        <ul class="list" id="menu-lms">
-          <!-- LMS Section -->
-          <li class="header">LMS</li>
-
-          <!-- Dashboard -->
-          <li class="<?php echo (uri_string() == 'admin' OR uri_string() == 'admin/dashboard') ? 'active' : ''; ?>">
-            <a href="<?php echo site_url('/admin'); ?>">
-              <i class="material-icons">dashboard</i>
-              <span><?php echo lang('menu_dashboard'); ?></span>
-            </a>
-          </li>
-
-          <!-- Class_categories -->
-          <li class="<?php echo (strstr(uri_string(), 'admin/categories')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('admin/categories'); ?>">
-              <i class="material-icons">device_hub</i>
-              <span><?php echo lang('menu_course_categories'); ?></span>
-            </a>
-          </li>
-
-          <!-- Courses -->
-          <li class="<?php echo (strstr(uri_string(), 'admin/courses')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('admin/courses'); ?>">
-              <i class="material-icons">account_balance</i>
-              <span><?php echo lang('menu_courses'); ?></span>
-            </a>
-          </li>
-
-          <!-- Batches -->
-          <li class="<?php echo (strstr(uri_string(), 'admin/batches')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('admin/batches'); ?>">
-              <i class="material-icons">event_note</i>
-              <span><?php echo lang('menu_batches'); ?></span>
-            </a>
-          </li>
-
-          <!-- Enrolled Users (Moved to LMS) -->
-          <li class="<?php echo (strstr(uri_string(), 'admin/enrolled_users')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('admin/enrolled_users'); ?>">
-              <i class="material-icons">class</i>
-              <span>Enrolled Users</span>
-            </a>
-          </li>
-        </ul>
-
-        <ul class="list" id="menu-users" style="display:none;">
-          <!-- User Roles Management (Renamed) -->
-          <li class="header">USER ROLES MANAGEMENT</li>
-
-          <!-- Learners -->
-          <li class="<?php echo (strstr(uri_string(), 'admin/users')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('admin/users'); ?>">
-              <i class="material-icons">account_circle</i>
-              <span>Users</span>
-            </a>
-          </li>
-
-          <!-- User Roles (Groups) -->
-          <li class="<?php echo (strstr(uri_string(), 'admin/groups')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('/admin/groups'); ?>">
-              <i class="material-icons">group_work</i>
-              <span>User Roles</span>
-            </a>
-          </li>
-
-          <!-- Permissions (ACL) -->
-          <li class="<?php echo (strstr(uri_string(), 'admin/manageacl')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('/admin/manageacl'); ?>">
-              <i class="material-icons">security</i>
-              <span>Permissions</span>
-            </a>
-          </li>
-        </ul>
-
-        <ul class="list" id="menu-cms" style="display:none;">
-          <li class="header">CMS</li>
-          <li class="<?php echo (strstr(uri_string(), 'admin/contacts')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('/admin/contacts'); ?>">
-              <i class="material-icons">inbox</i>
-              <span><?php echo lang('menu_contacts'); ?></span>
-            </a>
-          </li>
-          <li class="<?php echo (strstr(uri_string(), 'admin/testimonials')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('/admin/testimonials'); ?>">
-              <i class="material-icons">insert_comment</i>
-              <span><?php echo lang('menu_testimonials'); ?></span>
-            </a>
-          </li>
-          <li class="<?php echo (strstr(uri_string(), 'admin/sliders')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('/admin/sliders'); ?>">
-              <i class="material-icons">view_carousel</i>
-              <span>Sliders</span>
-            </a>
-          </li>
-          <li
-            class="<?php echo (strstr(uri_string(), 'admin/pages') || strstr(uri_string(), 'admin/menus') || strstr(uri_string(), 'admin/faqs')) ? ' active' : ''; ?>">
-            <a href="#" class="menu-toggle">
-              <i class="material-icons">developer_board</i>
-              <span>Pages & Menus</span>
-            </a>
-            <ul class="ml-menu">
-              <li class="<?php echo (strstr(uri_string(), 'admin/pages')) ? ' active' : ''; ?>">
-                <a href="<?php echo site_url('/admin/pages'); ?>">
-                  <?php echo lang('menu_pages'); ?>
-                </a>
-              </li>
-              <li class="<?php echo (strstr(uri_string(), 'admin/menus')) ? ' active' : ''; ?>">
-                <a href="<?php echo site_url('/admin/menus'); ?>">
-                  <?php echo lang('menu_menus'); ?>
-                </a>
-              </li>
-              <li class="<?php echo (strstr(uri_string(), 'admin/faqs')) ? ' active' : ''; ?>">
-                <a href="<?php echo site_url('/admin/faqs'); ?>">
-                  <?php echo lang('menu_faqs'); ?>
-                </a>
-              </li>
-            </ul>
-          </li>
-        </ul>
-
-        <ul class="list" id="menu-system" style="display:none;">
-          <li class="header">SYSTEM</li>
-          <li class="<?php echo (strstr(uri_string(), 'admin/settings')) ? ' active' : ''; ?>">
-            <a href="<?php echo site_url('/admin/settings'); ?>">
-              <i class="material-icons">settings</i>
-              <span><?php echo lang('menu_settings'); ?></span>
-            </a>
-          </li>
-        </ul>
-      </div>
       <!-- #Menu -->
+
       <!-- Footer -->
       <div class="legal">
         <div class="version">
@@ -514,6 +473,10 @@
           $activeList.slimscroll({ scrollTo: '0px' });
         }
       });
+
+      // Sync page tab bar with active product section
+      $('.page-tab-group').removeClass('active');
+      $('#tabs-' + productName).addClass('active');
 
       if (typeof (Storage) !== "undefined") {
         localStorage.setItem("activeProduct", productName);

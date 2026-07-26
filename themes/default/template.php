@@ -549,7 +549,7 @@ if (
                                     </div>
                                 <?php endif; ?>
                                 <span style="font-size:13.5px; font-weight:600; color:var(--text-dark);">
-                                    <?php echo $this->session->userdata('logged_in')['username']; ?>
+                                    <?php echo $this->session->userdata('logged_in')['username'] ?? ''; ?>
                                 </span>
                                 <i class="fa fa-chevron-down" style="font-size:10px; color:var(--text-muted);"></i>
                             </a>
