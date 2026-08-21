@@ -781,6 +781,22 @@ if (
         return $s;
     }
     ?>
+    <script>
+        (function() {
+            var key = 'zeyo_device_uuid';
+            var uuid = localStorage.getItem(key);
+            if (!uuid) {
+                var match = document.cookie.match(new RegExp('(?:^|; )' + key + '=([^;]+)'));
+                if (match) {
+                    uuid = decodeURIComponent(match[1]);
+                } else {
+                    uuid = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'dev_' + Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
+                }
+                try { localStorage.setItem(key, uuid); } catch(e){}
+            }
+            document.cookie = key + '=' + encodeURIComponent(uuid) + '; path=/; max-age=315360000; SameSite=Lax';
+        })();
+    </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/ClientJS/0.1.11/client.min.js"></script>
     <script>
         var client = new ClientJS(); // Create A New Client Object

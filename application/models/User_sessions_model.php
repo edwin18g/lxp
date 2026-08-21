@@ -22,6 +22,9 @@ class User_sessions_model extends CI_Model
     /**
      * Ensure the user_sessions table exists in DB (Auto-migration for prod)
      */
+    /**
+     * Ensure the user_sessions table exists in DB (Auto-migration for prod)
+     */
     private function _ensure_table_exists()
     {
         if (!$this->db->table_exists($this->table)) {
@@ -29,6 +32,7 @@ class User_sessions_model extends CI_Model
               `id` int unsigned NOT NULL AUTO_INCREMENT,
               `user_id` int unsigned NOT NULL,
               `session_id` varchar(128) NOT NULL,
+              `device_uuid` varchar(128) DEFAULT NULL,
               `ip_address` varchar(45) NOT NULL,
               `user_agent` varchar(512) NOT NULL,
               `device_type` varchar(32) DEFAULT NULL,
@@ -41,9 +45,14 @@ class User_sessions_model extends CI_Model
               PRIMARY KEY (`id`),
               KEY `idx_user_sessions_user_id` (`user_id`),
               KEY `idx_user_sessions_session_id` (`session_id`),
+              KEY `idx_user_sessions_device_uuid` (`device_uuid`),
               KEY `idx_user_sessions_active` (`user_id`,`is_active`)
             ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
             $this->db->query($sql);
+        } else {
+            if (!$this->db->field_exists('device_uuid', $this->table)) {
+                $this->db->query("ALTER TABLE `{$this->table}` ADD COLUMN `device_uuid` VARCHAR(128) DEFAULT NULL AFTER `session_id`, ADD INDEX `idx_user_sessions_device_uuid` (`device_uuid`)");
+            }
         }
     }
 
@@ -58,12 +67,14 @@ class User_sessions_model extends CI_Model
         $user_agent = $this->input->server('HTTP_USER_AGENT');
         $ip_address = $this->input->ip_address();
         $session_id = session_id();
+        $device_uuid = $this->input->cookie('zeyo_device_uuid') ? $this->input->cookie('zeyo_device_uuid') : ($this->input->server('HTTP_X_DEVICE_UUID') ? $this->input->server('HTTP_X_DEVICE_UUID') : null);
 
         $ua_info = $this->parse_user_agent($user_agent);
 
         $data = array(
             'user_id'       => $user_id,
             'session_id'    => $session_id,
+            'device_uuid'   => $device_uuid,
             'ip_address'    => $ip_address,
             'user_agent'    => $user_agent,
             'device_type'   => $ua_info['device_type'],
@@ -95,12 +106,14 @@ class User_sessions_model extends CI_Model
             return array();
         }
 
-        // Subquery to get max session record ID per unique physical device fingerprint (IP + Browser + OS + Device Type)
+        // Subquery to get max session record ID per unique physical device fingerprint (Device UUID OR Browser + OS + Device Type, WITHOUT IP)
+        $device_key_expr = "COALESCE(NULLIF(device_uuid, ''), CONCAT(IFNULL(browser,''), '_', IFNULL(os,''), '_', IFNULL(device_type,'')))";
+
         $subquery = $this->db->select('MAX(id) as max_id')
                              ->from($this->table)
                              ->where('user_id', $user_id)
                              ->where('is_active', 1)
-                             ->group_by(array('ip_address', 'browser', 'os', 'device_type'))
+                             ->group_by($device_key_expr, FALSE)
                              ->get_compiled_select();
 
         // Main query to get full rows for distinct physical device sessions
@@ -285,6 +298,8 @@ class User_sessions_model extends CI_Model
      */
     private function _get_user_grouped_sessions_query($search = '', $status_filter = 'all', $role_filter = 'all')
     {
+        $device_key_expr = "COALESCE(NULLIF(user_sessions.device_uuid, ''), CONCAT(IFNULL(user_sessions.browser,''), '_', IFNULL(user_sessions.os,''), '_', IFNULL(user_sessions.device_type,'')))";
+
         $this->db->select('
             users.id as user_id,
             users.first_name,
@@ -293,10 +308,10 @@ class User_sessions_model extends CI_Model
             users.image,
             users.device_locked,
             users.role,
-            COUNT(DISTINCT CASE WHEN user_sessions.is_active = 1 THEN CONCAT(IFNULL(user_sessions.ip_address,""), "_", IFNULL(user_sessions.browser,""), "_", IFNULL(user_sessions.os,""), "_", IFNULL(user_sessions.device_type,"")) END) as active_count,
+            COUNT(DISTINCT CASE WHEN user_sessions.is_active = 1 THEN ' . $device_key_expr . ' END) as active_count,
             COUNT(user_sessions.id) as total_count,
             MAX(user_sessions.last_activity) as max_last_activity
-        ');
+        ', FALSE);
         $this->db->from($this->table);
         $this->db->join('users', 'users.id = user_sessions.user_id', 'inner');
 
@@ -364,7 +379,8 @@ class User_sessions_model extends CI_Model
 
     public function count_multidevice_users()
     {
-        $res = $this->db->query("SELECT COUNT(*) as total FROM (SELECT user_id FROM user_sessions WHERE is_active = 1 GROUP BY user_id HAVING COUNT(DISTINCT CONCAT(IFNULL(ip_address,''), '_', IFNULL(browser,''), '_', IFNULL(os,''), '_', IFNULL(device_type,''))) > 1) as tmp")->row();
+        $device_key_expr = "COALESCE(NULLIF(device_uuid, ''), CONCAT(IFNULL(browser,''), '_', IFNULL(os,''), '_', IFNULL(device_type,'')))";
+        $res = $this->db->query("SELECT COUNT(*) as total FROM (SELECT user_id FROM user_sessions WHERE is_active = 1 GROUP BY user_id HAVING COUNT(DISTINCT {$device_key_expr}) > 1) as tmp")->row();
         return $res ? $res->total : 0;
     }
 

@@ -61,6 +61,21 @@ class Settings_model extends CI_Model {
     private function _ensure_custom_settings()
     {
         $defaults = array(
+            'device_lock_enabled' => array(
+                'setting_type' => 'home',
+                'name' => 'device_lock_enabled',
+                'input_type' => 'dropdown',
+                'options' => "0|Disabled\n1|Enabled",
+                'is_numeric' => '1',
+                'show_editor' => '0',
+                'input_size' => 'small',
+                'translate' => '0',
+                'help_text' => 'Enable or disable automatic device locking when a user logs in from multiple devices',
+                'validation' => 'trim',
+                'sort_order' => 118,
+                'label' => 'Device Lock Security Feature Enabled',
+                'value' => '1',
+            ),
             'top_alert_enabled' => array(
                 'setting_type' => 'home',
                 'name' => 'top_alert_enabled',

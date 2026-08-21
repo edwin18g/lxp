@@ -70,7 +70,8 @@ class MY_Controller extends CI_Controller
         }
 
         // --- Learning Lock Logic ---
-        if ($this->user) {
+        $lock_feature_enabled = !isset($this->settings->device_lock_enabled) || $this->settings->device_lock_enabled == 1;
+        if ($this->user && $lock_feature_enabled) {
             // Check if device_locked is set in session or DB
             // Note: Fetch from DB to ensure it's not stale
             $user_db = $this->db->select('device_locked, role, last_session_id')->get_where('users', array('id' => $this->user['id']))->row();
