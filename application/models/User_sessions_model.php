@@ -95,15 +95,15 @@ class User_sessions_model extends CI_Model
             return array();
         }
 
-        // Subquery to get max session record ID per session_id
+        // Subquery to get max session record ID per unique physical device fingerprint (IP + Browser + OS + Device Type)
         $subquery = $this->db->select('MAX(id) as max_id')
                              ->from($this->table)
                              ->where('user_id', $user_id)
                              ->where('is_active', 1)
-                             ->group_by('session_id')
+                             ->group_by(array('ip_address', 'browser', 'os', 'device_type'))
                              ->get_compiled_select();
 
-        // Main query to get full rows for distinct sessions
+        // Main query to get full rows for distinct physical device sessions
         $this->db->select('*')
                  ->from($this->table)
                  ->where("id IN ($subquery)", NULL, FALSE)
@@ -293,7 +293,7 @@ class User_sessions_model extends CI_Model
             users.image,
             users.device_locked,
             users.role,
-            COUNT(DISTINCT CASE WHEN user_sessions.is_active = 1 THEN user_sessions.session_id END) as active_count,
+            COUNT(DISTINCT CASE WHEN user_sessions.is_active = 1 THEN CONCAT(IFNULL(user_sessions.ip_address,""), "_", IFNULL(user_sessions.browser,""), "_", IFNULL(user_sessions.os,""), "_", IFNULL(user_sessions.device_type,"")) END) as active_count,
             COUNT(user_sessions.id) as total_count,
             MAX(user_sessions.last_activity) as max_last_activity
         ');
@@ -364,7 +364,7 @@ class User_sessions_model extends CI_Model
 
     public function count_multidevice_users()
     {
-        $res = $this->db->query("SELECT COUNT(*) as total FROM (SELECT user_id FROM user_sessions WHERE is_active = 1 GROUP BY user_id HAVING COUNT(DISTINCT session_id) > 1) as tmp")->row();
+        $res = $this->db->query("SELECT COUNT(*) as total FROM (SELECT user_id FROM user_sessions WHERE is_active = 1 GROUP BY user_id HAVING COUNT(DISTINCT CONCAT(IFNULL(ip_address,''), '_', IFNULL(browser,''), '_', IFNULL(os,''), '_', IFNULL(device_type,''))) > 1) as tmp")->row();
         return $res ? $res->total : 0;
     }
 
