@@ -1,9 +1,11 @@
 /* Premium Admin Theme - Zeyobron */
 
 :root {
-    --primary-color: #4f46e5; /* Electric Indigo */
+    --primary-color: #4f46e5;
+    /* Electric Indigo */
     --primary-hover: #4338ca;
-    --sidebar-bg: #0f172a; /* Dark Navy Slate */
+    --sidebar-bg: #0f172a;
+    /* Dark Navy Slate */
     --bg-color: #f8fafc;
     --card-bg: #ffffff;
     --text-color: #334155;
@@ -77,19 +79,19 @@ body {
 .nav-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 10px 14px;
-    border-radius: 10px;
+    gap: 14px;
+    padding: 11px 16px;
+    border-radius: 12px;
     color: #94a3b8 !important;
     font-weight: 600;
-    font-size: 0.88rem;
+    font-size: 1.5rem;
     text-decoration: none !important;
     transition: all 0.2s ease;
-    margin-bottom: 4px;
+    margin-bottom: 5px;
 }
 
 .nav-item i {
-    font-size: 20px;
+    font-size: 22px;
     color: #64748b;
     transition: color 0.2s ease;
 }
@@ -226,7 +228,8 @@ body {
     z-index: 10 !important;
     display: flex !important;
     flex-direction: column !important;
-    padding-top: 80px !important; /* Space for brand */
+    padding-top: 80px !important;
+    /* Space for brand */
     gap: 6px !important;
 }
 
@@ -528,11 +531,13 @@ section.content {
     section.content {
         margin-left: 0 !important;
     }
+
     .sidebar {
         width: 0 !important;
         overflow: hidden;
         transition: width 0.3s ease;
     }
+
     .sidebar .legal {
         display: none;
     }
@@ -1648,11 +1653,11 @@ body #userSidebar.right-sidebar.open {
     align-items: stretch;
 }
 
-.page-tab-dropdown > .page-tab-item {
+.page-tab-dropdown>.page-tab-item {
     margin: 8px 2px;
 }
 
-.page-tab-dropdown:hover > .page-tab-item {
+.page-tab-dropdown:hover>.page-tab-item {
     color: var(--primary-color);
     background: rgba(99, 102, 241, 0.06);
 }
@@ -1712,16 +1717,18 @@ body #userSidebar.right-sidebar.open {
 
 /* Adjust content area top offset to account for tab bar */
 section.content {
-    padding-top: 120px !important;
+    padding-top: 0 !important;
 }
 
 @media (max-width: 1170px) {
     .page-tab-bar {
         left: 0;
     }
+
     section.content {
         padding-top: 120px !important;
     }
+
     .product-item[data-tooltip]::before,
     .product-item[data-tooltip]::after {
         display: none !important;
@@ -1733,14 +1740,17 @@ section.content {
         height: 46px;
         padding: 0 10px;
     }
+
     .page-tab-item {
         padding: 0 12px;
         font-size: 12px;
         margin: 6px 1px;
     }
+
     .page-tab-item i.material-icons {
         font-size: 16px;
     }
+
     section.content {
         padding-top: 116px !important;
     }
