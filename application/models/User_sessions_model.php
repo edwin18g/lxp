@@ -16,6 +16,35 @@ class User_sessions_model extends CI_Model
     function __construct()
     {
         parent::__construct();
+        $this->_ensure_table_exists();
+    }
+
+    /**
+     * Ensure the user_sessions table exists in DB (Auto-migration for prod)
+     */
+    private function _ensure_table_exists()
+    {
+        if (!$this->db->table_exists($this->table)) {
+            $sql = "CREATE TABLE IF NOT EXISTS `{$this->table}` (
+              `id` int unsigned NOT NULL AUTO_INCREMENT,
+              `user_id` int unsigned NOT NULL,
+              `session_id` varchar(128) NOT NULL,
+              `ip_address` varchar(45) NOT NULL,
+              `user_agent` varchar(512) NOT NULL,
+              `device_type` varchar(32) DEFAULT NULL,
+              `browser` varchar(128) DEFAULT NULL,
+              `os` varchar(128) DEFAULT NULL,
+              `is_active` tinyint(1) NOT NULL DEFAULT '1',
+              `last_activity` int unsigned NOT NULL,
+              `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+              `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+              PRIMARY KEY (`id`),
+              KEY `idx_user_sessions_user_id` (`user_id`),
+              KEY `idx_user_sessions_session_id` (`session_id`),
+              KEY `idx_user_sessions_active` (`user_id`,`is_active`)
+            ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;";
+            $this->db->query($sql);
+        }
     }
 
     /**
