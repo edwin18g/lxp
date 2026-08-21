@@ -207,6 +207,10 @@
 
         <!-- Category: SYSTEM -->
         <div class="nav-category">SYSTEM</div>
+        <a href="<?php echo site_url('admin/users/sessions'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/users/sessions') ? 'active' : ''; ?>">
+          <i class="material-icons">devices</i>
+          <span>Active Sessions</span>
+        </a>
         <a href="<?php echo site_url('admin/contacts'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/contacts') ? 'active' : ''; ?>">
           <i class="material-icons">chat_bubble_outline</i>
           <span>CMS / Contacts</span>

@@ -886,6 +886,118 @@ class Users extends Admin_Controller
         redirect('admin/users/view/' . $user_id);
     }
 
+    /**
+     * User Sessions List View
+     */
+    public function sessions()
+    {
+        /* Initialize assets */
+        $this->include_index_plugins();
+        $data = $this->includes;
+
+        $data['total_sessions'] = $this->db->count_all('user_sessions');
+        $data['active_sessions'] = $this->db->where('is_active', 1)->count_all_results('user_sessions');
+
+        $data['t_headers'] = array(
+            '#',
+            'User',
+            'IP Address',
+            'Device',
+            'Browser',
+            'OS',
+            'Status',
+            'Last Active',
+            'Action',
+        );
+
+        /* Load View */
+        $content['content'] = $this->load->view('admin/system/users/sessions', $data, TRUE);
+        $this->load->view($this->template, $content);
+    }
+
+    /**
+     * ajax_sessions_list
+     */
+    public function ajax_sessions_list()
+    {
+        $start = $this->input->post('start');
+        $length = $this->input->post('length');
+        $search = $this->input->post('search')['value'];
+        $order_post = $this->input->post('order');
+
+        $orders = array();
+        $columns_map = array(
+            0 => 'user_sessions.id',
+            1 => 'users.first_name',
+            2 => 'user_sessions.ip_address',
+            3 => 'user_sessions.device_type',
+            4 => 'user_sessions.browser',
+            5 => 'user_sessions.os',
+            6 => 'user_sessions.is_active',
+            7 => 'user_sessions.last_activity',
+        );
+
+        if ($order_post) {
+            foreach ($order_post as $o) {
+                if (isset($columns_map[$o['column']])) {
+                    $orders[$columns_map[$o['column']]] = $o['dir'];
+                }
+            }
+        }
+
+        $list = $this->user_sessions_model->get_sessions_dt($length, $start, $orders, $search);
+
+        $data = array();
+        $no = $start;
+
+        foreach ($list as $val) {
+            $no++;
+            $row = array();
+            $row[] = $no;
+
+            // User Info
+            $user_img = !empty($val->image) ? base_url('upload/users/images/' . $val->image) : base_url('themes/admin/img/avatar2.png');
+            $user_name = !empty($val->first_name) ? $val->first_name . ' ' . $val->last_name : 'Unknown User';
+            $user_html = '<div style="display:flex; align-items:center; gap:10px;">';
+            $user_html .= '<img src="' . $user_img . '" style="width:32px; height:32px; border-radius:50%; object-fit:cover;" onerror="this.onerror=null;this.src=\'' . base_url('themes/admin/img/avatar2.png') . '\';">';
+            $user_html .= '<div><div style="font-weight:700; color:#1e293b;">' . $user_name . '</div><div style="font-size:12px; color:#64748b;">' . $val->email . '</div></div>';
+            $user_html .= '</div>';
+            $row[] = $user_html;
+
+            $row[] = '<span style="font-family:monospace; font-weight:600; color:#334155;">' . $val->ip_address . '</span>';
+            $row[] = '<span class="badge-premium bg-slate-soft color-slate" style="text-transform:capitalize;">' . ($val->device_type ? $val->device_type : 'Desktop') . '</span>';
+            $row[] = '<span style="color:#475569; font-weight:500;">' . ($val->browser ? $val->browser : 'Unknown') . '</span>';
+            $row[] = '<span style="color:#475569; font-weight:500;">' . ($val->os ? $val->os : 'Unknown') . '</span>';
+
+            // Status
+            $status_class = $val->is_active ? 'bg-emerald-soft color-emerald' : 'bg-rose-soft color-rose';
+            $status_text = $val->is_active ? 'Active' : 'Expired / Logged Out';
+            $row[] = '<span class="badge-premium ' . $status_class . '">' . $status_text . '</span>';
+
+            // Last Active
+            $row[] = '<span style="font-size:13px; color:#64748b;">' . time_elapsed_string($val->last_activity) . '</span>';
+
+            // Action
+            if ($val->is_active) {
+                $action = '<a href="' . site_url('admin/users/terminate_session/' . $val->user_id . '/' . $val->id) . '" class="btn-table-action color-rose bg-rose-soft" title="Terminate Session" onclick="return confirm(\'Are you sure you want to terminate this active session?\');"><i class="material-icons">power_settings_new</i> Terminate</a>';
+            } else {
+                $action = '<span style="color:#94a3b8; font-size:13px;">Inactive</span>';
+            }
+            $row[] = $action;
+
+            $data[] = $row;
+        }
+
+        $output = array(
+            "draw" => $this->input->post('draw'),
+            "recordsTotal" => $this->user_sessions_model->count_all_sessions(),
+            "recordsFiltered" => $this->user_sessions_model->count_filtered_sessions($search),
+            "data" => $data,
+        );
+
+        echo json_encode($output);
+    }
 }
+
 
 /* Users controller ends */

@@ -245,16 +245,6 @@ class User_sessions_model extends CI_Model
                     }
                 }
 
-                // Get macOS version
-                if ($os === 'macOS' && preg_match('/Mac OS X ([\d_]+)/i', $ua, $m)) {
-                    $os = 'macOS ' . str_replace('_', '.', $m[1]);
-                }
-
-                // Get Android version
-                if ($os === 'Android' && preg_match('/Android ([\d.]+)/i', $ua, $m)) {
-                    $os = 'Android ' . $m[1];
-                }
-
                 // Get iOS version
                 if ($os === 'iOS' && preg_match('/OS ([\d_]+)/i', $ua, $m)) {
                     $os = 'iOS ' . str_replace('_', '.', $m[1]);
@@ -270,4 +260,56 @@ class User_sessions_model extends CI_Model
             'device_type' => $device_type,
         );
     }
+
+    /**
+     * DataTables query helper for all sessions
+     */
+    private function _get_sessions_query($search = '')
+    {
+        $this->db->select('user_sessions.*, users.first_name, users.last_name, users.email, users.image');
+        $this->db->from($this->table);
+        $this->db->join('users', 'users.id = user_sessions.user_id', 'left');
+
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('users.first_name', $search);
+            $this->db->or_like('users.last_name', $search);
+            $this->db->or_like('users.email', $search);
+            $this->db->or_like('user_sessions.ip_address', $search);
+            $this->db->or_like('user_sessions.browser', $search);
+            $this->db->or_like('user_sessions.os', $search);
+            $this->db->group_end();
+        }
+    }
+
+    public function get_sessions_dt($limit = 10, $offset = 0, $orders = array(), $search = '')
+    {
+        $this->_get_sessions_query($search);
+
+        if (!empty($orders)) {
+            foreach ($orders as $key => $value) {
+                $this->db->order_by($key, $value);
+            }
+        } else {
+            $this->db->order_by('user_sessions.last_activity', 'DESC');
+        }
+
+        if ($limit != -1) {
+            $this->db->limit($limit, $offset);
+        }
+
+        return $this->db->get()->result();
+    }
+
+    public function count_all_sessions()
+    {
+        return $this->db->count_all($this->table);
+    }
+
+    public function count_filtered_sessions($search = '')
+    {
+        $this->_get_sessions_query($search);
+        return $this->db->get()->num_rows();
+    }
 }
+
