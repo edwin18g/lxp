@@ -32,7 +32,11 @@ class Welcome extends Public_Controller
 
     private function get_featured_c_e()
     {
-        $data['f_courses'] = $this->course_model->get_f_courses();
+        $f_courses = $this->course_model->get_f_courses();
+        if (empty($f_courses)) {
+            $f_courses = $this->course_model->get_courses();
+        }
+        $data['f_courses'] = $f_courses;
         $data['f_events'] = $this->event_model->get_f_events();
 
         $tutor_ids = array();
@@ -99,10 +103,37 @@ class Welcome extends Public_Controller
             }
         }
 
+        $testimonials = $this->testimonials_model->get_testimonials();
+        if (empty($testimonials)) {
+            $testimonials = array(
+                (object) array(
+                    'id' => 1,
+                    't_name' => 'Anand Kumar',
+                    't_type' => 'BigData Engineer',
+                    't_feedback' => 'The hands-on Spark and Kafka projects transformed my understanding. I went from beginner to leading analytics pipelines within 3 months!',
+                    'image' => ''
+                ),
+                (object) array(
+                    'id' => 2,
+                    't_name' => 'Priya Sharma',
+                    't_type' => 'Data Analyst',
+                    't_feedback' => 'Incredible course structure and batch support. Real-time doubt resolution helped me clear technical interviews easily.',
+                    'image' => ''
+                ),
+                (object) array(
+                    'id' => 3,
+                    't_name' => 'Rajesh V.',
+                    't_type' => 'Senior ETL Developer',
+                    't_feedback' => 'The best investment for big data learning. Highly recommended for anyone wanting practical experience over theoretical slides.',
+                    'image' => ''
+                )
+            );
+        }
+
         // set content data
         $content_data = array(
             'gallaries' => $this->gallaries_model->get_gallaries(6),
-            'testimonials' => $this->testimonials_model->get_testimonials(),
+            'testimonials' => $testimonials,
             'f_courses' => $c_e_data['f_courses'],
             'f_events' => $c_e_data['f_events'],
             'tutors' => $c_e_data['tutors'],

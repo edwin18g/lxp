@@ -30,6 +30,11 @@
 
 /* ----------- Global Reset for Landing ----------- */
 .lp-section { position: relative; overflow: hidden; }
+[data-aos] {
+    opacity: 1 !important;
+    transform: none !important;
+    visibility: visible !important;
+}
 
 /* ----------- Gradient Text ----------- */
 .gradient-text {
