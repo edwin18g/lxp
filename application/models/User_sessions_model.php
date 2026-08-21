@@ -121,6 +121,30 @@ class User_sessions_model extends CI_Model
     }
 
     /**
+     * Deactivate all active sessions for a user EXCEPT current session
+     *
+     * @param int $user_id
+     * @param string $current_session_id
+     * @return bool
+     */
+    public function deactivate_all_except($user_id, $current_session_id)
+    {
+        if (!$user_id) {
+            return FALSE;
+        }
+
+        $this->db->where('user_id', $user_id)
+                 ->where('is_active', 1);
+
+        if ($current_session_id) {
+            $this->db->where('session_id !=', $current_session_id);
+        }
+
+        $this->db->update($this->table, array('is_active' => 0));
+        return TRUE;
+    }
+
+    /**
      * Get all active sessions for a user
      *
      * @param int $user_id

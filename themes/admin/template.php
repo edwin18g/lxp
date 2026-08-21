@@ -98,6 +98,22 @@
     </div>
   </div>
   <!-- #END# Search Bar -->
+  <?php if (!empty($_SESSION['impersonator'])): ?>
+  <div style="background: linear-gradient(90deg, #f59e0b, #d97706); color: #ffffff; padding: 10px 24px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 9999; box-shadow: 0 2px 10px rgba(0,0,0,0.15);">
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <i class="material-icons">no_accounts</i>
+      <span>You are currently logged in as <strong><?php echo isset($_SESSION['logged_in']['first_name']) ? htmlspecialchars($_SESSION['logged_in']['first_name'] . ' ' . $_SESSION['logged_in']['last_name']) : 'User'; ?></strong> (<?php echo isset($_SESSION['logged_in']['email']) ? htmlspecialchars($_SESSION['logged_in']['email']) : ''; ?>)</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
+      <a href="<?php echo site_url('auth/switch_back'); ?>" style="background: #ffffff; color: #b45309; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+        <i class="material-icons" style="font-size: 18px;">swap_horiz</i> Switch Back to Admin
+      </a>
+      <a href="<?php echo site_url('logout'); ?>" style="background: rgba(255,255,255,0.25); color: #ffffff; border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+        <i class="material-icons" style="font-size: 18px;">exit_to_app</i> Logout
+      </a>
+    </div>
+  </div>
+  <?php endif; ?>
   <!-- Top Bar -->
   <nav class="navbar">
     <div class="container-fluid">

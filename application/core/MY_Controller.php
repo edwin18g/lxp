@@ -76,10 +76,10 @@ class MY_Controller extends CI_Controller
             $user_db = $this->db->select('device_locked, role, last_session_id')->get_where('users', array('id' => $this->user['id']))->row();
 
             if ($user_db) {
-                // Auto-lock logic for learners (role 3)
-                if ($user_db->role == 3 && strpos($this->current_uri, '/courses/lecture') === 0) {
+                // Auto-lock logic for learners (role 3) - Skip if Admin is impersonating
+                if ($user_db->role == 3 && strpos($this->current_uri, '/courses') === 0 && empty($_SESSION['impersonator'])) {
                     // If session ID mismatch, it means they logged in elsewhere and returned to an old session
-                    if ($user_db->last_session_id && $user_db->last_session_id != session_id()) {
+                    if (!empty($user_db->last_session_id) && $user_db->last_session_id != session_id()) {
                         $this->db->where('id', $this->user['id'])->update('users', array('device_locked' => 1));
                         $user_db->device_locked = 1; // Mark as locked for the immediate check below
                     }
@@ -87,17 +87,17 @@ class MY_Controller extends CI_Controller
 
                 $is_locked = $user_db->device_locked ? 1 : 0;
 
-                // If locked and trying to access courses
-                if ($is_locked && strpos($this->current_uri, '/courses') === 0) {
-                    $error_msg = 'Your learning access is currently locked. Please contact support.';
+                // If locked and trying to access courses (Skip lock check if Admin is impersonating)
+                if ($is_locked && strpos($this->current_uri, '/courses') === 0 && empty($_SESSION['impersonator'])) {
+                    $error_msg = '<p>Your learning account is currently locked due to security policy or multiple simultaneous device logins.</p><p style="color:#64748b; font-size:14px; margin-top:8px;">Please contact support to restore your course access.</p>';
 
                     // Specific message for lectures
                     if (strpos($this->current_uri, '/courses/lecture') === 0) {
-                        $error_msg = '<div style="text-align: center;font-size: 20px;">learning locked due to multiple device login <br> back to home <a href="' . base_url() . '">here</a></div>';
+                        $error_msg = '<p>Learning access locked due to multiple device login detected.</p><p style="color:#64748b; font-size:14px; margin-top:8px;">Please contact support or return to the home page.</p>';
                     }
 
                     // Instead of redirect, show message on the same page
-                    show_error($error_msg, 403, 'Learning Locked');
+                    show_error($error_msg, 403, 'Learning Access Locked');
                     exit;
                 }
             }

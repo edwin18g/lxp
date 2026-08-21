@@ -298,15 +298,11 @@ class Enrolled_users extends Admin_Controller
         );
 
         if ($this->users_model->enable_secure($data)) {
-            // Clear all sessions if unlocking
-            if (!$status) {
+            // Only terminate sessions when LOCKING (status = 1)
+            if ($status) {
                 // CI3 session data is serialized. We look for the user_id in the data blob.
-                // Format: user_id|s:len:"value";
                 $this->db->like('data', 'user_id|s:' . strlen($user_id) . ':"' . $user_id . '";');
                 $this->db->delete('ce_sessn');
-
-                // Also clear last_session_id in users table to be thorough
-                $this->db->where('id', $user_id)->update('users', array('last_session_id' => NULL));
             }
 
             $msg = $status ? 'Learning locked successfully.' : 'Learning unlocked successfully.';

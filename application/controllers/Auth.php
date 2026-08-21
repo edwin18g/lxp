@@ -919,4 +919,65 @@ class Auth extends Public_Controller
         return FALSE;
     }
 
+    /**
+     * Switch Back to Admin Account
+     */
+    public function switch_back()
+    {
+        if (!empty($_SESSION['impersonator'])) {
+            $admin_data = $_SESSION['impersonator'];
+
+            $this->session->set_userdata('logged_in', $admin_data['logged_in']);
+            $this->session->set_userdata('user_id', $admin_data['user_id']);
+            $this->session->set_userdata('identity', $admin_data['identity']);
+            $this->session->set_userdata('email', $admin_data['email']);
+            $_SESSION['groups_id'] = $admin_data['groups_id'];
+
+            unset($_SESSION['impersonator']);
+
+            $this->session->set_flashdata('message', 'Switched back to your administrator account.');
+            redirect('admin/users');
+        } else {
+            redirect('admin/users');
+        }
+    }
+
+    /**
+     * Terminate all other sessions & unlock learning access
+     */
+    public function unlock_device()
+    {
+        $user_id = (!empty($_SESSION['logged_in']['id'])) ? $_SESSION['logged_in']['id'] : $this->session->userdata('user_id');
+
+        if (!$user_id) {
+            $this->session->set_flashdata('error', 'Please log in to manage your sessions.');
+            redirect('auth/login');
+        }
+
+        $current_sess_id = session_id();
+
+        // 1. Deactivate all other sessions in user_sessions table
+        $this->load->model('user_sessions_model');
+        $this->user_sessions_model->deactivate_all_except($user_id, $current_sess_id);
+
+        // 2. Clear other CI3 sessions from ce_sessn table
+        if ($user_id) {
+            $this->db->like('data', 'user_id|s:' . strlen($user_id) . ':"' . $user_id . '";');
+            $this->db->where('id !=', $current_sess_id);
+            $this->db->delete('ce_sessn');
+        }
+
+        // 3. Update users table: unlock learning access & record current session
+        $this->db->where('id', $user_id)->update('users', array(
+            'device_locked'   => 0,
+            'last_session_id' => $current_sess_id
+        ));
+
+        $this->session->set_flashdata('message', 'All other device sessions have been terminated. Your learning access is now unlocked!');
+
+        $redirect_url = $this->input->get('redirect') ? urldecode($this->input->get('redirect')) : site_url('courses/my_courses');
+        redirect($redirect_url);
+    }
+
 }
+

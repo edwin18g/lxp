@@ -442,8 +442,9 @@ class Courses extends Public_Controller
             }
 
             $Is_subscription = $this->db->get_where('course_subscription', array('cs_user_id' => $user_id, 'cs_course_id' => $lecture['cl_course_id']))->num_rows();
+            $is_admin_user = ($this->ion_auth && $this->ion_auth->is_admin()) || !empty($_SESSION['impersonator']);
 
-            if ($Is_subscription > 0) {
+            if ($Is_subscription > 0 || $is_admin_user) {
 
                 $this->add_plugin_theme(array(
                     "owl-carousel/owl.carousel.css",
@@ -476,12 +477,16 @@ class Courses extends Public_Controller
                 $this->load->view('lecture_detials', $content_data);
                 // $this->load->view($this->template, $data);        
             } else {
-                throw new Exception("you are not authorized to access Video Content !...");
+                throw new Exception("You are not authorized to access this Video Content. Please enroll in the course to gain access.");
             }
 
         } catch (Exception $e) {
-            echo 'Message: ' . $e->getMessage();
-            die;
+            if ($user_id == null) {
+                $this->session->set_flashdata('error', 'Please log in to access course content.');
+                redirect('auth/login');
+            } else {
+                show_error($e->getMessage(), 403, 'Access Restricted');
+            }
         }
 
     }

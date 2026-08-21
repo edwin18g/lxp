@@ -121,7 +121,7 @@ if (
             position: relative;
             z-index: 100;
             padding: 0;
-            overflow: hidden;
+            overflow: visible !important;
         }
         /* Ensure header is never taller than 70px even with legacy padding overrides */
         #header > * { flex-shrink: 0; }
@@ -297,12 +297,27 @@ if (
         }
 
         /* Dropdown polish */
-        .dropdown-menu {
+        .user-nav {
+            position: relative;
+        }
+        .user-nav .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            left: auto;
+            z-index: 1050;
+            min-width: 200px;
             border: 1px solid #E5E7EB;
             border-radius: 12px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.12);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.15);
             padding: 8px;
             margin-top: 8px;
+            background: #ffffff;
+        }
+        .user-nav.open .dropdown-menu,
+        .user-nav.show .dropdown-menu,
+        .user-nav .dropdown-menu.show {
+            display: block !important;
         }
         .dropdown-menu > li > a {
             border-radius: 8px;
@@ -310,6 +325,9 @@ if (
             font-size: 14px;
             color: var(--text-dark);
             transition: background 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
         .dropdown-menu > li > a:hover {
             background: rgba(79,70,229,0.07);
@@ -494,6 +512,23 @@ if (
            ============================================ */
         .section-padding { padding: 80px 0; }
     </style>
+
+    <?php if (!empty($_SESSION['impersonator'])): ?>
+    <div style="background: linear-gradient(90deg, #f59e0b, #d97706); color: #ffffff; padding: 10px 24px; font-weight: 600; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 99999; box-shadow: 0 2px 10px rgba(0,0,0,0.15); font-family: 'Plus Jakarta Sans', sans-serif;">
+      <div style="display: flex; align-items: center; gap: 10px; font-size: 14px;">
+        <i class="fa fa-user-secret" style="font-size: 18px;"></i>
+        <span>You are currently logged in as <strong><?php echo isset($_SESSION['logged_in']['first_name']) ? htmlspecialchars($_SESSION['logged_in']['first_name'] . ' ' . $_SESSION['logged_in']['last_name']) : 'User'; ?></strong> (<?php echo isset($_SESSION['logged_in']['email']) ? htmlspecialchars($_SESSION['logged_in']['email']) : ''; ?>)</span>
+      </div>
+      <div style="display: flex; align-items: center; gap: 10px;">
+        <a href="<?php echo site_url('auth/switch_back'); ?>" style="background: #ffffff; color: #b45309; border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.1);">
+          <i class="fa fa-exchange"></i> Switch Back to Admin
+        </a>
+        <a href="<?php echo site_url('logout'); ?>" style="background: rgba(255,255,255,0.25); color: #ffffff; border: 1px solid rgba(255,255,255,0.4); border-radius: 8px; padding: 6px 14px; font-size: 13px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+          <i class="fa fa-sign-out"></i> Logout
+        </a>
+      </div>
+    </div>
+    <?php endif; ?>
 
     <!-- Header Begins -->
     <?php if (!isset($hide_header)): ?>
@@ -833,10 +868,30 @@ if (
     <!-- Core JS -->
     <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
     <script>
-        AOS.init({
-            duration: 800,
-            once: true,
-            offset: 100
+        document.addEventListener('DOMContentLoaded', function() {
+            var userMenu = document.getElementById('userMenu');
+            if (userMenu) {
+                userMenu.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var parent = this.closest('.dropdown');
+                    if (parent) {
+                        var isOpen = parent.classList.contains('open') || parent.classList.contains('show');
+                        if (isOpen) {
+                            parent.classList.remove('open', 'show');
+                        } else {
+                            parent.classList.add('open', 'show');
+                        }
+                    }
+                });
+
+                document.addEventListener('click', function(e) {
+                    var parent = userMenu.closest('.dropdown');
+                    if (parent && !parent.contains(e.target)) {
+                        parent.classList.remove('open', 'show');
+                    }
+                });
+            }
         });
     </script>
 </body>

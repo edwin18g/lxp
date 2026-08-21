@@ -133,6 +133,10 @@ class Users extends Admin_Controller
             $action .= '<button type="button" class="btn-table-action color-indigo bg-indigo-soft" onclick="openUserSidebar(' . $val->id . ')" title="View Details"><i class="material-icons">visibility</i></button>';
             // Edit Offcanvas
             $action .= '<button type="button" class="btn-table-action color-slate bg-slate-soft" onclick="openUserFormSidebar(' . $val->id . ')" title="Edit"><i class="material-icons">edit</i></button>';
+            // Login as User (Impersonate)
+            if ($val->id != $this->user['id']) {
+                $action .= '<a href="' . site_url('admin/users/login_as_user/' . $val->id) . '" class="btn-table-action color-emerald bg-emerald-soft" title="Login as ' . htmlspecialchars($val->first_name, ENT_QUOTES) . '" onclick="return confirm(\'Login as ' . htmlspecialchars($val->first_name . ' ' . $val->last_name, ENT_QUOTES) . '?\');"><i class="material-icons">login</i></a>';
+            }
             // Delete
             $action .= '<button type="button" class="btn-table-action color-rose bg-rose-soft" onclick="ajaxDelete(' . $val->id . ', ``, `User`)" title="Delete"><i class="material-icons">delete_outline</i></button>';
 
@@ -178,6 +182,9 @@ class Users extends Admin_Controller
             $html .= '<div class="profile-name-area">';
             $html .= '<h2>' . ucwords($user->first_name . ' ' . $user->last_name) . '</h2>';
             $html .= '<span class="role-badge">' . $user->group_name . '</span>';
+            if ($user->id != $this->user['id']) {
+                $html .= '<div style="margin-top: 10px;"><a href="' . site_url('admin/users/login_as_user/' . $user->id) . '" class="btn btn-emerald waves-effect" onclick="return confirm(\'Login as ' . htmlspecialchars($user->first_name . ' ' . $user->last_name, ENT_QUOTES) . '?\');" style="border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #10b981; color: #fff; text-decoration: none;"><i class="material-icons" style="font-size: 18px;">login</i> Login as User</a></div>';
+            }
             $html .= '</div>';
             $html .= '</div>';
             $html .= '</div>';
@@ -998,7 +1005,92 @@ class Users extends Admin_Controller
 
         echo json_encode($output);
     }
+
+    /**
+     * Login as User (Impersonate)
+     */
+    public function login_as_user($id = NULL)
+    {
+        if (!$this->ion_auth->is_admin()) {
+            $this->session->set_flashdata('error', 'Only administrators can perform this action.');
+            redirect('admin/users');
+        }
+
+        $id = (int) $id;
+        if (empty($id)) {
+            $this->session->set_flashdata('error', 'Invalid user specified.');
+            redirect('admin/users');
+        }
+
+        $target_user = $this->users_model->get_users_by_id($id, TRUE);
+        if (empty($target_user)) {
+            $this->session->set_flashdata('error', 'User not found.');
+            redirect('admin/users');
+        }
+
+        // Store original admin session if not already impersonating
+        if (empty($_SESSION['impersonator'])) {
+            $_SESSION['impersonator'] = array(
+                'user_id'   => $this->session->userdata('user_id'),
+                'logged_in' => $this->session->userdata('logged_in'),
+                'groups_id' => isset($_SESSION['groups_id']) ? $_SESSION['groups_id'] : NULL,
+                'identity'  => $this->session->userdata('identity'),
+                'email'     => $this->session->userdata('email'),
+            );
+        }
+
+        $this->load->model('ion_auth_model');
+
+        // Set target user session
+        $group = $this->ion_auth->get_users_groups($id)->row();
+        $_SESSION['groups_id'] = $group ? $group->id : 3;
+
+        $user_obj = $this->ion_auth->user($id)->row();
+        if ($user_obj) {
+            $this->ion_auth_model->set_session($user_obj);
+        }
+
+        $this->session->set_userdata('logged_in', $target_user);
+        $this->users_model->save_users(['last_session_id' => session_id()], $id);
+
+        // Record session
+        $this->load->model('user_sessions_model');
+        $this->user_sessions_model->create($id);
+
+        $this->session->set_flashdata('message', 'You are now logged in as ' . ucwords($target_user['first_name'] . ' ' . $target_user['last_name']));
+
+        // Redirect based on target user role
+        if (isset($target_user['role']) && $target_user['role'] == 1) {
+            redirect(site_url('/admin'));
+        } else {
+            redirect(site_url('/courses/my_courses'));
+        }
+    }
+
+    /**
+     * Switch Back to Admin Account
+     */
+    public function switch_back()
+    {
+        if (!empty($_SESSION['impersonator'])) {
+            $admin_data = $_SESSION['impersonator'];
+
+            $this->session->set_userdata('logged_in', $admin_data['logged_in']);
+            $this->session->set_userdata('user_id', $admin_data['user_id']);
+            $this->session->set_userdata('identity', $admin_data['identity']);
+            $this->session->set_userdata('email', $admin_data['email']);
+            $_SESSION['groups_id'] = $admin_data['groups_id'];
+
+            unset($_SESSION['impersonator']);
+
+            $this->session->set_flashdata('message', 'Switched back to your administrator account.');
+            redirect('admin/users');
+        } else {
+            redirect('admin/users');
+        }
+    }
 }
+
 
 
 /* Users controller ends */
