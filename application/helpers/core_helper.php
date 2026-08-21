@@ -772,6 +772,12 @@ if (!function_exists('time_elapsed_string')) {
      */
     function time_elapsed_string($datetime, $full = false)
     {
+        if (empty($datetime)) {
+            return 'N/A';
+        }
+        if (is_numeric($datetime)) {
+            $datetime = date('Y-m-d H:i:s', (int) $datetime);
+        }
         $now = new DateTime;
         $ago = new DateTime($datetime);
         $diff = $now->diff($ago);

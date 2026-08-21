@@ -1075,14 +1075,7 @@
                     </div>
                     <div class="lp-course-body">
                         <h4 class="lp-course-title"><?php echo htmlspecialchars($val->title) ?></h4>
-                        <div class="lp-course-meta">
-                            <div class="lp-rating">
-                                <i class="fa fa-star"></i>
-                                <span>4.8</span>
-                            </div>
-                            <span style="color:#D1D5DB;">•</span>
-                            <span><i class="fa fa-clock-o"></i> Self-paced</span>
-                        </div>
+                        
                         <div class="lp-course-actions">
                             <button class="btn-enroll"
                                 onclick="window.location.href='<?php echo site_url('auth/register'); ?>'">

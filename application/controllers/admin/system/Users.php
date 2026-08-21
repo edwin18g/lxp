@@ -920,9 +920,10 @@ class Users extends Admin_Controller
      */
     public function ajax_sessions_list()
     {
-        $start = $this->input->post('start');
-        $length = $this->input->post('length');
-        $search = $this->input->post('search')['value'];
+        $start = $this->input->post('start') !== NULL ? (int)$this->input->post('start') : 0;
+        $length = $this->input->post('length') !== NULL ? (int)$this->input->post('length') : 10;
+        $search_post = $this->input->post('search');
+        $search = isset($search_post['value']) ? $search_post['value'] : '';
         $order_post = $this->input->post('order');
 
         $orders = array();
@@ -989,7 +990,7 @@ class Users extends Admin_Controller
         }
 
         $output = array(
-            "draw" => $this->input->post('draw'),
+            "draw" => intval($this->input->post('draw')),
             "recordsTotal" => $this->user_sessions_model->count_all_sessions(),
             "recordsFiltered" => $this->user_sessions_model->count_filtered_sessions($search),
             "data" => $data,
