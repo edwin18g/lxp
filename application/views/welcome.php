@@ -1018,16 +1018,12 @@
         <div class="row justify-content-center">
             <div class="col-lg-8 col-md-10 col-12">
                 <div class="lp-hero-content">
-                    <div class="lp-hero-badge">
-                        <span class="badge-dot"></span>
-                        <span><?php echo $this->settings->site_name; ?> &mdash; Real-Time Projects</span>
-                    </div>
+                    
                     <h1>
-                        Master <span class="highlight">BigData &amp; Spark</span>
-                        Analytics
+                        Master <span class="highlight">AI &amp; Cloud Data</span> Engineering
                     </h1>
                     <p class="lp-hero-subtext">
-                        Industry-focused BigData, Spark &amp; Analytics programs with hands-on real-time projects — designed for professionals who want to stay ahead.
+                        Industry-focused Data Engineering &amp;Spark program with handson real time project- designed for both NON ITs and ITs
                     </p>
                     <div class="lp-hero-actions">
                         <a href="<?php echo site_url('auth/register') ?>" class="btn-lp-primary">
@@ -1058,7 +1054,7 @@
                 <i class="fa fa-database"></i> Live Batches
             </div>
             <h2 class="lp-section-title">
-                Our <span class="accent">BigData &amp; Spark</span> Programs
+                Our <span class="accent">Cloud Data Engineering &amp; Spark</span> Programs
             </h2>
             <p class="lp-section-sub">
                 Hands-on batch programs with real-time projects — from beginner to advanced Analytics &amp; Spark.
