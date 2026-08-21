@@ -384,25 +384,3 @@
     }
 </script>
 
-<style>
-    .rotating {
-        animation: rotate 2s linear infinite;
-        display: inline-block;
-        vertical-align: middle;
-    }
-
-    @keyframes rotate {
-        from {
-            transform: rotate(0deg);
-        }
-
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    .form-line-premium.error {
-        border-color: #e11d48 !important;
-        box-shadow: 0 0 0 4px rgba(225, 29, 72, 0.1) !important;
-    }
-</style>

@@ -776,28 +776,31 @@ if (!function_exists('time_elapsed_string')) {
         $ago = new DateTime($datetime);
         $diff = $now->diff($ago);
 
-        $diff->w = floor($diff->d / 7);
-        $diff->d -= $diff->w * 7;
+        // PHP 8.2+: DateInterval does not support dynamic properties.
+        // Calculate weeks as a local variable instead of assigning to $diff->w.
+        $weeks   = (int) floor($diff->d / 7);
+        $days    = $diff->d - ($weeks * 7);
 
-        $string = array(
-            'y' => 'year',
-            'm' => 'month',
-            'w' => 'week',
-            'd' => 'day',
-            'h' => 'hour',
-            'i' => 'minute',
-            's' => 'second',
+        $parts = array(
+            'y' => array('label' => 'year',   'value' => (int) $diff->y),
+            'm' => array('label' => 'month',  'value' => (int) $diff->m),
+            'w' => array('label' => 'week',   'value' => $weeks),
+            'd' => array('label' => 'day',    'value' => $days),
+            'h' => array('label' => 'hour',   'value' => (int) $diff->h),
+            'i' => array('label' => 'minute', 'value' => (int) $diff->i),
+            's' => array('label' => 'second', 'value' => (int) $diff->s),
         );
-        foreach ($string as $k => &$v) {
-            if ($diff->$k) {
-                $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
-            } else {
-                unset($string[$k]);
+
+        $string = array();
+        foreach ($parts as $k => $part) {
+            if ($part['value'] > 0) {
+                $string[$k] = $part['value'] . ' ' . $part['label'] . ($part['value'] > 1 ? 's' : '');
             }
         }
 
-        if (!$full)
+        if (!$full) {
             $string = array_slice($string, 0, 1);
+        }
 
         return $string ? implode(', ', $string) . ' ago' : 'just now';
     }

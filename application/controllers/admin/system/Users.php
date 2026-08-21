@@ -20,6 +20,7 @@ class Users extends Admin_Controller
         parent::__construct();
 
         $this->load->model('users_model');
+        $this->load->model('user_sessions_model');
         $this->lang->load('auth');
 
         // Page Title
@@ -674,6 +675,9 @@ class Users extends Admin_Controller
 
         $data['users'] = $result;
 
+        // Get active sessions for this user
+        $data['user_sessions'] = $this->user_sessions_model->get_active($id);
+
         /* Load Template */
         $content['content'] = $this->load->view('admin/system/users/view', $data, TRUE);
         $this->load->view($this->template, $content);
@@ -830,6 +834,56 @@ class Users extends Admin_Controller
             $this->session->set_flashdata('error', 'Failed to unlock user device.');
         }
         redirect('admin/users');
+    }
+
+    /**
+     * Terminate a specific session for a user
+     */
+    public function terminate_session($user_id = NULL, $session_id = NULL)
+    {
+        if (!$this->ion_auth->is_admin()) {
+            echo '<p>' . lang('users_only_admin_can') . '</p>';
+            exit;
+        }
+
+        $user_id = (int) $user_id;
+        $session_id = (int) $session_id;
+
+        if (empty($user_id) || empty($session_id)) {
+            $this->session->set_flashdata('error', 'Invalid session or user.');
+            redirect('admin/users');
+        }
+
+        if ($this->user_sessions_model->terminate($session_id, $user_id)) {
+            $this->session->set_flashdata('message', 'Session terminated successfully.');
+        } else {
+            $this->session->set_flashdata('error', 'Failed to terminate session.');
+        }
+
+        redirect('admin/users/view/' . $user_id);
+    }
+
+    /**
+     * Terminate all sessions for a user
+     */
+    public function terminate_all_sessions($user_id = NULL)
+    {
+        if (!$this->ion_auth->is_admin()) {
+            echo '<p>' . lang('users_only_admin_can') . '</p>';
+            exit;
+        }
+
+        $user_id = (int) $user_id;
+
+        if (empty($user_id)) {
+            $this->session->set_flashdata('error', 'Invalid user.');
+            redirect('admin/users');
+        }
+
+        $this->user_sessions_model->deactivate_all($user_id);
+        $this->session->set_flashdata('message', 'All sessions for this user have been terminated.');
+
+        redirect('admin/users/view/' . $user_id);
     }
 
 }

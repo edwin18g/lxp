@@ -21,6 +21,7 @@ class Profile extends Private_Controller {
 
         // load the users model
         $this->load->model('users_model');
+        $this->load->model('user_sessions_model');
         $this->load->library('file_uploads');
     }
 
@@ -126,6 +127,52 @@ class Profile extends Private_Controller {
         $data['content'] = $this->load->view('auth/profile_form', $content_data, TRUE);
         $this->load->view($this->template, $data);
 	}
+
+
+    /**************************************************************************************
+     * SESSION MANAGEMENT
+     **************************************************************************************/
+
+    /**
+     * Active Sessions - View and manage login sessions
+     */
+    function sessions()
+    {
+        // Handle POST actions (terminate sessions)
+        if ($this->input->method() === 'post') {
+            $action = $this->input->post('action');
+
+            if ($action === 'terminate') {
+                $session_id_to_terminate = $this->input->post('session_id');
+                if ($session_id_to_terminate) {
+                    $this->user_sessions_model->terminate($session_id_to_terminate, $this->user['id']);
+                    $this->session->set_flashdata('message', 'Session terminated successfully.');
+                }
+            } elseif ($action === 'terminate_all') {
+                $this->user_sessions_model->deactivate_all($this->user['id']);
+                // Re-activate current session so we don't log ourselves out
+                $this->user_sessions_model->create($this->user['id']);
+                $this->session->set_flashdata('message', 'All other sessions have been terminated.');
+            }
+
+            redirect('profile/sessions');
+        }
+
+        // GET: Display active sessions
+        $sessions = $this->user_sessions_model->get_active($this->user['id']);
+        $current_session_id = session_id();
+
+        $this->set_title('Active Sessions');
+        $data = $this->includes;
+
+        $content_data = array(
+            'sessions'           => $sessions,
+            'current_session_id' => $current_session_id,
+        );
+
+        $data['content'] = $this->load->view('auth/sessions', $content_data, TRUE);
+        $this->load->view($this->template, $data);
+    }
 
 
     /**************************************************************************************

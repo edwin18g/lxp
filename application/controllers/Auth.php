@@ -20,6 +20,7 @@ class Auth extends Public_Controller
 
         // load the users model
         $this->load->model('users_model');
+        $this->load->model('user_sessions_model');
         $this->load->model('notifications_model');
 
         // facebook login
@@ -86,6 +87,9 @@ class Auth extends Public_Controller
 
                 // Single Device Login: store current session ID
                 $this->users_model->save_users(['last_session_id' => session_id()], $user_id);
+
+                // Record session with device info
+                $this->user_sessions_model->create($user_id);
 
                 $group = $this->ion_auth->get_users_groups($result['id'])->row();
                 $_SESSION['groups_id'] = $group ? $group->id : NULL;
@@ -460,6 +464,9 @@ class Auth extends Public_Controller
             // Single Device Login: store current session ID
             $this->users_model->save_users(['last_session_id' => session_id()], $result['id']);
 
+            // Record session with device info
+            $this->user_sessions_model->create($result['id']);
+
             redirect(site_url());
         }
 
@@ -593,6 +600,9 @@ class Auth extends Public_Controller
                 // Single Device Login: store current session ID
                 $this->users_model->save_users(['last_session_id' => session_id()], $result['id']);
 
+                // Record session with device info
+                $this->user_sessions_model->create($result['id']);
+
                 redirect(site_url());
             } else {
                 $this->session->set_flashdata('error', lang('users_register_failed'));
@@ -649,6 +659,9 @@ class Auth extends Public_Controller
         if ($user_id) {
             $this->users_model->save_users(['last_session_id' => NULL], $user_id);
         }
+
+        // Deactivate session record
+        $this->user_sessions_model->deactivate(session_id());
 
         // log the user out
         $logout = $this->ion_auth->logout();

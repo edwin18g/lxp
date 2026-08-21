@@ -2,7 +2,7 @@
 ?>
 
 <div class="row clearfix">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 course-form-tabs course-form-card">
         <!-- Page Header -->
        
 
@@ -397,133 +397,7 @@
     </div>
 </div>
 
-<style>
-    /* Styling for the new form layout */
-    .nav-tabs {
-        border-bottom: none;
-        background: #f8f9fa;
-        padding: 0;
-        border-radius: 12px 12px 0 0;
-        margin-bottom: 25px;
-        display: flex;
-        width: 100%;
-    }
-    .nav-tabs > li {
-        flex: 1;
-        display: flex;
-    }
-    .nav-tabs > li > a {
-        font-weight: 600;
-        color: #777;
-        border: none !important;
-        padding: 18px 25px;
-        transition: all 0.3s;
-        font-size: 13px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        border-radius: 0;
-    }
-    .nav-tabs > li:first-child > a {
-        border-radius: 12px 0 0 0;
-    }
-    .nav-tabs > li:last-child > a {
-        border-radius: 0 12px 0 0;
-    }
-    .nav-tabs > li > a i {
-        margin-right: 8px;
-        font-size: 20px !important;
-    }
-    .nav-tabs > li.active > a {
-        color: #2196F3 !important;
-        background: #fff !important;
-        border-bottom: 3px solid #2196F3 !important;
-        box-shadow: 0 -4px 10px rgba(0,0,0,0.03);
-    }
-    .card {
-        border: none;
-        border-radius: 12px !important;
-        box-shadow: 0 4px 20px rgba(0,0,0,0.06) !important;
-        margin-bottom: 30px;
-        transition: transform 0.2s;
-    }
-    .card .header {
-        border-radius: 12px 12px 0 0 !important;
-        padding: 18px 25px !important;
-        border-bottom: 1px solid #f5f5f5;
-    }
-    .card .header h2 {
-        font-size: 15px !important;
-        font-weight: 600;
-        color: #333;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-    .form-group .form-line {
-        border-bottom: 1px solid #eee !important;
-    }
-    .form-line.focused {
-        border-bottom: 2px solid #2196F3 !important;
-    }
-    .form-label {
-        font-weight: 600;
-        color: #888;
-        font-size: 12px;
-        text-transform: uppercase;
-        margin-bottom: 8px;
-    }
-    .btn-circle {
-        border-radius: 50% !important;
-    }
 
-    /* Offcanvas Sidebar */
-    .offcanvas-sidebar {
-        position: fixed;
-        right: -100%;
-        top: 0;
-        width: 50%;
-        height: 100%;
-        background: #fff;
-        z-index: 1050;
-        box-shadow: -5px 0 25px rgba(0,0,0,0.1);
-        transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
-        display: flex;
-        flex-direction: column;
-    }
-    .offcanvas-sidebar.active {
-        right: 0;
-    }
-    .offcanvas-header {
-        padding: 20px 25px;
-        background: #f8f9fa;
-        border-bottom: 1px solid #eee;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-    }
-    .offcanvas-body {
-        padding: 30px 25px;
-        overflow-y: auto;
-        flex-grow: 1;
-    }
-    .offcanvas-backdrop {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.4);
-        z-index: 1040;
-        display: none;
-        backdrop-filter: blur(2px);
-    }
-    .offcanvas-backdrop.active {
-        display: block;
-    }
-</style>
 
 <!-- DataTables & Embedded Form Logic -->
 <?php if(!empty($id)) { ?>

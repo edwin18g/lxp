@@ -62,6 +62,13 @@ class MY_Controller extends CI_Controller
 
         // get current user
         $this->user = $this->session->userdata('logged_in');
+
+        // Update session activity timestamp
+        if ($this->user) {
+            $this->load->model('user_sessions_model');
+            $this->user_sessions_model->update_activity(session_id());
+        }
+
         // --- Learning Lock Logic ---
         if ($this->user) {
             // Check if device_locked is set in session or DB

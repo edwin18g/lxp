@@ -240,27 +240,3 @@
     });
 </script>
 
-<style>
-    .sortable-ghost {
-        opacity: 0.4;
-        background-color: #e3f2fd !important;
-        border: 2px dashed #2196F3 !important;
-    }
-
-    .sortable-chosen {
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15) !important;
-    }
-
-    .section-drag-handle:hover {
-        color: #2196F3 !important;
-    }
-
-    .lecture-drag-handle:hover {
-        color: #2196F3 !important;
-    }
-
-    .lecture-list li.card:hover {
-        border-color: #2196F3 !important;
-        transform: translateY(-2px);
-    }
-</style>

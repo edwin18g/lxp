@@ -1032,18 +1032,7 @@
                             <i class="fa fa-th-large"></i> Browse Batches
                         </a>
                     </div>
-                    <div class="lp-hero-trust">
-                        <div class="trust-avatars">
-                            <div class="av-placeholder">A</div>
-                            <div class="av-placeholder">B</div>
-                            <div class="av-placeholder">C</div>
-                            <div class="av-placeholder">+</div>
-                        </div>
-                        <div class="trust-text">
-                            <strong><?php echo !empty($count_tutors) ? number_format($count_tutors) . '+ Students' : '1,000+ Students'; ?></strong>
-                            trained &amp; placed
-                        </div>
-                    </div>
+                    
                 </div>
             </div>
         </div>
@@ -1282,8 +1271,9 @@
 $CI =& get_instance();
 $settings = $CI->settings;
 ?>
+<?php if (isset($settings->promo_modal_enabled) && $settings->promo_modal_enabled == 1): ?>
 <!-- ======================================================
-     OFFER MODAL — Opens on every page load
+     OFFER MODAL — Controlled by backend (Admin > Settings > promo_modal_enabled)
      ====================================================== -->
 <div id="offerModal" class="modal fade" role="dialog" style="z-index: 100000;">
     <div class="modal-dialog modal-md modal-dialog-centered">
@@ -1350,6 +1340,9 @@ $settings = $CI->settings;
     </div>
 </div>
 
+<?php endif; // promo_modal_enabled ?>
+
+<?php if (isset($settings->promo_modal_enabled) && $settings->promo_modal_enabled == 1): ?>
 <style>
 /* ---- Offer Modal Styles ---- */
 .offer-modal-content {
@@ -1494,7 +1487,7 @@ $settings = $CI->settings;
 </style>
 
 <script>
-/* Auto-open offer modal on every page load (no localStorage gate) */
+/* Auto-open offer modal — only rendered when promo_modal_enabled == 1 */
 document.addEventListener('DOMContentLoaded', function () {
     var checkJquery = setInterval(function () {
         if (window.jQuery) {
@@ -1511,3 +1504,4 @@ document.addEventListener('DOMContentLoaded', function () {
     }, 50);
 });
 </script>
+<?php endif; // promo_modal_enabled ?>

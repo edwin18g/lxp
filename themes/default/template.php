@@ -556,6 +556,7 @@ if (
                             <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="userMenu">
                                 <li><a href="<?php echo site_url('profile') ?>"><i class="fa fa-user-circle"></i> My Profile</a></li>
                                 <li><a href="<?php echo site_url('my_courses') ?>"><i class="fa fa-book"></i> My Learning</a></li>
+                                <li><a href="<?php echo site_url('profile/sessions') ?>"><i class="fa fa-shield"></i> Active Sessions</a></li>
                                 <li role="separator" class="divider" style="border-color:#F3F4F6;"></li>
                                 <li><a href="<?php echo site_url('auth/logout') ?>" style="color:#EF4444 !important;"><i class="fa fa-sign-out"></i> Logout</a></li>
                             </ul>

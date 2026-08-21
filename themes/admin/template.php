@@ -55,6 +55,16 @@
   <link
     href="<?php echo base_url('themes/admin/css/modern_admin.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
     rel="stylesheet" type="text/css">
+
+  <!-- Admin Shared Components CSS -->
+  <link
+    href="<?php echo base_url('themes/admin/css/admin_components.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
+    rel="stylesheet" type="text/css">
+
+  <!-- Admin Page-Specific CSS -->
+  <link
+    href="<?php echo base_url('themes/admin/css/admin_pages.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
+    rel="stylesheet" type="text/css">
 </head>
 
 <body class="theme-<?php echo $this->settings->admin_theme; ?>">
@@ -91,265 +101,131 @@
   <!-- Top Bar -->
   <nav class="navbar">
     <div class="container-fluid">
-      <div class="navbar-header">
-        <a href="javascript:void(0);" class="navbar-toggle collapsed" data-toggle="collapse"
-          data-target="#navbar-collapse" aria-expanded="false"></a>
-        <a href="javascript:void(0);" class="bars"></a>
-        <a class="navbar-brand" href="<?php echo site_url('admin'); ?>">
-          <?php echo $this->settings->site_name; ?>
-
-        </a>
+      <div style="display: flex; align-items: center; gap: 16px;">
+        <button class="navbar-toggle-btn" id="sidebarToggleBtn" style="background: transparent; border: none; color: #475569; cursor: pointer; display: flex; align-items: center; padding: 4px;">
+          <i class="material-icons" style="font-size: 26px;">menu</i>
+        </button>
+        <h3 style="margin: 0; font-weight: 800; font-size: 1.35rem; color: #0f172a; letter-spacing: -0.02em;"><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h3>
       </div>
-      <div class="collapse navbar-collapse" id="navbar-collapse">
-        <ul class="nav navbar-nav navbar-right">
-          <!-- Access Website -->
+
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <!-- Search bar input -->
+        <div style="position: relative; width: 340px;">
+          <i class="material-icons" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 22px;">search</i>
+          <input type="text" class="global-dt-search" placeholder="Search learners, courses, batches..." style="width: 100%; height: 44px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 14px 10px 46px; font-size: 0.95rem; font-weight: 500; color: #1e293b; outline: none; transition: all 0.2s;" data-table="table">
+        </div>
+
+        <!-- Icons right -->
+        <ul class="nav navbar-nav navbar-right" style="display: flex; align-items: center; gap: 12px; margin: 0;">
           <li>
-            <a href="<?php echo site_url(); ?>" target="_blank" title="<?php echo lang('menu_access_website'); ?>">
-              <i class="material-icons">public</i>
+            <a href="javascript:void(0);" style="position: relative; padding: 10px !important;">
+              <i class="material-icons" style="font-size: 24px; color: #475569;">notifications</i>
+              <?php if (count($this->notifications)) { ?><span class="label-count" style="position: absolute; top: 2px; right: 2px; background: #ef4444; color: #fff; font-size: 11px; border-radius: 10px; padding: 2px 7px; font-weight: 700;"><?php echo count($this->notifications) ?></span><?php } ?>
             </a>
           </li>
-          <!-- #END# Access Website -->
-          <!-- Call Search -->
-          <li><a href="javascript:void(0);" class="js-search" data-close="true"><i class="material-icons">search</i></a>
+          <li>
+            <a href="<?php echo site_url(); ?>" target="_blank" title="Visit Site" style="padding: 10px !important;">
+              <i class="material-icons" style="font-size: 24px; color: #475569;">public</i>
+            </a>
           </li>
-          <!-- #END# Call Search -->
-          <!-- Notifications -->
+          <li>
+            <a href="javascript:void(0);" style="padding: 10px !important;">
+              <i class="material-icons" style="font-size: 24px; color: #475569;">aspect_ratio</i>
+            </a>
+          </li>
           <li class="dropdown">
-            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button">
-              <i class="material-icons">notifications</i>
-              <?php if (count($this->notifications)) { ?><span
-                  class="label-count"><?php echo count($this->notifications) ?></span><?php } ?>
+            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button" style="padding: 4px !important; display: flex; align-items: center;">
+              <img src="<?php echo !empty($_SESSION['logged_in']['image']) ? base_url('upload/users/images/' . $_SESSION['logged_in']['image']) : base_url('themes/admin/img/avatar2.png'); ?>" style="width: 42px; height: 42px; border-radius: 50%; object-fit: cover; border: 2px solid #cbd5e1;" onerror="this.onerror=null;this.src='<?php echo base_url('themes/admin/img/avatar2.png'); ?>';">
             </a>
-            <ul class="dropdown-menu">
-              <li class="header"><?php echo lang('notifications') ?></li>
-              <li class="body">
-                <ul class="menu">
-                  <?php if (!empty($this->notifications)) {
-                    foreach ($this->notifications as $key => $val) { ?>
-                      <li>
-                        <a href="javascript:read_notification(`<?php echo $val->n_type ?>`, `<?php echo $val->n_url ?>`);">
-                          <div class="icon-circle bg-<?php echo $this->settings->admin_theme ?>">
-                            <?php if ($val->n_type == 'users') { ?>
-                              <i class="material-icons">person_add</i>
-                            <?php } else if ($val->n_type == 'events' || $val->n_type == 'batches') { ?>
-                                <i class="material-icons">loupe</i>
-                            <?php } else if ($val->n_type == 'bbookings' || $val->n_type == 'ebookings') { ?>
-                                  <i class="material-icons">monetization_on</i>
-                            <?php } else if ($val->n_type == 'b_cancellation' || $val->n_type == 'e_cancellation') { ?>
-                                    <i class="material-icons">money_off</i>
-                            <?php } else if ($val->n_type == 'contacts') { ?>
-                                      <i class="material-icons">email</i>
-                            <?php } ?>
-                          </div>
-                          <div class="menu-info">
-                            <h4>
-                              <?php echo $val->total . ' ' . lang('noti_new') . ' ' . sprintf(lang('' . $val->n_content . ''), lang('menu_' . $val->n_type . '')); ?>
-                            </h4>
-                            <p><i class="material-icons">access_time</i>
-                              <?php echo time_elapsed_string($val->date_added); ?></p>
-                          </div>
-                        </a>
-                      </li>
-                    <?php }
-                  } else { ?>
-                    <li><a href="#" class="text-center"><?php echo lang('noti_no'); ?></a></li>
-                  <?php } ?>
-                </ul>
-              </li>
+            <ul class="dropdown-menu pull-right" style="border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.12); border: 1px solid #e2e8f0; padding: 8px 0;">
+              <li><a href="<?php echo site_url('admin/users/form/') . $_SESSION['logged_in']['id']; ?>" style="font-size: 0.92rem; font-weight: 600; padding: 10px 18px;"><i class="material-icons" style="font-size: 20px;">person</i> Profile</a></li>
+              <li><a href="<?php echo site_url('logout'); ?>" style="font-size: 0.92rem; font-weight: 600; padding: 10px 18px;"><i class="material-icons" style="font-size: 20px;">input</i> Logout</a></li>
             </ul>
           </li>
-          <!-- #END# Notifications -->
-
-          <!-- Language Dropdown -->
-          <li class="dropdown">
-            <a class="dropdown-toggle" href="javascript:void(0);" data-toggle="dropdown" role="button">
-              <i class="material-icons">language</i>
-            </a>
-            <ul class="dropdown-menu">
-              <li class="header"><?php echo lang('languages') ?></li>
-              <li class="body">
-                <ul class="menu" id="session-language-dropdown">
-                  <?php foreach ($this->languages as $key => $name): ?>
-                    <li>
-                      <a href="#" rel="<?php echo $key; ?>">
-                        <?php if ($key == $this->session->language): ?>
-                          <i class="fa fa-check selected-session-language"></i>
-                        <?php endif; ?>
-                        <?php echo $name; ?>
-                      </a>
-                    </li>
-                  <?php endforeach; ?>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <!-- #END# Language Dropdown -->
-
-          <!-- User Menu -->
-          <li class="dropdown">
-            <a href="javascript:void(0);" class="dropdown-toggle" data-toggle="dropdown" role="button">
-              <i class="material-icons">account_circle</i>
-            </a>
-            <ul class="dropdown-menu">
-              <li class="header"><?php echo lang('action_account'); ?></li>
-              <li class="body">
-                <ul class="menu">
-                  <li>
-                    <a href="<?php echo site_url('admin/users/form/') . $_SESSION['logged_in']['id']; ?>">
-                      <i class="material-icons">person</i> <?php echo lang('action_profile'); ?>
-                    </a>
-                  </li>
-                  <li>
-                    <a href="<?php echo site_url('logout'); ?>">
-                      <i class="material-icons">input</i> <?php echo lang('action_logout'); ?>
-                    </a>
-                  </li>
-                </ul>
-              </li>
-            </ul>
-          </li>
-          <!-- #END# User Menu -->
         </ul>
       </div>
     </div>
   </nav>
   <!-- #Top Bar -->
 
-  <!-- ======================================================
-       PAGE TAB BAR — Horizontal submenu tabs per product section
-       ====================================================== -->
-  <div class="page-tab-bar" id="pageTabBar">
-
-    <!-- LMS Tabs -->
-    <div class="page-tab-group" id="tabs-lms">
-      <a class="page-tab-item <?php echo (uri_string() == 'admin' || uri_string() == 'admin/dashboard') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('/admin'); ?>">
-        <i class="material-icons">dashboard</i> Dashboard
-      </a>
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/categories') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('admin/categories'); ?>">
-        <i class="material-icons">device_hub</i> <?php echo lang('menu_course_categories'); ?>
-      </a>
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/courses') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('admin/courses'); ?>">
-        <i class="material-icons">account_balance</i> <?php echo lang('menu_courses'); ?>
-      </a>
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/batches') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('admin/batches'); ?>">
-        <i class="material-icons">event_note</i> <?php echo lang('menu_batches'); ?>
-      </a>
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/enrolled_users') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('admin/enrolled_users'); ?>">
-        <i class="material-icons">class</i> Enrolled Users
-      </a>
-    </div>
-
-    <!-- Manage / Users Tabs -->
-    <div class="page-tab-group" id="tabs-users">
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/users') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('admin/users'); ?>">
-        <i class="material-icons">account_circle</i> Users
-      </a>
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/groups') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('/admin/groups'); ?>">
-        <i class="material-icons">group_work</i> User Roles
-      </a>
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/manageacl') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('/admin/manageacl'); ?>">
-        <i class="material-icons">security</i> Permissions
-      </a>
-    </div>
-
-    <!-- CMS Tabs -->
-    <div class="page-tab-group" id="tabs-cms">
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/contacts') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('/admin/contacts'); ?>">
-        <i class="material-icons">inbox</i> <?php echo lang('menu_contacts'); ?>
-      </a>
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/testimonials') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('/admin/testimonials'); ?>">
-        <i class="material-icons">insert_comment</i> <?php echo lang('menu_testimonials'); ?>
-      </a>
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/sliders') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('/admin/sliders'); ?>">
-        <i class="material-icons">view_carousel</i> Sliders
-      </a>
-      <!-- Pages & Menus dropdown -->
-      <div class="page-tab-dropdown">
-        <a class="page-tab-item <?php echo (strstr(uri_string(), 'admin/pages') || strstr(uri_string(), 'admin/menus') || strstr(uri_string(), 'admin/faqs')) ? 'is-active' : ''; ?>">
-          <i class="material-icons">developer_board</i> Pages &amp; Menus <i class="material-icons" style="font-size:14px;margin-left:2px;">expand_more</i>
-        </a>
-        <div class="page-tab-submenu">
-          <a href="<?php echo site_url('/admin/pages'); ?>" class="<?php echo strstr(uri_string(), 'admin/pages') ? 'is-active' : ''; ?>">
-            <i class="material-icons" style="font-size:16px;">pages</i> <?php echo lang('menu_pages'); ?>
-          </a>
-          <a href="<?php echo site_url('/admin/menus'); ?>" class="<?php echo strstr(uri_string(), 'admin/menus') ? 'is-active' : ''; ?>">
-            <i class="material-icons" style="font-size:16px;">menu</i> <?php echo lang('menu_menus'); ?>
-          </a>
-          <a href="<?php echo site_url('/admin/faqs'); ?>" class="<?php echo strstr(uri_string(), 'admin/faqs') ? 'is-active' : ''; ?>">
-            <i class="material-icons" style="font-size:16px;">help_outline</i> <?php echo lang('menu_faqs'); ?>
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <!-- System Tabs -->
-    <div class="page-tab-group" id="tabs-system">
-      <a class="page-tab-item <?php echo strstr(uri_string(), 'admin/settings') ? 'is-active' : ''; ?>"
-         href="<?php echo site_url('/admin/settings'); ?>">
-        <i class="material-icons">settings</i> <?php echo lang('menu_settings'); ?>
-      </a>
-    </div>
-
-  </div>
-  <!-- #END# Page Tab Bar -->
-
   <section>
-    <!-- Left Sidebar -->
-    <aside id="leftsidebar" class="sidebar">
-
-      <!-- Product Bar -->
-      <div class="product-bar">
-        <!-- Branding / Home -->
-        <div class="product-item brand" onclick="window.location.href='<?php echo site_url(); ?>'"
-          title="Visit Website">
-          <div class="brand-content">
-            <i class="material-icons">public</i>
-          </div>
+    <!-- Full Left Sidebar -->
+    <aside id="leftsidebar" class="sidebar full-sidebar">
+      <!-- Brand Logo -->
+      <div class="sidebar-brand">
+        <div class="brand-logo-icon">
+          <i class="material-icons" style="color: #ffffff; font-size: 22px;">bolt</i>
         </div>
-
-        <div class="product-item active" onclick="switchProduct('lms')" data-toggle="tooltip" data-placement="right"
-          title="LMS">
-          <i class="material-icons">school</i>
-          <span class="product-name">LMS</span>
-        </div>
-        <div class="product-item" onclick="switchProduct('users')" data-toggle="tooltip" data-placement="right"
-          title="Administration">
-          <i class="material-icons">people</i>
-          <span class="product-name">Manage</span>
-        </div>
-        <div class="product-item" onclick="switchProduct('cms')" data-toggle="tooltip" data-placement="right"
-          title="CMS">
-          <i class="material-icons">web</i>
-          <span class="product-name">CMS</span>
-        </div>
-        <div class="product-item" onclick="switchProduct('system')" data-toggle="tooltip" data-placement="right"
-          title="System">
-          <i class="material-icons">settings_applications</i>
-          <span class="product-name">System</span>
-        </div>
+        <span class="brand-name"><?php echo $this->settings->site_name; ?></span>
       </div>
 
-      <!-- #Menu -->
+      <!-- Navigation Links -->
+      <div class="sidebar-nav-scroll">
+        <!-- Dashboard Item -->
+        <a href="<?php echo site_url('admin'); ?>" class="nav-item <?php echo (uri_string() == 'admin' || uri_string() == 'admin/dashboard') ? 'active' : ''; ?>">
+          <i class="material-icons">dashboard</i>
+          <span>Dashboard</span>
+        </a>
 
-      <!-- Footer -->
-      <div class="legal">
-        <div class="version">
-          <?php echo $this->settings->site_name; ?> v<?php echo $this->settings->site_version; ?>
-        </div>
-        <div class="copyright">&copy; 2019 <a href="https://edwin18g.com">edwin18g</a></div>
+        <!-- Category: LEARNING -->
+        <div class="nav-category">LEARNING</div>
+        <a href="<?php echo site_url('admin/categories'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/categories') ? 'active' : ''; ?>">
+          <i class="material-icons">schema</i>
+          <span>Course Categories</span>
+        </a>
+        <a href="<?php echo site_url('admin/courses'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/courses') ? 'active' : ''; ?>">
+          <i class="material-icons">import_contacts</i>
+          <span>Courses</span>
+        </a>
+        <a href="<?php echo site_url('admin/batches'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/batches') ? 'active' : ''; ?>">
+          <i class="material-icons">date_range</i>
+          <span>Batches</span>
+        </a>
+        <a href="<?php echo site_url('admin/enrolled_users'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/enrolled_users') ? 'active' : ''; ?>">
+          <i class="material-icons">assignment_ind</i>
+          <span>Enrolled Users</span>
+        </a>
+
+        <!-- Category: MANAGE -->
+        <div class="nav-category">MANAGE</div>
+        <a href="<?php echo site_url('admin/users'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/users') ? 'active' : ''; ?>">
+          <i class="material-icons">people_outline</i>
+          <span>Learners</span>
+        </a>
+        <a href="<?php echo site_url('admin/groups'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/groups') ? 'active' : ''; ?>">
+          <i class="material-icons">badge</i>
+          <span>Instructors / Roles</span>
+        </a>
+        <a href="<?php echo site_url('admin/manageacl'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/manageacl') ? 'active' : ''; ?>">
+          <i class="material-icons">analytics</i>
+          <span>Permissions</span>
+        </a>
+        <a href="<?php echo site_url('admin/events'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/events') ? 'active' : ''; ?>">
+          <i class="material-icons">event</i>
+          <span>Events</span>
+        </a>
+
+        <!-- Category: SYSTEM -->
+        <div class="nav-category">SYSTEM</div>
+        <a href="<?php echo site_url('admin/contacts'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/contacts') ? 'active' : ''; ?>">
+          <i class="material-icons">chat_bubble_outline</i>
+          <span>CMS / Contacts</span>
+        </a>
+        <a href="<?php echo site_url('admin/settings'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/settings') ? 'active' : ''; ?>">
+          <i class="material-icons">settings</i>
+          <span>Settings</span>
+        </a>
       </div>
-      <!-- #Footer -->
+
+      <!-- User Profile Badge at Bottom -->
+      <div class="sidebar-user-badge">
+        <img src="<?php echo !empty($_SESSION['logged_in']['image']) ? base_url('upload/users/images/' . $_SESSION['logged_in']['image']) : base_url('themes/admin/img/avatar2.png'); ?>" alt="User" onerror="this.onerror=null;this.src='<?php echo base_url('themes/admin/img/avatar2.png'); ?>';">
+        <div class="user-info-text">
+          <span class="user-name"><?php echo isset($_SESSION['logged_in']['first_name']) ? $_SESSION['logged_in']['first_name'] . ' ' . $_SESSION['logged_in']['last_name'] : 'Admin User'; ?></span>
+          <span class="user-email"><?php echo isset($_SESSION['logged_in']['email']) ? $_SESSION['logged_in']['email'] : 'admin@admin.com'; ?></span>
+          <span class="online-status"><span class="dot"></span> Online</span>
+        </div>
+      </div>
     </aside>
     <!-- #END# Left Sidebar -->
   </section>
@@ -481,13 +357,25 @@
       if (typeof (Storage) !== "undefined") {
         localStorage.setItem("activeProduct", productName);
       }
+
+      // Redirect to main page for each product section
+      var productRoutes = {
+        'lms': 'admin',
+        'users': 'admin/users',
+        'cms': 'admin/contacts',
+        'system': 'admin/settings'
+      };
+
+      if (productRoutes[productName]) {
+        var currentPath = window.location.pathname.replace(/\/+$/, '');
+        var targetPath = site_url + productRoutes[productName];
+        if (currentPath !== '/' + productRoutes[productName]) {
+          window.location.href = targetPath;
+        }
+      }
     }
 
     $(function () {
-      try {
-        $('[data-toggle="tooltip"]').tooltip();
-      } catch (e) { console.log("Tooltip init failed", e); }
-
       var activeProduct = localStorage.getItem("activeProduct");
       if (activeProduct) {
         switchProduct(activeProduct);
@@ -505,6 +393,9 @@
       }
     });
   </script>
+
+  <!-- Admin Shared JS -->
+  <script type="text/javascript" src="<?php echo base_url('themes/admin/js/admin_shared.js'); ?>?v=<?php echo $this->settings->site_version; ?>"></script>
 
   <!-- User Details Offcanvas (Global) -->
   <div id="userSidebar" class="right-sidebar">
