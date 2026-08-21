@@ -1149,7 +1149,7 @@ $settings = $CI->settings;
                         </a>
                         <a href="<?php echo site_url('courses') ?>" class="btn-lp-outline">
                             <i class="fa fa-th-large"></i> Browse Batches
-                        </a>
+                        </a> 
                     </div>
                     
                 </div>
