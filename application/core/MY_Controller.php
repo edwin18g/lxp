@@ -78,10 +78,19 @@ class MY_Controller extends CI_Controller
             if ($user_db) {
                 // Auto-lock logic for learners (role 3) - Skip if Admin is impersonating
                 if ($user_db->role == 3 && strpos($this->current_uri, '/courses') === 0 && empty($_SESSION['impersonator'])) {
-                    // If session ID mismatch, it means they logged in elsewhere and returned to an old session
-                    if (!empty($user_db->last_session_id) && $user_db->last_session_id != session_id()) {
+                    $this->load->model('user_sessions_model');
+                    $active_sessions = $this->user_sessions_model->get_active($this->user['id']);
+
+                    // Only trigger lock if MULTIPLE active sessions exist for this user
+                    if (count($active_sessions) > 1) {
                         $this->db->where('id', $this->user['id'])->update('users', array('device_locked' => 1));
-                        $user_db->device_locked = 1; // Mark as locked for the immediate check below
+                        $user_db->device_locked = 1;
+                    } else {
+                        // Single active session -> keep last_session_id in sync
+                        if (empty($user_db->last_session_id) || $user_db->last_session_id != session_id()) {
+                            $this->db->where('id', $this->user['id'])->update('users', array('last_session_id' => session_id()));
+                            $user_db->last_session_id = session_id();
+                        }
                     }
                 }
 

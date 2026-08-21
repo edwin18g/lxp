@@ -73,6 +73,13 @@ class User_sessions_model extends CI_Model
             'last_activity' => time(),
         );
 
+        // Check if active record for session_id already exists to prevent duplicates
+        $existing = $this->db->get_where($this->table, array('session_id' => $session_id, 'is_active' => 1))->row();
+        if ($existing) {
+            $this->db->where('id', $existing->id)->update($this->table, $data);
+            return $existing->id;
+        }
+
         $this->db->insert($this->table, $data);
 
         if ($this->db->insert_id()) {
@@ -82,12 +89,29 @@ class User_sessions_model extends CI_Model
         return FALSE;
     }
 
-    /**
-     * Deactivate a session on logout
-     *
-     * @param string $session_id
-     * @return bool
-     */
+    public function get_active($user_id)
+    {
+        if (!$user_id) {
+            return array();
+        }
+
+        // Subquery to get max session record ID per session_id
+        $subquery = $this->db->select('MAX(id) as max_id')
+                             ->from($this->table)
+                             ->where('user_id', $user_id)
+                             ->where('is_active', 1)
+                             ->group_by('session_id')
+                             ->get_compiled_select();
+
+        // Main query to get full rows for distinct sessions
+        $this->db->select('*')
+                 ->from($this->table)
+                 ->where("id IN ($subquery)", NULL, FALSE)
+                 ->order_by('last_activity', 'DESC');
+
+        return $this->db->get()->result_array();
+    }
+
     public function deactivate($session_id)
     {
         if (!$session_id) {
@@ -101,12 +125,6 @@ class User_sessions_model extends CI_Model
         return TRUE;
     }
 
-    /**
-     * Deactivate all sessions for a user (force logout everywhere)
-     *
-     * @param int $user_id
-     * @return bool
-     */
     public function deactivate_all($user_id)
     {
         if (!$user_id) {
@@ -120,13 +138,6 @@ class User_sessions_model extends CI_Model
         return TRUE;
     }
 
-    /**
-     * Deactivate all active sessions for a user EXCEPT current session
-     *
-     * @param int $user_id
-     * @param string $current_session_id
-     * @return bool
-     */
     public function deactivate_all_except($user_id, $current_session_id)
     {
         if (!$user_id) {
@@ -142,22 +153,6 @@ class User_sessions_model extends CI_Model
 
         $this->db->update($this->table, array('is_active' => 0));
         return TRUE;
-    }
-
-    /**
-     * Get all active sessions for a user
-     *
-     * @param int $user_id
-     * @return array
-     */
-    public function get_active($user_id)
-    {
-        $this->db->where('user_id', $user_id)
-                  ->where('is_active', 1)
-                  ->order_by('last_activity', 'DESC');
-
-        $query = $this->db->get($this->table);
-        return $query->result_array();
     }
 
     /**
@@ -283,6 +278,123 @@ class User_sessions_model extends CI_Model
             'os'          => $os,
             'device_type' => $device_type,
         );
+    }
+
+    /**
+     * DataTables query helper for sessions GROUPED BY USER with Filter Support
+     */
+    private function _get_user_grouped_sessions_query($search = '', $status_filter = 'all', $role_filter = 'all')
+    {
+        $this->db->select('
+            users.id as user_id,
+            users.first_name,
+            users.last_name,
+            users.email,
+            users.image,
+            users.device_locked,
+            users.role,
+            COUNT(DISTINCT CASE WHEN user_sessions.is_active = 1 THEN user_sessions.session_id END) as active_count,
+            COUNT(user_sessions.id) as total_count,
+            MAX(user_sessions.last_activity) as max_last_activity
+        ');
+        $this->db->from($this->table);
+        $this->db->join('users', 'users.id = user_sessions.user_id', 'inner');
+
+        if (!empty($role_filter) && $role_filter !== 'all') {
+            $this->db->where('users.role', $role_filter);
+        }
+
+        if (!empty($status_filter) && $status_filter === 'locked') {
+            $this->db->where('users.device_locked', 1);
+        }
+
+        if (!empty($search)) {
+            $this->db->group_start();
+            $this->db->like('users.first_name', $search);
+            $this->db->or_like('users.last_name', $search);
+            $this->db->or_like('users.email', $search);
+            $this->db->or_like('user_sessions.ip_address', $search);
+            $this->db->group_end();
+        }
+
+        $this->db->group_by('users.id');
+
+        if (!empty($status_filter)) {
+            if ($status_filter === 'active') {
+                $this->db->having('active_count >', 0);
+            } elseif ($status_filter === 'multidevice') {
+                $this->db->having('active_count >', 1);
+            } elseif ($status_filter === 'inactive') {
+                $this->db->having('active_count', 0);
+            }
+        }
+    }
+
+    public function get_user_grouped_sessions_dt($limit = 10, $offset = 0, $orders = array(), $search = '', $status_filter = 'all', $role_filter = 'all')
+    {
+        $this->_get_user_grouped_sessions_query($search, $status_filter, $role_filter);
+
+        if (!empty($orders)) {
+            foreach ($orders as $key => $value) {
+                $this->db->order_by($key, $value);
+            }
+        } else {
+            $this->db->order_by('active_count', 'DESC');
+            $this->db->order_by('max_last_activity', 'DESC');
+        }
+
+        if ($limit != -1) {
+            $this->db->limit($limit, $offset);
+        }
+
+        return $this->db->get()->result();
+    }
+
+    public function count_all_grouped_users()
+    {
+        $res = $this->db->query("SELECT COUNT(DISTINCT user_id) as total FROM user_sessions")->row();
+        return $res ? $res->total : 0;
+    }
+
+    public function count_filtered_grouped_users($search = '', $status_filter = 'all', $role_filter = 'all')
+    {
+        $this->_get_user_grouped_sessions_query($search, $status_filter, $role_filter);
+        return $this->db->get()->num_rows();
+    }
+
+    public function count_multidevice_users()
+    {
+        $res = $this->db->query("SELECT COUNT(*) as total FROM (SELECT user_id FROM user_sessions WHERE is_active = 1 GROUP BY user_id HAVING COUNT(DISTINCT session_id) > 1) as tmp")->row();
+        return $res ? $res->total : 0;
+    }
+
+    public function count_locked_users()
+    {
+        return $this->db->where('device_locked', 1)->count_all_results('users');
+    }
+
+    /**
+     * Get all session records for a specific user (for modal details)
+     */
+    public function get_all_sessions_by_user($user_id)
+    {
+        if (!$user_id) {
+            return array();
+        }
+
+        $subquery = $this->db->select('MAX(id) as max_id')
+                             ->from($this->table)
+                             ->where('user_id', $user_id)
+                             ->group_by('session_id')
+                             ->get_compiled_select();
+
+        $this->db->select('*')
+                 ->from($this->table)
+                 ->where("id IN ($subquery)", NULL, FALSE)
+                 ->order_by('is_active', 'DESC')
+                 ->order_by('last_activity', 'DESC');
+
+        return $this->db->get()->result_array();
     }
 
     /**

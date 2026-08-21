@@ -890,7 +890,7 @@ class Users extends Admin_Controller
         $this->user_sessions_model->deactivate_all($user_id);
         $this->session->set_flashdata('message', 'All sessions for this user have been terminated.');
 
-        redirect('admin/users/view/' . $user_id);
+        redirect('admin/users/sessions');
     }
 
     /**
@@ -904,15 +904,15 @@ class Users extends Admin_Controller
 
         $data['total_sessions'] = $this->db->count_all('user_sessions');
         $data['active_sessions'] = $this->db->where('is_active', 1)->count_all_results('user_sessions');
+        $data['multidevice_users'] = $this->user_sessions_model->count_multidevice_users();
+        $data['locked_users'] = $this->user_sessions_model->count_locked_users();
 
         $data['t_headers'] = array(
             '#',
             'User',
-            'IP Address',
-            'Device',
-            'Browser',
-            'OS',
-            'Status',
+            'Active Connections',
+            'Total Recorded',
+            'Lock Status',
             'Last Active',
             'Action',
         );
@@ -923,7 +923,7 @@ class Users extends Admin_Controller
     }
 
     /**
-     * ajax_sessions_list
+     * ajax_sessions_list (Grouped by User)
      */
     public function ajax_sessions_list()
     {
@@ -933,16 +933,17 @@ class Users extends Admin_Controller
         $search = isset($search_post['value']) ? $search_post['value'] : '';
         $order_post = $this->input->post('order');
 
+        $status_filter = $this->input->post('status_filter') ? $this->input->post('status_filter') : 'all';
+        $role_filter = $this->input->post('role_filter') ? $this->input->post('role_filter') : 'all';
+
         $orders = array();
         $columns_map = array(
-            0 => 'user_sessions.id',
+            0 => 'users.id',
             1 => 'users.first_name',
-            2 => 'user_sessions.ip_address',
-            3 => 'user_sessions.device_type',
-            4 => 'user_sessions.browser',
-            5 => 'user_sessions.os',
-            6 => 'user_sessions.is_active',
-            7 => 'user_sessions.last_activity',
+            2 => 'active_count',
+            3 => 'total_count',
+            4 => 'users.device_locked',
+            5 => 'max_last_activity',
         );
 
         if ($order_post) {
@@ -953,7 +954,7 @@ class Users extends Admin_Controller
             }
         }
 
-        $list = $this->user_sessions_model->get_sessions_dt($length, $start, $orders, $search);
+        $list = $this->user_sessions_model->get_user_grouped_sessions_dt($length, $start, $orders, $search, $status_filter, $role_filter);
 
         $data = array();
         $no = $start;
@@ -967,43 +968,101 @@ class Users extends Admin_Controller
             $user_img = !empty($val->image) ? base_url('upload/users/images/' . $val->image) : base_url('themes/admin/img/avatar2.png');
             $user_name = !empty($val->first_name) ? $val->first_name . ' ' . $val->last_name : 'Unknown User';
             $user_html = '<div style="display:flex; align-items:center; gap:10px;">';
-            $user_html .= '<img src="' . $user_img . '" style="width:32px; height:32px; border-radius:50%; object-fit:cover;" onerror="this.onerror=null;this.src=\'' . base_url('themes/admin/img/avatar2.png') . '\';">';
-            $user_html .= '<div><div style="font-weight:700; color:#1e293b;">' . $user_name . '</div><div style="font-size:12px; color:#64748b;">' . $val->email . '</div></div>';
+            $user_html .= '<img src="' . $user_img . '" style="width:36px; height:36px; border-radius:50%; object-fit:cover;" onerror="this.onerror=null;this.src=\'' . base_url('themes/admin/img/avatar2.png') . '\';">';
+            $user_html .= '<div><div style="font-weight:700; color:#1e293b;">' . htmlspecialchars($user_name) . '</div><div style="font-size:12px; color:#64748b;">' . htmlspecialchars($val->email) . '</div></div>';
             $user_html .= '</div>';
             $row[] = $user_html;
 
-            $row[] = '<span style="font-family:monospace; font-weight:600; color:#334155;">' . $val->ip_address . '</span>';
-            $row[] = '<span class="badge-premium bg-slate-soft color-slate" style="text-transform:capitalize;">' . ($val->device_type ? $val->device_type : 'Desktop') . '</span>';
-            $row[] = '<span style="color:#475569; font-weight:500;">' . ($val->browser ? $val->browser : 'Unknown') . '</span>';
-            $row[] = '<span style="color:#475569; font-weight:500;">' . ($val->os ? $val->os : 'Unknown') . '</span>';
+            // Active Connections Count
+            if ($val->active_count > 0) {
+                $badge_class = ($val->active_count > 1) ? 'bg-amber-soft color-amber' : 'bg-emerald-soft color-emerald';
+                $row[] = '<span class="badge-premium ' . $badge_class . '" style="font-weight:700; font-size:12px;"><i class="material-icons" style="font-size:15px; vertical-align:middle; margin-right:2px;">wifi_tethering</i> ' . $val->active_count . ' Active</span>';
+            } else {
+                $row[] = '<span class="badge-premium bg-slate-soft color-slate">0 Active</span>';
+            }
 
-            // Status
-            $status_class = $val->is_active ? 'bg-emerald-soft color-emerald' : 'bg-rose-soft color-rose';
-            $status_text = $val->is_active ? 'Active' : 'Expired / Logged Out';
-            $row[] = '<span class="badge-premium ' . $status_class . '">' . $status_text . '</span>';
+            // Total Sessions Recorded
+            $row[] = '<span style="font-weight:600; color:#475569;">' . $val->total_count . ' Sessions</span>';
+
+            // Learning Lock Status
+            if ($val->device_locked) {
+                $row[] = '<span class="badge-premium bg-rose-soft color-rose" style="font-weight:700;"><i class="material-icons" style="font-size:14px; vertical-align:middle;">lock</i> Locked</span>';
+            } else {
+                $row[] = '<span class="badge-premium bg-emerald-soft color-emerald"><i class="material-icons" style="font-size:14px; vertical-align:middle;">lock_open</i> Normal</span>';
+            }
 
             // Last Active
-            $row[] = '<span style="font-size:13px; color:#64748b;">' . time_elapsed_string($val->last_activity) . '</span>';
+            $row[] = '<span style="font-size:13px; color:#64748b;">' . time_elapsed_string($val->max_last_activity) . '</span>';
 
             // Action
-            if ($val->is_active) {
-                $action = '<a href="' . site_url('admin/users/terminate_session/' . $val->user_id . '/' . $val->id) . '" class="btn-table-action color-rose bg-rose-soft" title="Terminate Session" onclick="return confirm(\'Are you sure you want to terminate this active session?\');"><i class="material-icons">power_settings_new</i> Terminate</a>';
-            } else {
-                $action = '<span style="color:#94a3b8; font-size:13px;">Inactive</span>';
+            $actions = '<button type="button" class="btn btn-sm btn-default view-sessions-btn" data-userid="' . $val->user_id . '" data-username="' . htmlspecialchars($user_name) . '" style="border-radius:8px; font-weight:600; color:#4f46e5; border:1px solid #c7d2fe; background:#eef2ff;"><i class="material-icons" style="font-size:16px; vertical-align:middle;">pageview</i> View Sessions</button>';
+            
+            if ($val->device_locked || $val->active_count > 0) {
+                $actions .= ' <a href="' . site_url('admin/users/release_lock/' . $val->user_id) . '" class="btn btn-sm btn-success" style="border-radius:8px; font-weight:600;" onclick="return confirm(\'Release lock and clear all active sessions for ' . htmlspecialchars($user_name) . '?\');"><i class="material-icons" style="font-size:16px; vertical-align:middle;">lock_open</i> Release Lock</a>';
             }
-            $row[] = $action;
 
+            $row[] = $actions;
             $data[] = $row;
         }
 
         $output = array(
             "draw" => intval($this->input->post('draw')),
-            "recordsTotal" => $this->user_sessions_model->count_all_sessions(),
-            "recordsFiltered" => $this->user_sessions_model->count_filtered_sessions($search),
+            "recordsTotal" => $this->user_sessions_model->count_all_grouped_users(),
+            "recordsFiltered" => $this->user_sessions_model->count_filtered_grouped_users($search),
             "data" => $data,
         );
 
         echo json_encode($output);
+    }
+
+    /**
+     * Release device lock and terminate all sessions for a user
+     */
+    public function release_lock($user_id = NULL)
+    {
+        if (!$this->ion_auth->is_admin()) {
+            $this->session->set_flashdata('error', 'Only administrators can perform this action.');
+            redirect('admin/users/sessions');
+        }
+
+        $user_id = (int) $user_id;
+        if (!empty($user_id)) {
+            // 1. Release lock in users table
+            $this->db->where('id', $user_id)->update('users', array('device_locked' => 0, 'last_session_id' => NULL));
+
+            // 2. Deactivate all active sessions in user_sessions
+            $this->user_sessions_model->deactivate_all($user_id);
+
+            // 3. Purge session table entries
+            $this->db->like('data', 'user_id|s:' . strlen($user_id) . ':"' . $user_id . '";');
+            $this->db->delete('ce_sessn');
+
+            $this->session->set_flashdata('message', 'Device lock released and all active sessions cleared for the user.');
+        }
+
+        redirect('admin/users/sessions');
+    }
+
+    /**
+     * Get user session details for Modal view
+     */
+    public function ajax_user_sessions_modal($user_id = NULL)
+    {
+        if (!$user_id) {
+            echo json_encode(array('status' => FALSE, 'msg' => 'Invalid User ID'));
+            return;
+        }
+
+        $this->load->model('users_model');
+        $user = $this->users_model->get_users_by_id($user_id);
+        $sessions = $this->user_sessions_model->get_all_sessions_by_user($user_id);
+
+        $html = $this->load->view('admin/system/users/sessions_modal', array(
+            'user' => $user,
+            'sessions' => $sessions
+        ), TRUE);
+
+        echo json_encode(array('status' => TRUE, 'html' => $html, 'user_name' => $user ? $user->first_name . ' ' . $user->last_name : 'User'));
     }
 
     /**

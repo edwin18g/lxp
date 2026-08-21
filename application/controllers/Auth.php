@@ -947,6 +947,11 @@ class Auth extends Public_Controller
      */
     public function unlock_device()
     {
+        if (!$this->ion_auth->is_admin()) {
+            $this->session->set_flashdata('error', 'Only administrators can unlock learning accounts.');
+            redirect('/');
+        }
+
         $user_id = (!empty($_SESSION['logged_in']['id'])) ? $_SESSION['logged_in']['id'] : $this->session->userdata('user_id');
 
         if (!$user_id) {

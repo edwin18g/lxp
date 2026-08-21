@@ -231,11 +231,6 @@ defined('BASEPATH') OR exit('No direct script access allowed');
             <?php endif; ?>
 
             <div class="error-actions">
-                <?php if ($is_lock_page): ?>
-                    <a href="<?php echo config_item('base_url') . 'index.php/auth/unlock_device?redirect=' . urlencode(isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : ''); ?>" class="btn-primary" style="background: linear-gradient(135deg, #059669 0%, #10B981 100%); box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);">
-                        <i class="fa-solid fa-user-shield"></i> Terminate Other Sessions & Continue
-                    </a>
-                <?php endif; ?>
                 <a href="<?php echo config_item('base_url'); ?>" class="btn-primary">
                     <i class="fa-solid fa-house"></i> Return to Home
                 </a>
