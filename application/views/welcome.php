@@ -1002,10 +1002,128 @@
     .lp-stat-grid { grid-template-columns: 1fr 1fr; }
 }
 
-/* Section padding util */
-.lp-py { padding: 100px 0; }
+/* ======================================================
+   TOP OFFER ALERT BAR — Managed by Backend Settings
+   ====================================================== */
+.lp-top-offer-bar {
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 50%, #06B6D4 100%);
+    color: #ffffff;
+    padding: 10px 0;
+    position: relative;
+    z-index: 99;
+    box-shadow: 0 4px 16px rgba(79, 70, 229, 0.25);
+}
+.lp-top-offer-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    flex-wrap: wrap;
+    text-align: center;
+    position: relative;
+    padding: 0 40px;
+}
+.lp-top-offer-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    padding: 3px 12px;
+    border-radius: 50px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    flex-shrink: 0;
+}
+.lp-offer-pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #06B6D4;
+    border-radius: 50%;
+    box-shadow: 0 0 8px #06B6D4;
+    animation: lp-pulse 1.8s infinite;
+}
+.lp-top-offer-text {
+    font-size: 0.95rem;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+}
+.lp-top-offer-btn {
+    background: #ffffff;
+    color: #4F46E5 !important;
+    padding: 5px 16px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-decoration: none !important;
+    transition: all 0.25s ease;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+}
+.lp-top-offer-btn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    background: #F8FAFC;
+    color: #4338CA !important;
+}
+.lp-top-offer-close {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.15);
+    border: none;
+    color: #fff;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+.lp-top-offer-close:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
 
 </style>
+
+<?php
+$CI =& get_instance();
+$settings = $CI->settings;
+?>
+<?php if (!empty($settings->top_alert_enabled) && $settings->top_alert_enabled == 1 && !empty($settings->top_alert)): 
+    $alert_btn_text = !empty($settings->top_alert_btn_text) ? $settings->top_alert_btn_text : 'Claim Offer';
+    $alert_btn_url = !empty($settings->top_alert_btn_url) ? (filter_var($settings->top_alert_btn_url, FILTER_VALIDATE_URL) ? $settings->top_alert_btn_url : site_url($settings->top_alert_btn_url)) : site_url('courses');
+?>
+<!-- ======================================================
+     TOP OFFER ALERT BANNER — Controlled by Admin > Settings
+     ====================================================== -->
+<div class="lp-top-offer-bar">
+    <div class="container">
+        <div class="lp-top-offer-container">
+            <span class="lp-top-offer-badge">
+                <span class="lp-offer-pulse-dot"></span>
+                <i class="fa fa-bolt"></i> Special Offer
+            </span>
+            <span class="lp-top-offer-text">
+                <?php echo htmlspecialchars($settings->top_alert); ?>
+            </span>
+            <a href="<?php echo $alert_btn_url; ?>" class="lp-top-offer-btn">
+                <?php echo htmlspecialchars($alert_btn_text); ?> <i class="fa fa-arrow-right"></i>
+            </a>
+            <button type="button" class="lp-top-offer-close" onclick="this.closest('.lp-top-offer-bar').style.display='none';" aria-label="Close Alert">&times;</button>
+        </div>
+    </div>
+</div>
+<?php endif; ?>
 
 <!-- ======================================================
      HERO SECTION
