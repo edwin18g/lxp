@@ -908,6 +908,7 @@ class Users extends Admin_Controller
         $data['locked_users'] = $this->user_sessions_model->count_locked_users();
 
         $data['t_headers'] = array(
+            '<input type="checkbox" id="select_all_sessions" class="filled-in chk-col-indigo"><label for="select_all_sessions" style="margin-bottom:0;"></label>',
             '#',
             'User',
             'Active Connections',
@@ -938,12 +939,12 @@ class Users extends Admin_Controller
 
         $orders = array();
         $columns_map = array(
-            0 => 'users.id',
-            1 => 'users.first_name',
-            2 => 'active_count',
-            3 => 'total_count',
-            4 => 'users.device_locked',
-            5 => 'max_last_activity',
+            1 => 'users.id',
+            2 => 'users.first_name',
+            3 => 'active_count',
+            4 => 'total_count',
+            5 => 'users.device_locked',
+            6 => 'max_last_activity',
         );
 
         if ($order_post) {
@@ -962,6 +963,9 @@ class Users extends Admin_Controller
         foreach ($list as $val) {
             $no++;
             $row = array();
+            
+            // Bulk Checkbox
+            $row[] = '<input type="checkbox" id="sess_chk_' . $val->user_id . '" class="filled-in chk-col-indigo session-user-checkbox" value="' . $val->user_id . '"><label for="sess_chk_' . $val->user_id . '" style="margin-bottom:0;"></label>';
             $row[] = $no;
 
             // User Info
@@ -1041,6 +1045,46 @@ class Users extends Admin_Controller
         }
 
         redirect('admin/users/sessions');
+    }
+
+    /**
+     * Bulk Release device lock and terminate active sessions for multiple users
+     */
+    public function bulk_release_lock()
+    {
+        if (!$this->ion_auth->is_admin()) {
+            echo json_encode(array('status' => FALSE, 'msg' => 'Only administrators can perform this action.'));
+            return;
+        }
+
+        $user_ids = $this->input->post('user_ids');
+        if (empty($user_ids) || !is_array($user_ids)) {
+            echo json_encode(array('status' => FALSE, 'msg' => 'No users selected.'));
+            return;
+        }
+
+        $count = 0;
+        foreach ($user_ids as $id) {
+            $user_id = (int) $id;
+            if ($user_id > 0) {
+                // 1. Release lock in users table
+                $this->db->where('id', $user_id)->update('users', array('device_locked' => 0, 'last_session_id' => NULL));
+
+                // 2. Deactivate all active sessions in user_sessions
+                $this->user_sessions_model->deactivate_all($user_id);
+
+                // 3. Purge session table entries
+                $this->db->like('data', 'user_id|s:' . strlen($user_id) . ':"' . $user_id . '";');
+                $this->db->delete('ce_sessn');
+
+                $count++;
+            }
+        }
+
+        echo json_encode(array(
+            'status' => TRUE,
+            'msg' => 'Successfully released lock and cleared active sessions for ' . $count . ' user(s).'
+        ));
     }
 
     /**

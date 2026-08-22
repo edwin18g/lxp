@@ -17,6 +17,11 @@
                             <span class="header-subtitle" style="font-size: 0.875rem; color: #64748b;">Monitor active logins, identify multi-device access, and manage security locks.</span>
                         </div>
                     </div>
+                    <div>
+                        <button type="button" id="btn_bulk_release_lock" class="btn btn-success" style="border-radius: 10px; font-weight: 700; padding: 10px 20px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); display: inline-flex; align-items: center; gap: 8px;" disabled>
+                            <i class="material-icons" style="font-size: 20px;">lock_open</i> Bulk Release Lock (<span id="selected_count">0</span>)
+                        </button>
+                    </div>
                 </div>
             </div>
 
@@ -125,21 +130,25 @@
                 </div>
             </div>
 
-            <!-- Table Container -->
-            <div class="body" style="padding: 0 28px 24px 28px;">
-                <div class="table-responsive">
-                    <table class="table table-bordered table-striped table-hover dataTable js-exportable" id="sessions_table" style="width: 100%; margin-bottom: 0;">
-                        <thead>
-                            <tr style="background: #f8fafc;">
-                                <?php foreach ($t_headers as $header): ?>
-                                    <th style="font-weight: 700; color: #475569; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; border-bottom: 2px solid #e2e8f0;"><?php echo $header; ?></th>
-                                <?php endforeach; ?>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
-                </div>
+<div class="row clearfix index-page">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
+        <div class="card premium-table-card">
+            <div class="body table-responsive">
+                <table id="sessions_table" class="table table-hover table-striped dataTable">
+                    <thead>
+                        <tr>
+                            <?php foreach ($t_headers as $val) {
+                                echo '<th>' . $val . '</th>';
+                            } ?>
+                        </tr>
+                    </thead>
+                    <tbody class="text-capitalize">
+                    </tbody>
+                </table>
             </div>
+        </div>
+    </div>
+</div>
 
         </div>
     </div>
@@ -180,26 +189,142 @@
 <script type="text/javascript">
 $(document).ready(function() {
     var table = $('#sessions_table').DataTable({
+        "destroy": true,
         "processing": true,
         "serverSide": true,
         "ajax": {
             "url": "<?php echo site_url('admin/users/ajax_sessions_list'); ?>",
             "type": "POST",
             "data": function(d) {
+                d.<?php echo $this->security->get_csrf_token_name(); ?> = '<?php echo $this->security->get_csrf_hash(); ?>';
                 d.status_filter = $('#filter_status').val();
                 d.role_filter = $('#filter_role').val();
             }
         },
         "columnDefs": [
-            { "targets": [0, 6], "orderable": false }
+            { "targets": [0, 1, 7], "orderable": false }
         ],
-        "order": [[2, "desc"]],
+        "order": [[3, "desc"]],
         "language": {
             "search": "_INPUT_",
             "searchPlaceholder": "Search user, email...",
             "paginate": {
                 "previous": "<i class='material-icons'>chevron_left</i>",
                 "next": "<i class='material-icons'>chevron_right</i>"
+            }
+        },
+        "drawCallback": function() {
+            updateBulkButtonState();
+            $('#select_all_sessions').prop('checked', false);
+        }
+    });
+
+    // Helper to update bulk action button state
+    function updateBulkButtonState() {
+        var selectedCount = $('.session-user-checkbox:checked').length;
+        $('#selected_count').text(selectedCount);
+        if (selectedCount > 0) {
+            $('#btn_bulk_release_lock').prop('disabled', false);
+        } else {
+            $('#btn_bulk_release_lock').prop('disabled', true);
+        }
+    }
+
+    // Select All Checkbox Handler
+    $(document).on('change', '#select_all_sessions', function() {
+        var isChecked = $(this).is(':checked');
+        $('.session-user-checkbox').prop('checked', isChecked);
+        updateBulkButtonState();
+    });
+
+    // Individual Checkbox Handler
+    $(document).on('change', '.session-user-checkbox', function() {
+        updateBulkButtonState();
+        var allChecked = $('.session-user-checkbox').length > 0 && $('.session-user-checkbox:checked').length === $('.session-user-checkbox').length;
+        $('#select_all_sessions').prop('checked', allChecked);
+    });
+
+    // Bulk Release Lock Action
+    $('#btn_bulk_release_lock').on('click', function() {
+        var selectedUserIds = [];
+        $('.session-user-checkbox:checked').each(function() {
+            selectedUserIds.push($(this).val());
+        });
+
+        if (selectedUserIds.length === 0) {
+            if (typeof swal !== 'undefined') {
+                swal("Notice", "Please select at least one user.", "info");
+            } else {
+                alert('Please select at least one user.');
+            }
+            return;
+        }
+
+        var doRelease = function() {
+            var $btn = $('#btn_bulk_release_lock');
+            $btn.prop('disabled', true).html('<i class="material-icons" style="font-size:20px;">hourglass_top</i> Processing...');
+
+            var postData = {
+                user_ids: selectedUserIds
+            };
+            postData['<?php echo $this->security->get_csrf_token_name(); ?>'] = '<?php echo $this->security->get_csrf_hash(); ?>';
+
+            $.ajax({
+                url: "<?php echo site_url('admin/users/bulk_release_lock'); ?>",
+                type: "POST",
+                data: postData,
+                dataType: "JSON",
+                success: function(res) {
+                    if (res.status) {
+                        table.ajax.reload(null, false);
+                        if (typeof show_success === 'function') {
+                            show_success(res.msg);
+                        } else if (typeof swal !== 'undefined') {
+                            swal("Success!", res.msg, "success");
+                        } else {
+                            alert(res.msg);
+                        }
+                    } else {
+                        if (typeof show_danger === 'function') {
+                            show_danger(res.msg);
+                        } else if (typeof swal !== 'undefined') {
+                            swal("Error!", res.msg, "error");
+                        } else {
+                            alert('Error: ' + res.msg);
+                        }
+                    }
+                },
+                error: function() {
+                    if (typeof show_danger === 'function') {
+                        show_danger('An unexpected error occurred while processing bulk lock release.');
+                    } else if (typeof swal !== 'undefined') {
+                        swal("Error!", "An unexpected error occurred while processing bulk lock release.", "error");
+                    } else {
+                        alert('An unexpected error occurred while processing bulk lock release.');
+                    }
+                },
+                complete: function() {
+                    $btn.html('<i class="material-icons" style="font-size: 20px;">lock_open</i> Bulk Release Lock ( <span id="selected_count">0</span> )');
+                    updateBulkButtonState();
+                }
+            });
+        };
+
+        if (typeof swal !== 'undefined') {
+            swal({
+                title: "Are you sure?",
+                text: "Release locks and clear active sessions for " + selectedUserIds.length + " selected user(s)?",
+                type: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#4f46e5",
+                confirmButtonText: "Yes, release locks!",
+                closeOnConfirm: true
+            }, function() {
+                doRelease();
+            });
+        } else {
+            if (confirm('Are you sure you want to release locks and clear active sessions for ' + selectedUserIds.length + ' selected user(s)?')) {
+                doRelease();
             }
         }
     });
