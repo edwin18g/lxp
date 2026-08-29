@@ -360,7 +360,7 @@
 }
 .lp-course-img-wrap img {
     width: 100%; height: 100%;
-    object-fit: cover;
+    object-fit: fill !important;
     transition: transform 0.6s cubic-bezier(0.165,0.84,0.44,1);
 }
 .lp-course-card:hover .lp-course-img-wrap img {
