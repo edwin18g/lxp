@@ -158,8 +158,36 @@ CREATE TABLE `course_lecture` (
   `cl_decsription` text,
   `cl_status` int NOT NULL DEFAULT '0',
   `cl_secure` int NOT NULL DEFAULT '0',
-  PRIMARY KEY (`id`)
+  `sort_order` int DEFAULT '0',
+  `section_id` int DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_cl_course_section_sort` (`cl_course_id`,`section_id`,`sort_order`)
 ) ENGINE=MyISAM AUTO_INCREMENT=1446 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+DROP TABLE IF EXISTS `course_sections`;
+CREATE TABLE `course_sections` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `course_id` int DEFAULT NULL,
+  `title` varchar(255) DEFAULT NULL,
+  `sort_order` int DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `idx_sections_course_sort` (`course_id`,`sort_order`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `sliders`;
+CREATE TABLE `sliders` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) NOT NULL,
+  `subtitle` varchar(255) NOT NULL,
+  `button_text` varchar(64) NOT NULL,
+  `button_link` varchar(255) NOT NULL,
+  `image` varchar(255) NOT NULL,
+  `order_index` int DEFAULT '0',
+  `status` tinyint(1) DEFAULT '1',
+  `date_added` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `date_updated` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 DROP TABLE IF EXISTS `course_subscription`;
 CREATE TABLE `course_subscription` (
@@ -169,7 +197,9 @@ CREATE TABLE `course_subscription` (
   `cs_start_date` date NOT NULL,
   `cs_end_date` date NOT NULL,
   `cs_status` enum('0','1','') DEFAULT '1',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  KEY `idx_cs_course_status` (`cs_course_id`,`cs_status`),
+  KEY `idx_cs_user_status_course` (`cs_user_id`,`cs_status`,`cs_course_id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=128548 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 DROP TABLE IF EXISTS `courses`;
