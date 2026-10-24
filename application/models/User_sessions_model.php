@@ -22,9 +22,6 @@ class User_sessions_model extends CI_Model
     /**
      * Ensure the user_sessions table exists in DB (Auto-migration for prod)
      */
-    /**
-     * Ensure the user_sessions table exists in DB (Auto-migration for prod)
-     */
     private function _ensure_table_exists()
     {
         if (!$this->db->table_exists($this->table)) {
@@ -113,6 +110,7 @@ class User_sessions_model extends CI_Model
                              ->from($this->table)
                              ->where('user_id', $user_id)
                              ->where('is_active', 1)
+                             ->where('last_activity >=', $this->get_active_cutoff())
                              ->group_by($device_key_expr, FALSE)
                              ->get_compiled_select();
 
@@ -196,12 +194,100 @@ class User_sessions_model extends CI_Model
      */
     public function terminate($id, $user_id)
     {
-        $this->db->where('id', $id)
-                  ->where('user_id', $user_id)
+        $row = $this->db->get_where($this->table, array('id' => $id, 'user_id' => $user_id, 'is_active' => 1))->row();
+        if (!$row) {
+            return FALSE;
+        }
+
+        $this->db->where('session_id', $row->session_id)
                   ->where('is_active', 1)
                   ->update($this->table, array('is_active' => 0));
 
-        return $this->db->affected_rows() > 0;
+        // Destroy the real CI session so the device is actually logged out
+        if ($row->session_id !== session_id()) {
+            $this->db->where('id', $row->session_id)->delete($this->config->item('sess_save_path'));
+        }
+
+        return TRUE;
+    }
+
+    /**
+     * Admin lock / unlock of a user's learning access
+     *
+     * @param int $user_id
+     * @param bool $locked
+     * @return bool
+     */
+    public function set_lock($user_id, $locked)
+    {
+        $user_id = (int) $user_id;
+        if (!$user_id) {
+            return FALSE;
+        }
+
+        $this->db->where('id', $user_id)->update('users', array('device_locked' => $locked ? 1 : 0, 'last_session_id' => NULL));
+        return TRUE;
+    }
+
+    /**
+     * Force logout of every device of a user
+     *
+     * @param int $user_id
+     * @param string|null $keep_session_id CI session id that must survive (e.g. the acting admin)
+     * @return bool
+     */
+    public function logout_all($user_id, $keep_session_id = NULL)
+    {
+        $user_id = (int) $user_id;
+        if (!$user_id) {
+            return FALSE;
+        }
+
+        $this->deactivate_all($user_id);
+
+        $this->db->like('data', 'user_id|s:' . strlen($user_id) . ':"' . $user_id . '";');
+        if ($keep_session_id) {
+            $this->db->where('id !=', $keep_session_id);
+        }
+        $this->db->delete($this->config->item('sess_save_path'));
+
+        return TRUE;
+    }
+
+    /**
+     * Sessions idle longer than the CI session lifetime are dead even if never logged out
+     *
+     * @return int unix timestamp
+     */
+    public function get_active_cutoff()
+    {
+        $expiration = (int) $this->config->item('sess_expiration');
+        return time() - ($expiration > 0 ? $expiration : 7200);
+    }
+
+    /**
+     * Mark tracked sessions that silently expired (browser closed, no logout) as inactive
+     */
+    public function prune_expired()
+    {
+        $this->db->where('is_active', 1)
+                 ->where('last_activity <', $this->get_active_cutoff())
+                 ->update($this->table, array('is_active' => 0));
+    }
+
+    /**
+     * KPI counters for the admin sessions page
+     *
+     * @return array
+     */
+    public function get_stats()
+    {
+        $cutoff = $this->get_active_cutoff();
+        return array(
+            'active_sessions'   => (int) $this->db->where('is_active', 1)->where('last_activity >=', $cutoff)->count_all_results($this->table),
+            'multidevice_users' => (int) $this->count_multidevice_users(),
+            'locked_users'      => (int) $this->count_locked_users(),
+        );
     }
 
     /**
@@ -299,6 +385,7 @@ class User_sessions_model extends CI_Model
     private function _get_user_grouped_sessions_query($search = '', $status_filter = 'all', $role_filter = 'all')
     {
         $device_key_expr = "COALESCE(NULLIF(user_sessions.device_uuid, ''), CONCAT(IFNULL(user_sessions.browser,''), '_', IFNULL(user_sessions.os,''), '_', IFNULL(user_sessions.device_type,'')))";
+        $cutoff = (int) $this->get_active_cutoff();
 
         $this->db->select('
             users.id as user_id,
@@ -308,7 +395,7 @@ class User_sessions_model extends CI_Model
             users.image,
             users.device_locked,
             users.role,
-            COUNT(DISTINCT CASE WHEN user_sessions.is_active = 1 THEN ' . $device_key_expr . ' END) as active_count,
+            COUNT(DISTINCT CASE WHEN user_sessions.is_active = 1 AND user_sessions.last_activity >= ' . $cutoff . ' THEN ' . $device_key_expr . ' END) as active_count,
             COUNT(user_sessions.id) as total_count,
             MAX(user_sessions.last_activity) as max_last_activity
         ', FALSE);
@@ -328,7 +415,9 @@ class User_sessions_model extends CI_Model
             $this->db->like('users.first_name', $search);
             $this->db->or_like('users.last_name', $search);
             $this->db->or_like('users.email', $search);
-            $this->db->or_like('user_sessions.ip_address', $search);
+            $this->db->or_like("CONCAT(users.first_name, ' ', users.last_name)", $search);
+            // Match IP via subquery so the user's aggregate counts stay complete
+            $this->db->or_where('users.id IN (SELECT user_id FROM ' . $this->table . ' WHERE ip_address LIKE ' . $this->db->escape('%' . $this->db->escape_like_str($search) . '%') . ')', NULL, FALSE);
             $this->db->group_end();
         }
 
@@ -380,7 +469,7 @@ class User_sessions_model extends CI_Model
     public function count_multidevice_users()
     {
         $device_key_expr = "COALESCE(NULLIF(device_uuid, ''), CONCAT(IFNULL(browser,''), '_', IFNULL(os,''), '_', IFNULL(device_type,'')))";
-        $res = $this->db->query("SELECT COUNT(*) as total FROM (SELECT user_id FROM user_sessions WHERE is_active = 1 GROUP BY user_id HAVING COUNT(DISTINCT {$device_key_expr}) > 1) as tmp")->row();
+        $res = $this->db->query("SELECT COUNT(*) as total FROM (SELECT user_id FROM user_sessions WHERE is_active = 1 AND last_activity >= " . (int) $this->get_active_cutoff() . " GROUP BY user_id HAVING COUNT(DISTINCT {$device_key_expr}) > 1) as tmp")->row();
         return $res ? $res->total : 0;
     }
 
@@ -410,7 +499,13 @@ class User_sessions_model extends CI_Model
                  ->order_by('is_active', 'DESC')
                  ->order_by('last_activity', 'DESC');
 
-        return $this->db->get()->result_array();
+        $cutoff = $this->get_active_cutoff();
+        $rows = $this->db->get()->result_array();
+        foreach ($rows as &$row) {
+            $row['is_expired'] = $row['is_active'] && $row['last_activity'] < $cutoff;
+            $row['is_live'] = $row['is_active'] && !$row['is_expired'];
+        }
+        return $rows;
     }
 
     /**

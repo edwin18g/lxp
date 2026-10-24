@@ -53,17 +53,17 @@
 
   <!-- Modern Admin CSS (Global Overrides) -->
   <link
-    href="<?php echo base_url('themes/admin/css/modern_admin.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
+    href="<?php echo base_url('themes/admin/css/modern_admin.css'); ?>?v=<?php echo @filemtime(FCPATH . 'themes/admin/css/modern_admin.css'); ?>"
     rel="stylesheet" type="text/css">
 
   <!-- Admin Shared Components CSS -->
   <link
-    href="<?php echo base_url('themes/admin/css/admin_components.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
+    href="<?php echo base_url('themes/admin/css/admin_components.css'); ?>?v=<?php echo @filemtime(FCPATH . 'themes/admin/css/admin_components.css'); ?>"
     rel="stylesheet" type="text/css">
 
   <!-- Admin Page-Specific CSS -->
   <link
-    href="<?php echo base_url('themes/admin/css/admin_pages.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
+    href="<?php echo base_url('themes/admin/css/admin_pages.css'); ?>?v=<?php echo @filemtime(FCPATH . 'themes/admin/css/admin_pages.css'); ?>"
     rel="stylesheet" type="text/css">
 </head>
 
@@ -117,22 +117,22 @@
   <!-- Top Bar -->
   <nav class="navbar">
     <div class="container-fluid">
-      <div style="display: flex; align-items: center; gap: 16px;">
+      <div style="display: flex; align-items: center; gap: 12px; min-width: 0;">
         <button class="navbar-toggle-btn" id="sidebarToggleBtn" style="background: transparent; border: none; color: #475569; cursor: pointer; display: flex; align-items: center; padding: 4px;">
           <i class="material-icons" style="font-size: 26px;">menu</i>
         </button>
-        <h3 style="margin: 0; font-weight: 800; font-size: 1.35rem; color: #0f172a; letter-spacing: -0.02em;"><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h3>
+        <h3 class="navbar-title"><?php echo isset($page_title) ? $page_title : 'Dashboard'; ?></h3>
       </div>
 
-      <div style="display: flex; align-items: center; gap: 24px;">
+      <div style="display: flex; align-items: center; gap: 16px; flex-shrink: 0;">
         <!-- Search bar input -->
-        <div style="position: relative; width: 340px;">
+        <div class="navbar-search" style="position: relative;">
           <i class="material-icons" style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #94a3b8; font-size: 22px;">search</i>
-          <input type="text" class="global-dt-search" placeholder="Search learners, courses, batches..." style="width: 100%; height: 44px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 14px 10px 46px; font-size: 0.95rem; font-weight: 500; color: #1e293b; outline: none; transition: all 0.2s;" data-table="table">
+          <input type="text" class="global-dt-search" placeholder="Search learners, courses..." style="width: 100%; height: 40px; background: #f8fafc; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 14px 10px 46px; font-size: 0.95rem; font-weight: 500; color: #1e293b; outline: none; transition: all 0.2s;" data-table="table">
         </div>
 
         <!-- Icons right -->
-        <ul class="nav navbar-nav navbar-right" style="display: flex; align-items: center; gap: 12px; margin: 0;">
+        <ul class="nav navbar-nav navbar-right" style="display: flex; align-items: center; gap: 4px; margin: 0; float: none;">
           <li>
             <a href="javascript:void(0);" style="position: relative; padding: 10px !important;">
               <i class="material-icons" style="font-size: 24px; color: #475569;">notifications</i>
@@ -177,64 +177,50 @@
 
       <!-- Navigation Links -->
       <div class="sidebar-nav-scroll">
-        <!-- Dashboard Item -->
-        <a href="<?php echo site_url('admin'); ?>" class="nav-item <?php echo (uri_string() == 'admin' || uri_string() == 'admin/dashboard') ? 'active' : ''; ?>">
-          <i class="material-icons">dashboard</i>
-          <span>Dashboard</span>
-        </a>
+        <?php
+        $nav_menu = array(
+          ''         => array(array('admin', 'dashboard', 'Dashboard')),
+          'Courses'  => array(
+            array('admin/courses', 'import_contacts', 'Courses'),
+            array('admin/categories', 'category', 'Categories'),
+            array('admin/enrolled_users', 'assignment_ind', 'Enrollments'),
+          ),
+          'People'   => array(
+            array('admin/users', 'school', 'Learners'),
+            array('admin/users/sessions', 'devices', 'Active Sessions'),
+            array('admin/groups', 'badge', 'Instructors & Roles'),
+            array('admin/manageacl', 'admin_panel_settings', 'Permissions'),
+          ),
+          'General'  => array(
+            array('admin/contacts', 'mail_outline', 'Contacts'),
+            array('admin/settings', 'settings', 'Settings'),
+          ),
+        );
 
-        <!-- Category: LEARNING -->
-        <div class="nav-category">LEARNING</div>
-        <a href="<?php echo site_url('admin/categories'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/categories') ? 'active' : ''; ?>">
-          <i class="material-icons">schema</i>
-          <span>Course Categories</span>
-        </a>
-        <a href="<?php echo site_url('admin/courses'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/courses') ? 'active' : ''; ?>">
-          <i class="material-icons">import_contacts</i>
-          <span>Courses</span>
-        </a>
-        <a href="<?php echo site_url('admin/batches'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/batches') ? 'active' : ''; ?>">
-          <i class="material-icons">date_range</i>
-          <span>Batches</span>
-        </a>
-        <a href="<?php echo site_url('admin/enrolled_users'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/enrolled_users') ? 'active' : ''; ?>">
-          <i class="material-icons">assignment_ind</i>
-          <span>Enrolled Users</span>
-        </a>
+        // Highlight only the most specific matching item (so /admin/users/sessions doesn't also light up Learners)
+        $nav_uri = trim(uri_string(), '/');
+        $nav_active = ($nav_uri === 'admin/dashboard') ? 'admin' : '';
+        foreach ($nav_menu as $nav_items) {
+          foreach ($nav_items as $nav_item) {
+            $path = $nav_item[0];
+            $match = ($path === 'admin') ? ($nav_uri === 'admin') : ($nav_uri === $path || strpos($nav_uri, $path . '/') === 0);
+            if ($match && strlen($path) > strlen($nav_active)) {
+              $nav_active = $path;
+            }
+          }
+        }
 
-        <!-- Category: MANAGE -->
-        <div class="nav-category">MANAGE</div>
-        <a href="<?php echo site_url('admin/users'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/users') ? 'active' : ''; ?>">
-          <i class="material-icons">people_outline</i>
-          <span>Learners</span>
-        </a>
-        <a href="<?php echo site_url('admin/groups'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/groups') ? 'active' : ''; ?>">
-          <i class="material-icons">badge</i>
-          <span>Instructors / Roles</span>
-        </a>
-        <a href="<?php echo site_url('admin/manageacl'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/manageacl') ? 'active' : ''; ?>">
-          <i class="material-icons">analytics</i>
-          <span>Permissions</span>
-        </a>
-        <a href="<?php echo site_url('admin/events'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/events') ? 'active' : ''; ?>">
-          <i class="material-icons">event</i>
-          <span>Events</span>
-        </a>
-
-        <!-- Category: SYSTEM -->
-        <div class="nav-category">SYSTEM</div>
-        <a href="<?php echo site_url('admin/users/sessions'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/users/sessions') ? 'active' : ''; ?>">
-          <i class="material-icons">devices</i>
-          <span>Active Sessions</span>
-        </a>
-        <a href="<?php echo site_url('admin/contacts'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/contacts') ? 'active' : ''; ?>">
-          <i class="material-icons">chat_bubble_outline</i>
-          <span>CMS / Contacts</span>
-        </a>
-        <a href="<?php echo site_url('admin/settings'); ?>" class="nav-item <?php echo strstr(uri_string(), 'admin/settings') ? 'active' : ''; ?>">
-          <i class="material-icons">settings</i>
-          <span>Settings</span>
-        </a>
+        foreach ($nav_menu as $nav_section => $nav_items) {
+          if ($nav_section !== '') {
+            echo '<div class="nav-category">' . $nav_section . '</div>';
+          }
+          foreach ($nav_items as $nav_item) {
+            list($path, $icon, $label) = $nav_item;
+            echo '<a href="' . site_url($path) . '" class="nav-item' . ($path === $nav_active ? ' active' : '') . '" title="' . $label . '">'
+              . '<i class="material-icons">' . $icon . '</i><span>' . $label . '</span></a>';
+          }
+        }
+        ?>
       </div>
 
       <!-- User Profile Badge at Bottom -->

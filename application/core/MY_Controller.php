@@ -72,39 +72,16 @@ class MY_Controller extends CI_Controller
         // --- Learning Lock Logic ---
         $lock_feature_enabled = !isset($this->settings->device_lock_enabled) || $this->settings->device_lock_enabled == 1;
         if ($this->user && $lock_feature_enabled) {
-            // Check if device_locked is set in session or DB
-            // Note: Fetch from DB to ensure it's not stale
-            $user_db = $this->db->select('device_locked, role, last_session_id')->get_where('users', array('id' => $this->user['id']))->row();
+            // Locks are only ever set manually by an admin (Admin > Active Sessions); never auto-locked here.
+            // Fetch from DB so an admin lock/unlock takes effect immediately.
+            $user_db = $this->db->select('device_locked')->get_where('users', array('id' => $this->user['id']))->row();
 
             if ($user_db) {
-                // Auto-lock logic for learners (role 3) - Skip if Admin is impersonating
-                if ($user_db->role == 3 && strpos($this->current_uri, '/courses') === 0 && empty($_SESSION['impersonator'])) {
-                    $this->load->model('user_sessions_model');
-                    $active_sessions = $this->user_sessions_model->get_active($this->user['id']);
-
-                    // Only trigger lock if MULTIPLE active sessions exist for this user
-                    if (count($active_sessions) > 1) {
-                        $this->db->where('id', $this->user['id'])->update('users', array('device_locked' => 1));
-                        $user_db->device_locked = 1;
-                    } else {
-                        // Single active session -> keep last_session_id in sync
-                        if (empty($user_db->last_session_id) || $user_db->last_session_id != session_id()) {
-                            $this->db->where('id', $this->user['id'])->update('users', array('last_session_id' => session_id()));
-                            $user_db->last_session_id = session_id();
-                        }
-                    }
-                }
-
                 $is_locked = $user_db->device_locked ? 1 : 0;
 
                 // If locked and trying to access courses (Skip lock check if Admin is impersonating)
                 if ($is_locked && strpos($this->current_uri, '/courses') === 0 && empty($_SESSION['impersonator'])) {
-                    $error_msg = '<p>Your learning account is currently locked due to security policy or multiple simultaneous device logins.</p><p style="color:#64748b; font-size:14px; margin-top:8px;">Please contact support to restore your course access.</p>';
-
-                    // Specific message for lectures
-                    if (strpos($this->current_uri, '/courses/lecture') === 0) {
-                        $error_msg = '<p>Learning access locked due to multiple device login detected.</p><p style="color:#64748b; font-size:14px; margin-top:8px;">Please contact support or return to the home page.</p>';
-                    }
+                    $error_msg = '<p>Your learning access has been locked by an administrator.</p><p style="color:#64748b; font-size:14px; margin-top:8px;">Please contact support to restore your course access.</p>';
 
                     // Instead of redirect, show message on the same page
                     show_error($error_msg, 403, 'Learning Access Locked');

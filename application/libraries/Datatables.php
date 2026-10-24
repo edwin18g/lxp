@@ -21,6 +21,7 @@ class Datatables
     var $column_search = array(); // columns for search
     var $order = array(); // default order     
     var $sort_table2 = '';      // order by other table
+    var $CI_LIB;                // CI instance (declared to avoid PHP 8.2 dynamic property deprecation)
 
     function __construct()
     {

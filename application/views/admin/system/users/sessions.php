@@ -1,140 +1,44 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
-<!-- User Sessions View (Admin Premium Redesign) -->
-<div class="row clearfix animate-up">
+<div class="row clearfix">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div class="card card-premium" style="border-radius: 16px; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03); overflow: hidden; background: #ffffff;">
-            
-            <!-- Page Header -->
-            <div class="header header-premium" style="padding: 24px 28px; background: linear-gradient(to right, #f8fafc, #ffffff); border-bottom: 1px solid #e2e8f0;">
-                <div class="header-title-group" style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px;">
-                    <div style="display: flex; align-items: center; gap: 16px;">
-                        <div class="header-icon" style="width: 48px; height: 48px; border-radius: 12px; background: linear-gradient(135deg, #6366f1, #4f46e5); color: #ffffff; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);">
-                            <i class="material-icons" style="font-size: 26px;">devices</i>
-                        </div>
-                        <div>
-                            <h2 style="font-size: 1.35rem; font-weight: 800; color: #0f172a; margin: 0 0 4px 0;">User Sessions Management</h2>
-                            <span class="header-subtitle" style="font-size: 0.875rem; color: #64748b;">Monitor active logins, identify multi-device access, and manage security locks.</span>
-                        </div>
-                    </div>
-                    <div>
-                        <button type="button" id="btn_bulk_release_lock" class="btn btn-success" style="border-radius: 10px; font-weight: 700; padding: 10px 20px; box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25); display: inline-flex; align-items: center; gap: 8px;" disabled>
-                            <i class="material-icons" style="font-size: 20px;">lock_open</i> Bulk Release Lock (<span id="selected_count">0</span>)
-                        </button>
-                    </div>
+        <div class="card sess-card">
+
+            <!-- Header + quick stats -->
+            <div class="sess-head">
+                <div>
+                    <h2>Active Sessions</h2>
+                    <p>See who is logged in and on how many devices. Lock a learner to block their course access.</p>
+                </div>
+                <div class="sess-stats">
+                    <button type="button" class="sess-stat" data-filter="active">
+                        <strong id="kpi_active_sessions"><?php echo number_format(isset($active_sessions) ? $active_sessions : 0); ?></strong> Online now
+                    </button>
+                    <button type="button" class="sess-stat is-amber" data-filter="multidevice">
+                        <strong id="kpi_multidevice_users"><?php echo number_format(isset($multidevice_users) ? $multidevice_users : 0); ?></strong> Multi-device
+                    </button>
+                    <button type="button" class="sess-stat is-rose" data-filter="locked">
+                        <strong id="kpi_locked_users"><?php echo number_format(isset($locked_users) ? $locked_users : 0); ?></strong> Locked
+                    </button>
                 </div>
             </div>
 
-            <!-- Stats KPI Cards -->
-            <div class="body" style="padding: 24px 28px 12px 28px;">
-                <div class="row clearfix">
-                    <!-- Total Recorded Sessions -->
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" style="margin-bottom: 16px;">
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease;" class="kpi-card">
-                            <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(99, 102, 241, 0.1); color: #6366f1; display: flex; align-items: center; justify-content: center;">
-                                <i class="material-icons" style="font-size: 24px;">devices</i>
-                            </div>
-                            <div>
-                                <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; line-height: 1.1;"><?php echo isset($total_sessions) ? number_format($total_sessions) : 0; ?></div>
-                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Total Sessions</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Active Connections -->
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" style="margin-bottom: 16px;">
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease;" class="kpi-card">
-                            <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(16, 185, 129, 0.1); color: #10b981; display: flex; align-items: center; justify-content: center;">
-                                <i class="material-icons" style="font-size: 24px;">wifi_tethering</i>
-                            </div>
-                            <div>
-                                <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; line-height: 1.1;"><?php echo isset($active_sessions) ? number_format($active_sessions) : 0; ?></div>
-                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Active Connections</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Multi-Device Users -->
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" style="margin-bottom: 16px;">
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease;" class="kpi-card">
-                            <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(245, 158, 11, 0.1); color: #f59e0b; display: flex; align-items: center; justify-content: center;">
-                                <i class="material-icons" style="font-size: 24px;">phonelink_setup</i>
-                            </div>
-                            <div>
-                                <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; line-height: 1.1;"><?php echo isset($multidevice_users) ? number_format($multidevice_users) : 0; ?></div>
-                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Multi-Device Users</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Locked Accounts -->
-                    <div class="col-lg-3 col-md-6 col-sm-6 col-xs-12" style="margin-bottom: 16px;">
-                        <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px 20px; display: flex; align-items: center; gap: 16px; transition: transform 0.2s ease, box-shadow 0.2s ease;" class="kpi-card">
-                            <div style="width: 46px; height: 46px; border-radius: 12px; background: rgba(244, 63, 94, 0.1); color: #f43f5e; display: flex; align-items: center; justify-content: center;">
-                                <i class="material-icons" style="font-size: 24px;">lock</i>
-                            </div>
-                            <div>
-                                <div style="font-size: 1.5rem; font-weight: 800; color: #0f172a; line-height: 1.1;"><?php echo isset($locked_users) ? number_format($locked_users) : 0; ?></div>
-                                <div style="font-size: 0.75rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: 0.5px; margin-top: 4px;">Locked Accounts</div>
-                            </div>
-                        </div>
-                    </div>
+            <!-- Filters -->
+            <div class="sess-filters">
+                <div class="sess-search">
+                    <i class="material-icons">search</i>
+                    <input type="text" id="sess_search" class="form-control" placeholder="Search name, email or IP...">
                 </div>
+                <select id="sess_status" class="form-control">
+                    <option value="all">All users</option>
+                    <option value="active">Online now</option>
+                    <option value="multidevice">Multi-device</option>
+                    <option value="locked">Locked</option>
+                </select>
             </div>
 
-            <!-- Filter & Search Controls Bar -->
-            <div class="body" style="padding: 0 28px 20px 28px;">
-                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px 20px;">
-                    <div class="row clearfix" style="display: flex; align-items: center; flex-wrap: wrap; margin: 0; gap: 12px;">
-                        
-                        <!-- Search Input -->
-                        <div class="col-md-4 col-sm-6 col-xs-12" style="padding: 0;">
-                            <label style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">Search Learner / Email / IP</label>
-                            <div style="position: relative;">
-                                <i class="material-icons" style="position: absolute; left: 10px; top: 10px; font-size: 18px; color: #94a3b8;">search</i>
-                                <input type="text" id="custom_search_input" class="form-control" placeholder="Search by name, email, IP..." style="border-radius: 8px; border: 1px solid #cbd5e1; height: 38px; padding-left: 36px; font-weight: 500; color: #1e293b; background: #ffffff;">
-                            </div>
-                        </div>
-
-                        <!-- Filter by Connection Status -->
-                        <div class="col-md-3 col-sm-6 col-xs-12" style="padding: 0;">
-                            <label style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">Connection Status</label>
-                            <select id="filter_status" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 38px; font-weight: 600; color: #1e293b; background: #ffffff;">
-                                <option value="all">All Users & Sessions</option>
-                                <option value="active">Active Sessions Only</option>
-                                <option value="multidevice">Multi-Device Users (>1 Connection)</option>
-                                <option value="locked">Locked Accounts Only</option>
-                                <option value="inactive">Inactive / Logged Out</option>
-                            </select>
-                        </div>
-
-                        <!-- Filter by User Role -->
-                        <div class="col-md-3 col-sm-6 col-xs-12" style="padding: 0;">
-                            <label style="font-size: 11px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px; display: block;">User Role</label>
-                            <select id="filter_role" class="form-control" style="border-radius: 8px; border: 1px solid #cbd5e1; height: 38px; font-weight: 600; color: #1e293b; background: #ffffff;">
-                                <option value="all">All User Roles</option>
-                                <option value="3">Learners</option>
-                                <option value="2">Instructors</option>
-                                <option value="1">Administrators</option>
-                            </select>
-                        </div>
-
-                        <!-- Reset Filter Action -->
-                        <div class="col-md-1 col-sm-12 col-xs-12 text-right" style="padding: 0; margin-left: auto; display: flex; align-items: flex-end; justify-content: flex-end;">
-                            <button type="button" id="btn_reset_filters" class="btn btn-default" title="Reset Filters & Search" style="border-radius: 8px; font-weight: 600; height: 38px; color: #64748b; border: 1px solid #cbd5e1; display: inline-flex; align-items: center; justify-content: center; width: 100%;">
-                                <i class="material-icons" style="font-size: 18px;">refresh</i>
-                            </button>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
-<div class="row clearfix index-page">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div class="card premium-table-card">
-            <div class="body table-responsive">
-                <table id="sessions_table" class="table table-hover table-striped dataTable">
+            <div class="body table-responsive" style="padding-top: 0;">
+                <table id="sessions_table" class="table table-hover" style="width: 100%;">
                     <thead>
                         <tr>
                             <?php foreach ($t_headers as $val) {
@@ -142,240 +46,176 @@
                             } ?>
                         </tr>
                     </thead>
-                    <tbody class="text-capitalize">
-                    </tbody>
+                    <tbody></tbody>
                 </table>
             </div>
         </div>
     </div>
 </div>
 
-        </div>
-    </div>
-</div>
-
-<!-- User Sessions Details Modal -->
-<div class="modal fade" id="userSessionsModal" tabindex="-1" role="dialog" aria-labelledby="userSessionsModalLabel">
-    <div class="modal-dialog modal-lg" role="document" style="max-width: 840px;">
-        <div class="modal-content" style="border-radius: 16px; overflow: hidden; border: none; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25);">
-            <div class="modal-header" style="background: #f8fafc; border-bottom: 1px solid #e2e8f0; padding: 18px 24px; display: flex; align-items: center; justify-content: space-between;">
-                <h4 class="modal-title" id="userSessionsModalLabel" style="font-size: 1.15rem; font-weight: 800; color: #0f172a; margin: 0; display: flex; align-items: center; gap: 8px;">
-                    <i class="material-icons" style="color: #6366f1;">devices</i> <span id="modalUserName">User Sessions Details</span>
-                </h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close" style="font-size: 24px; color: #64748b; border: none; background: none; outline: none;">&times;</button>
+<!-- User Devices Modal -->
+<div class="modal fade" id="userSessionsModal" tabindex="-1" role="dialog" aria-labelledby="modalUserName">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content" style="border-radius: 12px; overflow: hidden;">
+            <div class="modal-header" style="display: flex; align-items: center; justify-content: space-between;">
+                <h4 class="modal-title" id="modalUserName" style="font-weight: 700; margin: 0;">Devices</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">&times;</button>
             </div>
-            <div class="modal-body" id="modalSessionsBody" style="padding: 24px;">
-                <div class="text-center" style="padding: 40px;">
-                    <div class="spinner-border text-primary" role="status" style="width: 40px; height: 40px;">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                    <div style="margin-top: 12px; color: #64748b; font-weight: 600;">Fetching session records...</div>
-                </div>
-            </div>
-            <div class="modal-footer" style="background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 14px 24px;">
-                <button type="button" class="btn btn-default" data-dismiss="modal" style="border-radius: 8px; font-weight: 600; padding: 6px 20px;">Close</button>
-            </div>
+            <div class="modal-body" id="modalSessionsBody"></div>
         </div>
     </div>
 </div>
 
 <style>
-.kpi-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 10px 15px -3px rgba(0,0,0,0.05), 0 4px 6px -2px rgba(0,0,0,0.02);
-}
+.sess-card { border-radius: 12px; overflow: hidden; }
+.sess-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px; padding: 22px 24px; border-bottom: 1px solid #e2e8f0; }
+.sess-head h2 { font-size: 1.25rem; font-weight: 800; color: #0f172a; margin: 0 0 4px; }
+.sess-head p { margin: 0; font-size: 13px; color: #64748b; }
+.sess-stats { display: flex; gap: 8px; flex-wrap: wrap; }
+.sess-stat { border: 1px solid #a7f3d0; background: #ecfdf5; color: #047857; border-radius: 999px; padding: 6px 14px; font-size: 13px; cursor: pointer; }
+.sess-stat strong { font-weight: 800; margin-right: 2px; }
+.sess-stat.is-amber { border-color: #fde68a; background: #fffbeb; color: #b45309; }
+.sess-stat.is-rose { border-color: #fecdd3; background: #fff1f2; color: #be123c; }
+.sess-filters { display: flex; gap: 12px; flex-wrap: wrap; padding: 16px 24px; }
+.sess-search { position: relative; flex: 1 1 280px; max-width: 420px; }
+.sess-search i { position: absolute; left: 10px; top: 9px; font-size: 18px; color: #94a3b8; }
+.sess-search input { padding-left: 34px; border-radius: 8px; height: 38px; }
+#sess_status { width: 180px; border-radius: 8px; height: 38px; }
+.sess-user { display: flex; align-items: center; gap: 10px; }
+.sess-user img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
+.sess-user-name { font-weight: 700; color: #1e293b; }
+.sess-user-email { font-size: 12px; color: #64748b; }
+.sess-muted { font-size: 13px; color: #64748b; }
+.sess-ico { font-size: 14px; vertical-align: middle; }
+.sess-actions { display: flex; gap: 6px; white-space: nowrap; }
+.sess-actions .btn { border-radius: 6px; font-weight: 600; }
+#sessions_table td { vertical-align: middle; }
 </style>
 
 <script type="text/javascript">
 $(document).ready(function() {
+    var csrfName = '<?php echo $this->security->get_csrf_token_name(); ?>';
+    var csrfHash = '<?php echo $this->security->get_csrf_hash(); ?>';
+    var currentModalUser = null;
+
     var table = $('#sessions_table').DataTable({
-        "destroy": true,
         "processing": true,
         "serverSide": true,
+        "dom": "rtip",
+        "pageLength": 25,
         "ajax": {
             "url": "<?php echo site_url('admin/users/ajax_sessions_list'); ?>",
             "type": "POST",
             "data": function(d) {
-                d.<?php echo $this->security->get_csrf_token_name(); ?> = '<?php echo $this->security->get_csrf_hash(); ?>';
-                d.status_filter = $('#filter_status').val();
-                d.role_filter = $('#filter_role').val();
+                d[csrfName] = csrfHash;
+                d.status_filter = $('#sess_status').val();
+            },
+            "dataSrc": function(json) {
+                $.each(json.stats || {}, function(key, val) {
+                    $('#kpi_' + key).text(Number(val).toLocaleString());
+                });
+                return json.data;
             }
         },
-        "columnDefs": [
-            { "targets": [0, 1, 7], "orderable": false }
-        ],
+        "columnDefs": [{ "targets": [4], "orderable": false }],
         "order": [[3, "desc"]],
         "language": {
-            "search": "_INPUT_",
-            "searchPlaceholder": "Search user, email...",
+            "emptyTable": "No users match the current filters.",
             "paginate": {
                 "previous": "<i class='material-icons'>chevron_left</i>",
                 "next": "<i class='material-icons'>chevron_right</i>"
             }
-        },
-        "drawCallback": function() {
-            updateBulkButtonState();
-            $('#select_all_sessions').prop('checked', false);
         }
     });
 
-    // Helper to update bulk action button state
-    function updateBulkButtonState() {
-        var selectedCount = $('.session-user-checkbox:checked').length;
-        $('#selected_count').text(selectedCount);
-        if (selectedCount > 0) {
-            $('#btn_bulk_release_lock').prop('disabled', false);
-        } else {
-            $('#btn_bulk_release_lock').prop('disabled', true);
-        }
+    function notify(ok, msg) {
+        if (ok && typeof show_success === 'function') return show_success(msg);
+        if (!ok && typeof show_danger === 'function') return show_danger(msg);
+        alert(msg);
     }
 
-    // Select All Checkbox Handler
-    $(document).on('change', '#select_all_sessions', function() {
-        var isChecked = $(this).is(':checked');
-        $('.session-user-checkbox').prop('checked', isChecked);
-        updateBulkButtonState();
-    });
-
-    // Individual Checkbox Handler
-    $(document).on('change', '.session-user-checkbox', function() {
-        updateBulkButtonState();
-        var allChecked = $('.session-user-checkbox').length > 0 && $('.session-user-checkbox:checked').length === $('.session-user-checkbox').length;
-        $('#select_all_sessions').prop('checked', allChecked);
-    });
-
-    // Bulk Release Lock Action
-    $('#btn_bulk_release_lock').on('click', function() {
-        var selectedUserIds = [];
-        $('.session-user-checkbox:checked').each(function() {
-            selectedUserIds.push($(this).val());
+    function postAction(url, data, $btn) {
+        data = data || {};
+        data[csrfName] = csrfHash;
+        $btn.prop('disabled', true);
+        $.post(url, data, null, 'json').done(function(res) {
+            notify(res.status, res.msg);
+            table.ajax.reload(null, false);
+            if (currentModalUser && $('#userSessionsModal').is(':visible')) {
+                loadModal(currentModalUser.id, currentModalUser.name);
+            }
+        }).fail(function() {
+            notify(false, 'Something went wrong. Please try again.');
+        }).always(function() {
+            $btn.prop('disabled', false);
         });
+    }
 
-        if (selectedUserIds.length === 0) {
-            if (typeof swal !== 'undefined') {
-                swal("Notice", "Please select at least one user.", "info");
-            } else {
-                alert('Please select at least one user.');
-            }
-            return;
-        }
-
-        var doRelease = function() {
-            var $btn = $('#btn_bulk_release_lock');
-            $btn.prop('disabled', true).html('<i class="material-icons" style="font-size:20px;">hourglass_top</i> Processing...');
-
-            var postData = {
-                user_ids: selectedUserIds
-            };
-            postData['<?php echo $this->security->get_csrf_token_name(); ?>'] = '<?php echo $this->security->get_csrf_hash(); ?>';
-
-            $.ajax({
-                url: "<?php echo site_url('admin/users/bulk_release_lock'); ?>",
-                type: "POST",
-                data: postData,
-                dataType: "JSON",
-                success: function(res) {
-                    if (res.status) {
-                        table.ajax.reload(null, false);
-                        if (typeof show_success === 'function') {
-                            show_success(res.msg);
-                        } else if (typeof swal !== 'undefined') {
-                            swal("Success!", res.msg, "success");
-                        } else {
-                            alert(res.msg);
-                        }
-                    } else {
-                        if (typeof show_danger === 'function') {
-                            show_danger(res.msg);
-                        } else if (typeof swal !== 'undefined') {
-                            swal("Error!", res.msg, "error");
-                        } else {
-                            alert('Error: ' + res.msg);
-                        }
-                    }
-                },
-                error: function() {
-                    if (typeof show_danger === 'function') {
-                        show_danger('An unexpected error occurred while processing bulk lock release.');
-                    } else if (typeof swal !== 'undefined') {
-                        swal("Error!", "An unexpected error occurred while processing bulk lock release.", "error");
-                    } else {
-                        alert('An unexpected error occurred while processing bulk lock release.');
-                    }
-                },
-                complete: function() {
-                    $btn.html('<i class="material-icons" style="font-size: 20px;">lock_open</i> Bulk Release Lock ( <span id="selected_count">0</span> )');
-                    updateBulkButtonState();
-                }
-            });
-        };
-
-        if (typeof swal !== 'undefined') {
-            swal({
-                title: "Are you sure?",
-                text: "Release locks and clear active sessions for " + selectedUserIds.length + " selected user(s)?",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#4f46e5",
-                confirmButtonText: "Yes, release locks!",
-                closeOnConfirm: true
-            }, function() {
-                doRelease();
-            });
-        } else {
-            if (confirm('Are you sure you want to release locks and clear active sessions for ' + selectedUserIds.length + ' selected user(s)?')) {
-                doRelease();
-            }
-        }
+    // Lock / Unlock learning access (table + modal)
+    $(document).on('click', '.lock-toggle-btn', function() {
+        var $btn = $(this);
+        var lock = String($btn.data('lock')) === '1';
+        var text = lock
+            ? 'Lock ' + $btn.data('username') + '? They will not be able to open courses until unlocked.'
+            : 'Unlock ' + $btn.data('username') + '?';
+        if (!confirm(text)) return;
+        postAction("<?php echo site_url('admin/users/set_lock/'); ?>" + $btn.data('userid'), { status: lock ? 1 : 0 }, $btn);
     });
 
-    // Custom Search Input Event Binding
-    $('#custom_search_input').on('keyup change', function() {
-        table.search(this.value).draw();
+    // Log out all devices (modal)
+    $(document).on('click', '.logout-devices-btn', function() {
+        var $btn = $(this);
+        if (!confirm('Log out ' + $btn.data('username') + ' from all devices?')) return;
+        postAction("<?php echo site_url('admin/users/logout_devices/'); ?>" + $btn.data('userid'), {}, $btn);
     });
 
-    // Trigger Table Reload on Filter Change
-    $('#filter_status, #filter_role').on('change', function() {
+    // Log out a single device (modal)
+    $(document).on('click', '.terminate-session-btn', function() {
+        var $btn = $(this);
+        if (!confirm('Log out this device?')) return;
+        postAction("<?php echo site_url('admin/users/terminate_session/'); ?>" + $btn.data('userid') + '/' + $btn.data('sessid'), {}, $btn);
+    });
+
+    // Debounced search
+    var searchTimer = null;
+    $('#sess_search').on('input', function() {
+        var val = $.trim(this.value);
+        clearTimeout(searchTimer);
+        searchTimer = setTimeout(function() {
+            if (table.search() !== val) table.search(val).draw();
+        }, 350);
+    });
+
+    $('#sess_status').on('change', function() {
         table.ajax.reload();
     });
 
-    // Reset Filters Button
-    $('#btn_reset_filters').on('click', function() {
-        $('#custom_search_input').val('');
-        $('#filter_status').val('all');
-        $('#filter_role').val('all');
-        table.search('').draw();
-        table.ajax.reload();
+    // Stat pills act as quick filters (click again to clear)
+    $('.sess-stat').on('click', function() {
+        var f = $(this).data('filter');
+        $('#sess_status').val($('#sess_status').val() === f ? 'all' : f).trigger('change');
     });
 
-    // Handle View Sessions Modal Button Click
-    $(document).on('click', '.view-sessions-btn', function() {
-        var userId = $(this).data('userid');
-        var userName = $(this).data('username');
-
-        $('#modalUserName').text('Sessions Details: ' + userName);
-        $('#modalSessionsBody').html(
-            '<div class="text-center" style="padding: 40px;">' +
-            '<div style="font-size: 15px; font-weight: 600; color: #6366f1;">Loading session records...</div>' +
-            '</div>'
-        );
-        $('#userSessionsModal').modal('show');
-
-        $.ajax({
-            url: "<?php echo site_url('admin/users/ajax_user_sessions_modal/'); ?>" + userId,
-            type: "GET",
-            dataType: "JSON",
-            success: function(res) {
-                if (res.status && res.html) {
-                    $('#modalSessionsBody').html(res.html);
-                } else {
-                    $('#modalSessionsBody').html('<div class="alert alert-danger">Failed to load session details.</div>');
-                }
-            },
-            error: function() {
+    function loadModal(userId, userName) {
+        currentModalUser = { id: userId, name: userName };
+        $('#modalUserName').text(userName + ' — Devices');
+        $.getJSON("<?php echo site_url('admin/users/ajax_user_sessions_modal/'); ?>" + userId)
+            .done(function(res) {
+                $('#modalSessionsBody').html(res.status && res.html ? res.html : '<div class="alert alert-danger">Failed to load devices.</div>');
+            })
+            .fail(function() {
                 $('#modalSessionsBody').html('<div class="alert alert-danger">Error connecting to server.</div>');
-            }
-        });
+            });
+    }
+
+    $(document).on('click', '.view-sessions-btn', function() {
+        $('#modalSessionsBody').html('<div class="text-center" style="padding: 32px; color: #64748b;">Loading...</div>');
+        $('#userSessionsModal').modal('show');
+        loadModal($(this).data('userid'), $(this).data('username'));
+    });
+
+    $('#userSessionsModal').on('hidden.bs.modal', function() {
+        currentModalUser = null;
     });
 });
 </script>
