@@ -433,17 +433,49 @@
 // Global variables and functions
     var courseId = "<?php echo $id; ?>";
     
+    // Load the curriculum with a timeout and a visible error + retry (jQuery .load() fails silently,
+    // which left the spinner spinning forever when the request failed)
+    var curriculumXhr = null;
     window.loadCurriculum = function() {
-        if(courseId) {
-            $('#curriculum_container').load("<?php echo site_url('admin/courses/render_curriculum/'); ?>" + courseId);
+        if (!courseId) return;
+        var $c = $('#curriculum_container');
+        if (curriculumXhr) curriculumXhr.abort();
+        if (!$c.children().length || $c.find('.curr-load-error').length) {
+            $c.html('<div class="curr-loading"><span class="curr-spinner"></span> Loading curriculum…</div>');
+        } else {
+            $c.addClass('is-refreshing');
         }
+        curriculumXhr = $.ajax({
+            url: "<?php echo site_url('admin/courses/render_curriculum/'); ?>" + courseId,
+            type: 'GET',
+            dataType: 'html',
+            cache: false,
+            timeout: 30000
+        }).done(function (html) {
+            $c.html(html);
+        }).fail(function (xhr, status) {
+            if (status === 'abort') return;
+            var reason = status === 'timeout' ? 'The server took too long to respond.'
+                : (xhr.status ? 'Server error (HTTP ' + xhr.status + ').' : 'Network error. Check your connection.');
+            $c.html('<div class="curr-load-error"><i class="material-icons">error_outline</i>'
+                + '<div><strong>Couldn\'t load the curriculum.</strong><span>' + reason + '</span></div>'
+                + '<button type="button" class="btn btn-default" onclick="loadCurriculum()"><i class="material-icons">refresh</i> Retry</button></div>');
+        }).always(function () {
+            $c.removeClass('is-refreshing');
+            curriculumXhr = null;
+        });
     }
 
     document.addEventListener("DOMContentLoaded", function() {
         // Load Curriculum
         loadCurriculum();
 
-        // Initialize Students Table
+        // Learners table is built the first time its tab is opened (not on page load), so it doesn't
+        // compete with the curriculum request.
+        var studentsTableReady = false;
+        function initStudentsTable() {
+            if (studentsTableReady) return;
+            studentsTableReady = true;
         $('#students_table').DataTable({
             "processing": true,
             "serverSide": true,
@@ -466,6 +498,9 @@
                 "searchPlaceholder": "Search learners..."
             }
         });
+        }
+        $('a[href="#students"][data-toggle="tab"]').on('shown.bs.tab', initStudentsTable);
+        if ($('#students').hasClass('active')) initStudentsTable();
 
         // Toggle Offcanvas Form
         window.openLectureOffcanvas = function(title = 'Add new lecture', selectedSectionId = 0) {
@@ -898,7 +933,7 @@
             success: function(response) {
                 swal("Success", "Learners enrolled successfully", "success");
                 $('#enrollmentModal').modal('hide');
-                $('#students_table').DataTable().ajax.reload();
+                if ($.fn.DataTable.isDataTable('#students_table')) $('#students_table').DataTable().ajax.reload();
                 selectedUsers = [];
             },
             error: function() {

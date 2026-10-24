@@ -1,121 +1,72 @@
-<?php defined('BASEPATH') OR exit('No direct script access allowed');
-/*Common Table View*/
-?>
+<?php defined('BASEPATH') OR exit('No direct script access allowed'); ?>
 
-<!-- Quick Stats -->
-<div class="row clearfix">
-    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-        <div class="info-box-2 hover-zoom-effect">
-            <div class="icon bg-gradient-cyan">
-                <i class="material-icons col-white">import_contacts</i>
-            </div>
-            <div class="content">
-                <div class="text">Total Courses</div>
-                <div class="number count-to" data-from="0" data-to="<?php echo $total_courses; ?>" data-speed="1000"
-                    data-fresh-interval="20"><?php echo $total_courses; ?></div>
-            </div>
+<div class="cl-page">
+
+    <!-- Page header -->
+    <div class="cl-head">
+        <div>
+            <h1>Courses</h1>
+            <p>Create, publish and manage your courses and batches.</p>
         </div>
+        <a href="<?php echo site_url('admin/courses/form'); ?>" class="cl-btn cl-btn-primary cl-btn-lg">
+            <i class="material-icons">add</i><span>New course</span>
+        </a>
     </div>
-    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-        <div class="info-box-2 hover-zoom-effect">
-            <div class="icon bg-gradient-light-green">
-                <i class="material-icons col-white">check_circle</i>
+
+    <!-- Stat cards double as quick filters -->
+    <div class="cl-stats" role="tablist" aria-label="Filter courses">
+        <button type="button" class="cl-stat is-active" data-filter="all">
+            <span class="cl-stat-icon is-indigo"><i class="material-icons">import_contacts</i></span>
+            <span><strong id="stat_all"><?php echo (int) $total_courses; ?></strong><small>All courses</small></span>
+        </button>
+        <button type="button" class="cl-stat" data-filter="active">
+            <span class="cl-stat-icon is-green"><i class="material-icons">check_circle</i></span>
+            <span><strong id="stat_active"><?php echo (int) $active_courses; ?></strong><small>Active</small></span>
+        </button>
+        <button type="button" class="cl-stat" data-filter="inactive">
+            <span class="cl-stat-icon is-slate"><i class="material-icons">pause_circle_outline</i></span>
+            <span><strong id="stat_inactive"><?php echo (int) $inactive_courses; ?></strong><small>Inactive</small></span>
+        </button>
+        <button type="button" class="cl-stat" data-filter="featured">
+            <span class="cl-stat-icon is-amber"><i class="material-icons">star</i></span>
+            <span><strong id="stat_featured"><?php echo (int) $featured_courses; ?></strong><small>Featured</small></span>
+        </button>
+    </div>
+
+    <!-- List -->
+    <div class="cl-card">
+        <div class="cl-toolbar">
+            <div class="cl-search">
+                <i class="material-icons">search</i>
+                <input type="text" class="global-dt-search" data-table="courses_table" placeholder="Search courses by title…" aria-label="Search courses">
             </div>
-            <div class="content">
-                <div class="text">Active Courses</div>
-                <div class="number count-to" data-from="0" data-to="<?php echo $active_courses; ?>" data-speed="1000"
-                    data-fresh-interval="20"><?php echo $active_courses; ?></div>
-            </div>
+            <select id="category_filter" class="form-control" data-live-search="true" title="All categories">
+                <option value="">All categories</option>
+                <?php foreach ($categories as $cat) { ?>
+                    <option value="<?php echo (int) $cat->id; ?>"><?php echo htmlspecialchars($cat->title); ?></option>
+                <?php } ?>
+            </select>
+            <select id="status_filter" class="form-control" title="Any status">
+                <option value="">Any status</option>
+                <option value="1">Active</option>
+                <option value="0">Inactive</option>
+            </select>
+            <button type="button" class="cl-reset" id="cl_reset" style="display:none;">
+                <i class="material-icons">close</i> Clear filters
+            </button>
         </div>
-    </div>
-    <div class="col-lg-4 col-md-4 col-sm-6 col-xs-12">
-        <div class="info-box-2 hover-zoom-effect">
-            <div class="icon bg-gradient-pink">
-                <i class="material-icons col-white">star</i>
-            </div>
-            <div class="content">
-                <div class="text">Featured Courses</div>
-                <div class="number count-to" data-from="0" data-to="<?php echo $featured_courses; ?>" data-speed="1000"
-                    data-fresh-interval="20"><?php echo $featured_courses; ?></div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- #END# Quick Stats -->
 
-<!-- Toolbar -->
-<div class="row clearfix">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div class="card" style="box-shadow: 0 2px 10px rgba(0,0,0,0.05); margin-bottom: 20px;">
-            <div class="body" style="padding: 15px 20px;">
-                <div class="row clearfix" style="display: flex; align-items: center; flex-wrap: wrap;">
-                    <!-- Category Filter -->
-                    <div class="col-md-3 col-sm-6" style="margin-bottom: 0;">
-                        <select id="category_filter" class="form-control show-tick" data-style="btn-default"
-                            title="Select Category">
-                            <option value="">All Categories</option>
-                            <?php foreach ($categories as $cat) { ?>
-                                <option value="<?php echo $cat->id; ?>"><?php echo $cat->title; ?></option>
-                            <?php } ?>
-                        </select>
-                    </div>
-
-                    <!-- Status Filter -->
-                    <div class="col-md-3 col-sm-6" style="margin-bottom: 0;">
-                        <select id="status_filter" class="form-control show-tick" data-style="btn-default"
-                            title="Select Status">
-                            <option value="">All Status</option>
-                            <option value="1">Active</option>
-                            <option value="0">Inactive</option>
-                        </select>
-                    </div>
-
-                    <!-- Custom Search and Add Button combined into a new header structure -->
-                    <div class="col-md-6 col-sm-12" style="margin-bottom: 0;">
-                        <div class="header"
-                            style="background: #fff; padding: 0; border-bottom: none; display: flex; align-items: center; justify-content: flex-end;">
-                            <div style="display: flex; align-items: center; gap: 20px;">
-                                <!-- External Search Box -->
-                                <div class="global-search-wrapper">
-                                    <i class="material-icons">search</i>
-                                    <input type="text" class="global-dt-search" placeholder="Search courses..."
-                                        data-table="courses_table">
-                                </div>
-
-                                <div class="header-dropdown" style="position: static; margin: 0;">
-                                    <a href="<?php echo site_url('admin/courses/form'); ?>"
-                                        class="btn bg-indigo btn-circle waves-effect waves-circle waves-float"
-                                        title="Add New Course">
-                                        <i class="material-icons">add</i>
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<!-- #END# Toolbar -->
-
-<div class="row clearfix index-page">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div class="">
-
-            <div class="body table-responsive">
-                <table id="courses_table" class="table table-striped table-hover dataTable">
-                    <thead>
-                        <tr>
-                            <?php foreach ($t_headers as $val) {
-                                echo '<th>' . $val . '</th>';
-                            } ?>
-                        </tr>
-                    </thead>
-                    <tbody class="text-capitalize">
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-responsive">
+            <table id="courses_table" class="table cl-table" style="width:100%">
+                <thead>
+                    <tr>
+                        <?php foreach ($t_headers as $val) {
+                            echo '<th>' . $val . '</th>';
+                        } ?>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -123,35 +74,84 @@
 <script>
     var table;
     $(document).ready(function () {
+        var featuredOnly = false;
+
         table = $('#courses_table').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "order": [],
-            "ajax": {
-                "url": "<?php echo site_url('admin/courses/ajax_list') ?>",
-                "type": "POST",
-                "data": function (d) {
+            processing: true,
+            serverSide: true,
+            order: [[4, 'desc']],
+            pageLength: 25,
+            lengthMenu: [10, 25, 50, 100],
+            dom: 'rt<"cl-foot"lip>',
+            autoWidth: false,
+            ajax: {
+                url: "<?php echo site_url('admin/courses/ajax_list') ?>",
+                type: "POST",
+                data: function (d) {
                     d.category_id = $('#category_filter').val();
                     d.status = $('#status_filter').val();
+                    d.featured = featuredOnly ? '1' : '';
+                },
+                dataSrc: function (json) {
+                    if (json.stats) {
+                        $.each(json.stats, function (k, v) { $('#stat_' + k).text(v); });
+                    }
+                    return json.data;
                 }
             },
-            "columnDefs": [
-                {
-                    "targets": [0, 1, -1], // Disable sorting on first (ID), second (Image), and last (Action) columns
-                    "orderable": false,
-                },
+            // One entry per column: DataTables overwrites (not merges) className on body cells
+            columnDefs: [
+                { targets: [1], className: 'cl-hide-sm' },
+                { targets: [2, 3], className: 'cl-col-num cl-hide-sm' },
+                { targets: [4], className: 'cl-hide-xs' },
+                { targets: [7], orderable: false, className: 'text-right' }
             ],
+            language: {
+                processing: '<div class="cl-loading"><i class="material-icons">sync</i> Loading…</div>',
+                emptyTable: 'No courses yet. Click “New course” to create your first one.',
+                zeroRecords: 'No courses match your search or filters.',
+                info: 'Showing _START_–_END_ of _TOTAL_',
+                infoEmpty: 'No courses',
+                infoFiltered: '(filtered from _MAX_)',
+                lengthMenu: 'Show _MENU_',
+                paginate: { previous: '<i class="material-icons">chevron_left</i>', next: '<i class="material-icons">chevron_right</i>' }
+            }
         });
 
-        // Filter Event Listeners
-        $('#category_filter, #status_filter').change(function () {
+        function syncUi() {
+            var status = $('#status_filter').val();
+            var key = featuredOnly ? 'featured' : (status === '1' ? 'active' : (status === '0' ? 'inactive' : 'all'));
+            $('.cl-stat').removeClass('is-active').filter('[data-filter="' + key + '"]').addClass('is-active');
+            var filtered = featuredOnly || status !== '' || $('#category_filter').val() !== '' || $.trim($('.cl-search input').val()) !== '';
+            $('#cl_reset').toggle(filtered);
+        }
+        function refreshSelect($s) { if ($.fn.selectpicker && $s.data('selectpicker')) $s.selectpicker('refresh'); }
+
+        // Stat cards = quick filters
+        $('.cl-stat').on('click', function () {
+            var f = $(this).data('filter');
+            featuredOnly = (f === 'featured');
+            $('#status_filter').val(f === 'active' ? '1' : (f === 'inactive' ? '0' : ''));
+            refreshSelect($('#status_filter'));
+            syncUi();
             table.draw();
         });
 
-        // Custom Search Listener
-        $('#custom_search').keyup(function () {
-            table.search($(this).val()).draw();
+        $('#category_filter, #status_filter').on('change', function () {
+            if (this.id === 'status_filter') featuredOnly = false;
+            syncUi();
+            table.draw();
+        });
+        $('.cl-search input').on('input', syncUi);
+
+        $('#cl_reset').on('click', function () {
+            featuredOnly = false;
+            $('#category_filter, #status_filter').val('');
+            refreshSelect($('#category_filter')); refreshSelect($('#status_filter'));
+            $('.cl-search input').val('');
+            table.search('');
+            syncUi();
+            table.draw();
         });
     });
 </script>
-

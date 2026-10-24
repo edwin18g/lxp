@@ -205,41 +205,39 @@ class Courses_model extends CI_Model
 
     public function get_curriculum($course_id)
     {
+        $course_id = (int) $course_id;
         $sections = $this->get_sections($course_id);
 
-        // If no sections execute, create a default one and move existing lectures to it? 
-        // For now, let's just return what we have. If a lecture has section_id=0, it might be "Uncategorized"
-
-        $curriculum = [];
-
-        // 1. Get all sections
-        foreach ($sections as $section) {
-            $section['lectures'] = $this->db->select('*')
-                ->where('cl_course_id', $course_id)
-                ->where('section_id', $section['id'])
-                ->order_by('sort_order', 'ASC')
-                ->get('course_lecture')
-                ->result_array();
-            $curriculum[] = $section;
-        }
-
-        // 2. Get logic for "Uncategorized" lectures (section_id = 0)
-        $uncategorized = $this->db->select('*')
+        // One query for every lecture of the course (was one query per section), only the columns the
+        // curriculum view needs (skips the long description text). Uses idx_cl_course_section_sort.
+        $lectures = $this->db->select('id, cl_name, cl_type, cl_file_name, cl_status, cl_secure, section_id, sort_order')
             ->where('cl_course_id', $course_id)
-            ->where('section_id', 0)
             ->order_by('sort_order', 'ASC')
+            ->order_by('id', 'ASC')
             ->get('course_lecture')
             ->result_array();
 
-        if (!empty($uncategorized)) {
-            // Check if we should auto-create a default section or just append
-            // For this UI, we might want to force everything into a section, but for now let's return them
-            array_unshift($curriculum, [
+        $by_section = array();
+        foreach ($lectures as $lecture) {
+            $by_section[(int) $lecture['section_id']][] = $lecture;
+        }
+
+        $curriculum = array();
+        foreach ($sections as $section) {
+            $sid = (int) $section['id'];
+            $section['lectures'] = isset($by_section[$sid]) ? $by_section[$sid] : array();
+            unset($by_section[$sid]);
+            $curriculum[] = $section;
+        }
+
+        // Lectures without a section go under "General / Uncategorized" (same as before)
+        if (!empty($by_section[0])) {
+            array_unshift($curriculum, array(
                 'id' => 0,
                 'title' => 'General / Uncategorized',
                 'sort_order' => -1,
-                'lectures' => $uncategorized
-            ]);
+                'lectures' => $by_section[0],
+            ));
         }
 
         return $curriculum;

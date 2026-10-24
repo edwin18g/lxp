@@ -54,17 +54,10 @@ class Courses extends Admin_Controller
         // Categories for filter
         $data['categories'] = $this->courses_model->get_course_categories_dropdown();
 
+        $data['inactive_courses'] = max(0, $data['total_courses'] - $data['active_courses']);
+
         // Table Header
-        $data['t_headers'] = array(
-            '#',
-            'Image',
-            lang('common_title'),
-            lang('courses_category'),
-            lang('common_updated'),
-            lang('common_featured'),
-            lang('common_status'),
-            lang('action_action'),
-        );
+        $data['t_headers'] = array('Course', 'Category', 'Lectures', 'Learners', 'Updated', 'Featured', 'Status', '');
 
         // load views
         $content['content'] = $this->load->view('admin/lms/courses/index', $data, TRUE);
@@ -76,9 +69,15 @@ class Courses extends Admin_Controller
      */
     public function ajax_list()
     {
+        // Read-only endpoint: release the DB session lock (auth already ran in the constructor) so other
+        // requests from this admin aren't queued behind the listing query.
+        session_write_close();
+
         $this->load->library('datatables');
 
         $table = 'courses';
+        // Per-course counts use idx_cl_course_section_sort / idx_cs_course_status
+        // (application/database/migrations/2026_10_24_course_performance_indexes.sql)
         $columns = array(
             "$table.id",
             "$table.title",
@@ -88,62 +87,105 @@ class Courses extends Admin_Controller
             "$table.status",
             "$table.date_updated",
             "(SELECT cc.title FROM course_categories cc WHERE cc.id = $table.course_categories_id) category_name",
+            "(SELECT COUNT(*) FROM course_lecture cl WHERE cl.cl_course_id = $table.id) lecture_count",
+            "(SELECT COUNT(*) FROM course_subscription cs WHERE cs.cs_course_id = $table.id AND cs.cs_status = '1') learner_count",
         );
+        // Must line up with the table columns in the view
         $columns_order = array(
-            "$table.id",
-            "",
             "$table.title",
-            "$table.course_categories_id",
+            "category_name",
+            "lecture_count",
+            "learner_count",
             "$table.date_updated",
             "$table.featured",
             "$table.status",
+            "",
         );
         $columns_search = array(
-            'title',
+            "$table.title",
         );
-        $order = array('date_updated' => 'DESC');
+        $order = array("$table.date_updated" => 'DESC');
 
         // Filtering
         $where = array();
         if ($this->input->post('category_id')) {
-            $where["$table.course_categories_id"] = $this->input->post('category_id');
+            $where["$table.course_categories_id"] = (int) $this->input->post('category_id');
         }
-        if ($this->input->post('status') !== '' && $this->input->post('status') !== NULL) {
-            $where["$table.status"] = $this->input->post('status');
+        $status = $this->input->post('status');
+        if ($status === '0' || $status === '1') {
+            $where["$table.status"] = $status;
+        }
+        if ($this->input->post('featured') === '1') {
+            $where["$table.featured"] = '1';
         }
 
         $result = $this->datatables->get_datatables($table, $columns, $columns_order, $columns_search, $order, $where);
         $data = array();
-        $no = $_POST['start'];
+
+        // Course images live in upload/courses/images/ (with a *_thumb copy). A wrong or missing path makes every
+        // thumbnail a 404 that boots the whole app and waits on the DB session lock, which stalls this page.
+        $img_dir = FCPATH . 'upload/courses/images/';
+        $default_img = base_url('themes/default/images/course/course-01.jpg');
 
         foreach ($result as $val) {
-            $no++;
             $row = array();
-            $row[] = $no;
 
-            // Image
+            // Thumbnail: prefer *_thumb, then the original, then the default (only files that exist)
+            $img_src = $default_img;
             $images = ($val->images) ? json_decode($val->images) : null;
-            $img_src = base_url('assets/img/defaults/course_default.png'); // Placeholder/Default
             if (!empty($images) && is_array($images) && !empty($images[0])) {
-                // Assuming images are stored in assets/uploads/courses/
-                $img_src = base_url('assets/uploads/courses/' . $images[0]);
+                $file = basename($images[0]);
+                $thumb = image_to_thumb($file);
+                if (is_file($img_dir . $thumb)) {
+                    $img_src = base_url('upload/courses/images/' . $thumb);
+                } elseif (is_file($img_dir . $file)) {
+                    $img_src = base_url('upload/courses/images/' . $file);
+                }
             }
-            $row[] = '<img src="' . $img_src . '" class="img-thumbnail" style="width: 50px; height: 50px; object-fit: cover;">';
 
-            $row[] = mb_substr($val->title, 0, 30, 'utf-8');
-            $row[] = '<a href="' . site_url('admin/categories/view/') . $val->course_categories_id . '" target="_blank">' . $val->category_name . '</a>';
-            $row[] = date('g:iA d/m/y', strtotime($val->date_updated));
+            $edit_url = site_url('admin/courses/form/' . $val->id);
+            $title = htmlspecialchars($val->title);
+
+            // Course: thumbnail + title + id
+            $row[] = '<a href="' . $edit_url . '" class="cl-course">'
+                . '<img src="' . $img_src . '" alt="" loading="lazy" decoding="async" width="56" height="40">'
+                . '<span class="cl-course-text"><span class="cl-course-title" title="' . $title . '">' . $title . '</span>'
+                . '<span class="cl-course-id">ID #' . (int) $val->id . '</span></span></a>';
+
+            $row[] = $val->category_name
+                ? '<span class="cl-cat">' . htmlspecialchars($val->category_name) . '</span>'
+                : '<span class="cl-muted">—</span>';
+
+            $row[] = '<span class="cl-num' . ($val->lecture_count ? '' : ' is-zero') . '"><i class="material-icons">play_circle_outline</i>' . (int) $val->lecture_count . '</span>';
+            $row[] = '<span class="cl-num' . ($val->learner_count ? '' : ' is-zero') . '"><i class="material-icons">people_outline</i>' . (int) $val->learner_count . '</span>';
+
+            $row[] = '<span class="cl-date" title="' . date('d M Y, g:i A', strtotime($val->date_updated)) . '">' . time_elapsed_string($val->date_updated) . '</span>';
             $row[] = featured_switch($val->featured, $val->id);
             $row[] = status_switch($val->status, $val->id);
-            $row[] = '<a href="' . site_url('admin/courses/form/') . $val->id . '" target="_blank">manage</a>';
+
+            $view_url = site_url('courses/detail/') . str_replace(' ', '+', $val->title);
+            $row[] = '<div class="cl-actions">'
+                . '<a href="' . $edit_url . '" class="cl-btn cl-btn-primary" title="Edit course"><i class="material-icons">edit</i><span>Edit</span></a>'
+                . '<a href="' . $view_url . '" target="_blank" rel="noopener" class="cl-btn cl-btn-icon" title="View on website"><i class="material-icons">open_in_new</i></a>'
+                . '</div>';
             $data[] = $row;
         }
 
         $output = array(
-            "draw" => $_POST['draw'],
+            "draw" => (int) $this->input->post('draw'),
             "recordsTotal" => $this->datatables->count_all(),
-            "recordsFiltered" => $this->datatables->count_filtered(),
+            "recordsFiltered" => $this->datatables->count_filtered($where),
             "data" => $data,
+        );
+
+        // Keep the stat cards in sync after featured/status toggles
+        $total = (int) $this->courses_model->count_all_courses();
+        $active = (int) $this->courses_model->count_active_courses();
+        $output['stats'] = array(
+            'all' => $total,
+            'active' => $active,
+            'inactive' => max(0, $total - $active),
+            'featured' => (int) $this->courses_model->count_featured_courses(),
         );
 
         //output to json format
@@ -151,12 +193,9 @@ class Courses extends Admin_Controller
         exit;
     }
 
-    /**
-     * ajax_list
-     */
-
     public function ajax_users_list()
     {
+        session_write_close(); // read-only: don't hold the DB session lock (other requests on this page queue behind it)
         $course_id = $this->input->post('id');
         if (!$course_id) {
             echo json_encode(array(
@@ -255,6 +294,7 @@ class Courses extends Admin_Controller
 
     public function ajax_get_sections($course_id)
     {
+        session_write_close(); // read-only: don't hold the DB session lock (other requests on this page queue behind it)
         if (!$this->input->is_ajax_request()) {
             exit('No direct script access allowed');
         }
@@ -264,7 +304,8 @@ class Courses extends Admin_Controller
 
     public function render_curriculum($course_id)
     {
-        $data['curriculum'] = $this->courses_model->get_curriculum($course_id);
+        session_write_close(); // read-only: don't hold the DB session lock (other requests on this page queue behind it)
+        $data['curriculum'] = $this->courses_model->get_curriculum((int) $course_id);
         $this->load->view('admin/lms/courses/curriculum_list', $data);
     }
     protected function _json(int $status, string $message, array $errors = [], array $data = [])
@@ -1567,6 +1608,7 @@ class Courses extends Admin_Controller
      */
     public function ajax_get_lecture($id)
     {
+        session_write_close(); // read-only: don't hold the DB session lock (other requests on this page queue behind it)
         if (!$id) {
             echo json_encode(array('flag' => 0, 'msg' => 'Invalid ID'));
             exit;

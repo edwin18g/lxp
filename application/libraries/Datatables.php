@@ -102,7 +102,16 @@ class Datatables
                     $this->CI_LIB->db->order_by('users_groups.group_id', $this->CI_LIB->input->post('order')['0']['dir']);
             } else // default case
             {
-                $this->CI_LIB->db->order_by($this->column_order[$this->CI_LIB->input->post('order')['0']['column']], $this->CI_LIB->input->post('order')['0']['dir']);
+                // Ignore unknown/blank sort columns (e.g. image or action columns) instead of erroring
+                $order_post = $this->CI_LIB->input->post('order');
+                $col_index = isset($order_post[0]['column']) ? (int) $order_post[0]['column'] : -1;
+                $col = isset($this->column_order[$col_index]) ? $this->column_order[$col_index] : '';
+                $dir = (isset($order_post[0]['dir']) && strtolower($order_post[0]['dir']) === 'asc') ? 'ASC' : 'DESC';
+                if ($col !== '') {
+                    $this->CI_LIB->db->order_by($col, $dir);
+                } elseif (!empty($this->order)) {
+                    $this->CI_LIB->db->order_by(key($this->order), current($this->order));
+                }
             }
 
         } else if (isset($this->order)) {
@@ -125,8 +134,9 @@ class Datatables
         if (!empty($where))
             $this->CI_LIB->db->where($where);
 
-        return $this->CI_LIB->db->get()
-            ->num_rows();
+        // COUNT(*) in the database instead of fetching every matching row (with all selected columns
+        // and subqueries) just to call num_rows(). count_all_results() drops the ORDER BY for us.
+        return (int) $this->CI_LIB->db->count_all_results();
     }
 
     /**

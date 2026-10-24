@@ -296,11 +296,18 @@
         }
       });
 
-      // Global External Search Binding
-      $(document).on('keyup', '.global-dt-search', function () {
-        var tableId = $(this).data('table') || 'table';
-        var table = $('#' + tableId).DataTable();
-        table.search($(this).val()).draw();
+      // Global External Search Binding (debounced: one server request after typing pauses, not one per key)
+      var globalSearchTimer = null;
+      $(document).on('input', '.global-dt-search', function () {
+        var $input = $(this);
+        clearTimeout(globalSearchTimer);
+        globalSearchTimer = setTimeout(function () {
+          var tableId = $input.data('table') || 'table';
+          if (!$.fn.DataTable.isDataTable('#' + tableId)) return;
+          var table = $('#' + tableId).DataTable();
+          var val = $.trim($input.val());
+          if (table.search() !== val) table.search(val).draw();
+        }, 400);
       });
     }
 

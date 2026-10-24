@@ -168,7 +168,7 @@ CREATE TABLE `course_subscription` (
   `cs_course_id` int NOT NULL,
   `cs_start_date` date NOT NULL,
   `cs_end_date` date NOT NULL,
-  `cs_status` enum('0','1','','') DEFAULT '1',
+  `cs_status` enum('0','1','') DEFAULT '1',
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=128548 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
