@@ -27,7 +27,7 @@
 
     <!-- Modern Admin CSS -->
     <link
-        href="<?php echo base_url('themes/admin/css/modern_admin.css'); ?>?v=<?php echo $this->settings->site_version; ?>"
+        href="<?php echo base_url('themes/admin/css/modern_admin.css'); ?>?v=<?php echo @filemtime(FCPATH . 'themes/admin/css/modern_admin.css'); ?>"
         rel="stylesheet" type="text/css">
 
 
@@ -70,6 +70,29 @@
             /* Remove sidebar margin */
         }
 
+        /* No sidebar on this layout: top bar spans the full width and the brand link is not squeezed */
+        .navbar {
+            left: 0 !important;
+            width: 100% !important;
+        }
+        .navbar .container-fluid::before,
+        .navbar .container-fluid::after { display: none !important; }
+        .navbar .navbar-brand {
+            width: auto !important;
+            justify-content: flex-start !important;
+            padding: 0 !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            color: #334155 !important;
+            letter-spacing: 0 !important;
+            display: inline-flex !important;
+            align-items: center;
+            white-space: nowrap;
+        }
+        .navbar .navbar-brand:hover { color: #4f46e5 !important; }
+        .navbar .navbar-header { float: none; }
+        .navbar .navbar-collapse { display: flex !important; padding-right: 0 !important; }
+
         .bars {
             display: none !important;
         }
@@ -87,6 +110,10 @@
             z-index: 9999;
         }
     </style>
+    <!-- Admin Page-Specific CSS (course form offcanvas, cards, etc.) -->
+    <link
+        href="<?php echo base_url('themes/admin/css/admin_pages.css'); ?>?v=<?php echo @filemtime(FCPATH . 'themes/admin/css/admin_pages.css'); ?>"
+        rel="stylesheet" type="text/css">
 </head>
 
 <body class="theme-<?php echo $this->settings->admin_theme; ?>">

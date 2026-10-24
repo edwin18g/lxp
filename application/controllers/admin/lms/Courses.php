@@ -872,7 +872,7 @@ class Courses extends Admin_Controller
 
         if (!empty($_POST['id'])) {
             if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', 'p_edit')) {
-                echo '<p>' . sprintf(lang('manage_acl_permission_no'), lang('manage_acl_edit')) . '</p>';
+                echo json_encode(array('flag' => 0, 'msg' => strip_tags(sprintf(lang('manage_acl_permission_no'), lang('manage_acl_edit')))));
                 exit;
             }
 
@@ -890,21 +890,21 @@ class Courses extends Admin_Controller
             }
         } else {
             if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', 'p_add')) {
-                echo '<p>' . sprintf(lang('manage_acl_permission_no'), lang('manage_acl_add')) . '</p>';
+                echo json_encode(array('flag' => 0, 'msg' => strip_tags(sprintf(lang('manage_acl_permission_no'), lang('manage_acl_add')))));
                 exit;
             }
         }
 
         /* Validate form input */
         $this->form_validation
-            ->set_rules('title', 'Lecture Name empty not allowed ', 'trim|required|alpha_dash_spaces|max_length[256]')
+            ->set_rules('title', 'Title', 'trim|required|max_length[200]')
             ->set_rules('description', lang('common_description'), 'trim')
             ->set_rules('featured', lang('common_featured'), 'required|in_list[0,1]')
             ->set_rules('status', lang('common_status'), 'required|in_list[0,1]')
-            ->set_rules('meta_title', 'Enter google file id', 'required|trim|max_length[128]')
+            ->set_rules('meta_title', 'URL / File ID', 'required|trim|max_length[200]')
 
 
-            ->set_rules('category', 'Please select content type', 'required|is_natural_no_zero', array('is_natural_no_zero' => lang('courses_select_category')));
+            ->set_rules('category', 'Content Type', 'required|in_list[1,2,3]', array('in_list' => 'Please select a content type.'));
 
 
 
@@ -915,7 +915,11 @@ class Courses extends Admin_Controller
                 if (form_error($key))
                     $error_fields[] = $key;
 
-            echo json_encode(array('flag' => 0, 'msg' => validation_errors(), 'error_fields' => json_encode($error_fields)));
+            echo json_encode(array(
+                'flag' => 0,
+                'msg' => trim(strip_tags(validation_errors('', "\n"))),
+                'error_fields' => $error_fields,
+            ));
             exit;
         }
 
@@ -932,7 +936,19 @@ class Courses extends Admin_Controller
         $data['section_id'] = (int) $this->input->post('section_id');
         $data['cl_type'] = $this->input->post('category');
         if ($data['cl_type'] == 3) {
-            $data['cl_file_name'] = $this->generate_youtube_url($this->input->post('meta_title'));
+            $video_url = $this->generate_youtube_url($data['cl_file_name']);
+            if ($video_url === FALSE && preg_match('~vimeo\.com/(?:video/)?(\d+)~', $data['cl_file_name'], $vm)) {
+                $video_url = 'https://player.vimeo.com/video/' . $vm[1];
+            }
+            if ($video_url === FALSE) {
+                echo json_encode(array(
+                    'flag' => 0,
+                    'msg' => "That doesn't look like a YouTube or Vimeo link. Paste the video URL or the 11-character YouTube ID.",
+                    'error_fields' => array('meta_title'),
+                ));
+                exit;
+            }
+            $data['cl_file_name'] = $video_url;
         }
 
 
@@ -968,28 +984,18 @@ class Courses extends Admin_Controller
 
     private function generate_youtube_url($url = false)
     {
-        $pattern =
-            '%^# Match any youtube URL
-        (?:https?://)?  # Optional scheme. Either http or https
-        (?:www\.)?      # Optional www subdomain
-        (?:             # Group host alternatives
-          youtu\.be/    # Either youtu.be,
-        | youtube\.com  # or youtube.com
-          (?:           # Group path alternatives
-            /embed/     # Either /embed/
-          | /v/         # or /v/
-          | /watch\?v=  # or /watch\?v=
-          )             # End path alternatives.
-        )               # End host alternatives.
-        ([\w-]{10,12})  # Allow 10-12 for 11 char youtube id.
-        $%x'
-        ;
-        $result = preg_match($pattern, $url, $matches);
-        if ($result) {
-            //return $matches[1];
-            return 'https://www.youtube.com/embed/' . $matches[1];
+        $url = trim((string) $url);
+        if ($url === '') {
+            return FALSE;
         }
-        return false;
+
+        // watch?v=…&t=…, youtu.be/…?si=…, embed/, shorts/, live/, v/ — or a bare 11-character ID
+        if (preg_match('~(?:youtube(?:-nocookie)?\.com/(?:embed/|watch\?(?:.*&)?v=|shorts/|live/|v/)|youtu\.be/)([A-Za-z0-9_-]{11})~', $url, $m)
+            || preg_match('~^([A-Za-z0-9_-]{11})$~', $url, $m)) {
+            return 'https://www.youtube.com/embed/' . $m[1];
+        }
+
+        return FALSE;
     }
 
     public function user_save_beta()

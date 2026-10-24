@@ -2,32 +2,48 @@
 ?>
 
 <div class="row clearfix">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 course-form-tabs course-form-card">
+    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 course-form-tabs course-form-card course-offcanvas">
         <!-- Page Header -->
-       
+        <div class="course-page-head">
+            <a href="<?php echo site_url('admin/courses'); ?>" class="course-back" title="Back to courses">
+                <i class="material-icons">arrow_back</i>
+            </a>
+            <div class="course-page-title">
+                <div class="course-crumb"><a href="<?php echo site_url('admin/courses'); ?>">Courses</a> <i class="material-icons">chevron_right</i> <?php echo empty($id) ? 'New course' : 'Edit course'; ?></div>
+                <h1><?php echo !empty($title['value']) ? htmlspecialchars($title['value']) : 'Untitled course'; ?></h1>
+            </div>
+        </div>
 
-        <!-- Tabs -->
-        <div class="card">
-            <div class="body">
-                <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active">
-                        <a href="#overview" data-toggle="tab">
-                            <i class="material-icons">info_outline</i> OVERVIEW
-                        </a>
-                    </li>
-                    <li role="presentation" class="<?php echo empty($id) ? 'disabled' : ''; ?>">
-                        <a href="#curriculum" data-toggle="tab" <?php echo empty($id) ? 'onclick="return false;"' : ''; ?>>
-                            <i class="material-icons">format_list_numbered</i> CURRICULUM
-                        </a>
-                    </li>
-                    <li role="presentation" class="<?php echo empty($id) ? 'disabled' : ''; ?>">
-                        <a href="#students" data-toggle="tab" <?php echo empty($id) ? 'onclick="return false;"' : ''; ?>>
-                            <i class="material-icons">people</i> LEARNERS
-                        </a>
-                    </li>
-                </ul>
+        <!-- Tabs: left menu + right content -->
+        <div class="card course-tabs-card">
+            <div class="body course-tabs-layout">
+                <aside class="course-tabs-nav">
+                    <div class="course-tabs-nav-label">Course setup</div>
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active">
+                            <a href="#overview" data-toggle="tab">
+                                <i class="material-icons">info_outline</i>
+                                <span class="course-nav-text"><strong>Overview</strong><small>Title, category, pricing &amp; media</small></span>
+                            </a>
+                        </li>
+                        <li role="presentation" class="<?php echo empty($id) ? 'disabled' : ''; ?>">
+                            <a href="#curriculum" data-toggle="tab" <?php echo empty($id) ? 'onclick="return false;"' : ''; ?>>
+                                <i class="material-icons">format_list_numbered</i>
+                                <span class="course-nav-text"><strong>Curriculum</strong><small>Sections &amp; lectures</small></span>
+                                <?php echo empty($id) ? '<span class="course-nav-lock" title="Save the course first"><i class="material-icons">lock</i></span>' : ''; ?>
+                            </a>
+                        </li>
+                        <li role="presentation" class="<?php echo empty($id) ? 'disabled' : ''; ?>">
+                            <a href="#students" data-toggle="tab" <?php echo empty($id) ? 'onclick="return false;"' : ''; ?>>
+                                <i class="material-icons">people_outline</i>
+                                <span class="course-nav-text"><strong>Learners</strong><small>Enrolled students</small></span>
+                                <?php echo empty($id) ? '<span class="course-nav-lock" title="Save the course first"><i class="material-icons">lock</i></span>' : ''; ?>
+                            </a>
+                        </li>
+                    </ul>
+                </aside>
 
-                <div class="tab-content" style="margin-top: 20px;">
+                <div class="tab-content course-tabs-content">
                     
                     <!-- Tab 1: Overview (The Main Form) -->
                     <div role="tabpanel" class="tab-pane fade in active" id="overview">
@@ -199,18 +215,26 @@
                         <div class="row clearfix">
                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                 <div class="card">
-                                    <div class="header" style="background: #fcfcfc;">
-                                        <h2 id="curriculum_header_title" style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                                            <span>COURSE CURRICULUM</span>
+                                    <div class="header curr-card-head">
+                                        <div id="curriculum_header_title" class="curr-card-title">
+                                            <div>
+                                                <h2>Course Curriculum</h2>
+                                                <p>Organise lectures into sections. Learners see them in this order.</p>
+                                            </div>
                                             <?php if(!empty($id)) { ?>
-                                            <button type="button" id="btn_add_lecture" class="btn btn-primary waves-effect btn-sm">
-                                                <i class="material-icons" style="font-size: 18px;">add</i> ADD LECTURE
+                                            <div class="curr-card-buttons">
+                                            <button type="button" class="btn btn-default waves-effect" onclick="addSection()">
+                                                <i class="material-icons">view_agenda</i> Add Section
                                             </button>
+                                            <button type="button" id="btn_add_lecture" class="btn btn-primary waves-effect">
+                                                <i class="material-icons">add</i> Add Lecture
+                                            </button>
+                                            </div>
                                             <button type="button" id="btn_cancel_lecture" class="btn btn-default waves-effect btn-sm" style="display: none;">
                                                 <i class="material-icons" style="font-size: 18px;">close</i> CANCEL
                                             </button>
                                             <?php } ?>
-                                        </h2>
+                                        </div>
                                     </div>
                                     <div class="body">
                                         <?php if(empty($id)) { ?>
@@ -235,115 +259,116 @@
 
                                              <!-- Offcanvas Lecture Form -->
                                              <div class="offcanvas-backdrop" id="lecture-offcanvas-backdrop"></div>
-                                             <div class="offcanvas-sidebar" id="lecture-offcanvas">
+                                             <div class="offcanvas-sidebar lecture-panel" id="lecture-offcanvas" role="dialog" aria-labelledby="offcanvas_lecture_title">
                                                  <div class="offcanvas-header">
-                                                     <h4 style="margin: 0; font-weight: 700; color: #333;" id="offcanvas_lecture_title">ADD NEW LECTURE</h4>
-                                                     <button type="button" class="btn btn-default btn-circle waves-effect" id="close-lecture-offcanvas">
+                                                     <div class="lecture-panel-heading">
+                                                         <span class="lecture-panel-icon"><i class="material-icons">video_library</i></span>
+                                                         <div>
+                                                             <h4 id="offcanvas_lecture_title">Add new lecture</h4>
+                                                             <p>Add a video, PDF or Google Drive file to this course.</p>
+                                                         </div>
+                                                     </div>
+                                                     <button type="button" class="lecture-panel-close" id="close-lecture-offcanvas" title="Close">
                                                          <i class="material-icons">close</i>
                                                      </button>
                                                  </div>
-                                                 <div class="offcanvas-body">
-                                                     <?php echo form_open_multipart(site_url('admin/courses/lecture_save'), array('class' => 'form-horizontal', 'id' => 'form-lecture-create', 'role'=>"form")); ?>
-                                                         <input type="hidden" name="course_id" value="<?php echo $id; ?>">
-                                                         <input type="hidden" name="id" id="lecture_id" value=""> <!-- For Edit -->
 
-                                                         <div class="row clearfix m-b-20">
-                                                             <div class="col-sm-12">
-                                                                 <label class="form-label">Section</label>
-                                                                 <div class="form-group">
-                                                                     <div class="form-line">
-                                                                         <select name="section_id" id="lecture_section_id_select" class="form-control show-tick" required>
+                                                 <?php echo form_open_multipart(site_url('admin/courses/lecture_save'), array('class' => 'lecture-form', 'id' => 'form-lecture-create', 'role' => "form", 'novalidate' => 'novalidate')); ?>
+                                                     <input type="hidden" name="course_id" value="<?php echo $id; ?>">
+                                                     <input type="hidden" name="id" id="lecture_id" value=""> <!-- For Edit -->
+
+                                                     <div class="offcanvas-body">
+                                                         <div class="lecture-form-grid">
+                                                             <!-- Left: details -->
+                                                             <div class="lecture-form-col">
+                                                                 <div class="lf-card">
+                                                                     <div class="lf-card-title">Lecture details</div>
+
+                                                                     <div class="form-group lf-field">
+                                                                         <label class="lf-label" for="lecture_section_id_select">Section</label>
+                                                                         <select name="section_id" id="lecture_section_id_select" class="form-control show-tick">
                                                                              <option value="0">Uncategorized</option>
                                                                          </select>
                                                                      </div>
-                                                                 </div>
-                                                             </div>
-                                                         </div>
 
-                                                         <div class="row clearfix m-b-20">
-                                                             <div class="col-sm-12">
-                                                                 <label class="form-label">Content Type</label>
-                                                                 <div class="form-group">
-                                                                     <div class="form-line">
-                                                                         <?php 
+                                                                     <div class="form-group lf-field">
+                                                                         <label class="lf-label" for="lecture_category">Content type <span class="lf-req">*</span></label>
+                                                                         <?php
                                                                          $lecture_types = array(
                                                                              '' => '-- Select Content Type --',
                                                                              '1' => 'Google Drive',
                                                                              '2' => 'PDF Document',
                                                                              '3' => 'YouTube / Vimeo'
                                                                          );
-                                                                         echo form_dropdown('category', $lecture_types, '', 'id="lecture_category" class="form-control" required'); 
+                                                                         echo form_dropdown('category', $lecture_types, '', 'id="lecture_category" class="form-control"');
                                                                          ?>
                                                                      </div>
+
+                                                                     <div class="form-group lf-field">
+                                                                         <label class="lf-label" for="lecture_title">Title <span class="lf-req">*</span></label>
+                                                                         <input type="text" name="title" id="lecture_title" class="form-control" maxlength="200" placeholder="e.g. 21 Spark lazy evaluation">
+                                                                     </div>
+
+                                                                     <div class="form-group lf-field">
+                                                                         <label class="lf-label" for="lecture_meta_title">URL / File ID <span class="lf-req">*</span></label>
+                                                                         <input type="text" name="meta_title" id="lecture_meta_title" class="form-control" maxlength="200" placeholder="Paste a YouTube / Vimeo URL, or a Google Drive link / file ID">
+                                                                         <div class="lf-hint">YouTube links are saved as an embed link automatically.</div>
+                                                                     </div>
+
+                                                                     <div class="form-group lf-field">
+                                                                         <label class="lf-label" for="lecture_description">Description</label>
+                                                                         <textarea name="description" id="lecture_description" class="form-control" rows="5" placeholder="What will learners get from this lecture? (optional)"></textarea>
+                                                                     </div>
                                                                  </div>
                                                              </div>
-                                                         </div>
 
-                                                         <div class="row clearfix m-b-20">
-                                                             <div class="col-sm-12">
-                                                                 <label class="form-label">Title</label>
-                                                                 <div class="form-group">
-                                                                     <div class="form-line">
-                                                                         <input type="text" name="title" id="lecture_title" class="form-control" required>
+                                                             <!-- Right: preview + visibility -->
+                                                             <div class="lecture-form-col lecture-form-side">
+                                                                 <div class="lecture-preview" id="lecture_preview">
+                                                                     <div class="lecture-preview-head">
+                                                                         <span class="lecture-preview-label"><i class="material-icons">visibility</i> Preview</span>
+                                                                         <span class="lecture-preview-source" id="lecture_preview_source"></span>
+                                                                         <a href="#" target="_blank" rel="noopener" class="lecture-preview-open" id="lecture_preview_open" style="display:none;">
+                                                                             Open <i class="material-icons">open_in_new</i>
+                                                                         </a>
+                                                                     </div>
+                                                                     <div class="lecture-preview-frame" id="lecture_preview_frame">
+                                                                         <div class="lecture-preview-empty" id="lecture_preview_empty">
+                                                                             <i class="material-icons">smart_display</i>
+                                                                             <span>Choose a content type and paste a URL or File ID to see a preview.</span>
+                                                                         </div>
+                                                                     </div>
+                                                                 </div>
+
+                                                                 <div class="lf-card">
+                                                                     <div class="lf-card-title">Visibility</div>
+                                                                     <div class="lf-row">
+                                                                         <div class="form-group lf-field">
+                                                                             <label class="lf-label" for="lecture_status">Status</label>
+                                                                             <select name="status" id="lecture_status" class="form-control">
+                                                                                 <option value="1">Active</option>
+                                                                                 <option value="0">Inactive</option>
+                                                                             </select>
+                                                                         </div>
+                                                                         <div class="form-group lf-field">
+                                                                             <label class="lf-label" for="lecture_featured">Access</label>
+                                                                             <select name="featured" id="lecture_featured" class="form-control">
+                                                                                 <option value="1">Secure (enrolled only)</option>
+                                                                                 <option value="0">Public preview</option>
+                                                                             </select>
+                                                                         </div>
                                                                      </div>
                                                                  </div>
                                                              </div>
                                                          </div>
+                                                     </div>
 
-                                                         <div class="row clearfix m-b-20">
-                                                             <div class="col-sm-12">
-                                                                 <label class="form-label">URL / File ID</label>
-                                                                 <div class="form-group">
-                                                                     <div class="form-line">
-                                                                         <input type="text" name="meta_title" id="lecture_meta_title" class="form-control" required placeholder="Enter Video URL or File ID">
-                                                                     </div>
-                                                                 </div>
-                                                             </div>
-                                                         </div>
-
-                                                         <div class="row clearfix m-b-20">
-                                                             <div class="col-sm-12">
-                                                                 <label class="form-label">Description</label>
-                                                                 <div class="form-group">
-                                                                     <div class="form-line">
-                                                                         <textarea name="description" id="lecture_description" class="form-control" rows="3"></textarea>
-                                                                     </div>
-                                                                 </div>
-                                                             </div>
-                                                         </div>
-
-                                                         <div class="row clearfix m-b-20">
-                                                             <div class="col-sm-6">
-                                                                 <label class="form-label">Status</label>
-                                                                 <div class="form-group">
-                                                                     <div class="form-line">
-                                                                         <select name="status" id="lecture_status" class="form-control">
-                                                                             <option value="1">Active</option>
-                                                                             <option value="0">Inactive</option>
-                                                                         </select>
-                                                                     </div>
-                                                                 </div>
-                                                             </div>
-                                                             <div class="col-sm-6">
-                                                                 <label class="form-label">Secure Content</label>
-                                                                 <div class="form-group">
-                                                                     <div class="form-line">
-                                                                         <select name="featured" id="lecture_featured" class="form-control">
-                                                                             <option value="1">Yes (Secure)</option>
-                                                                             <option value="0">No (Public)</option>
-                                                                         </select>
-                                                                     </div>
-                                                                 </div>
-                                                             </div>
-                                                         </div>
-
-                                                         <div class="row clearfix m-t-20">
-                                                             <div class="col-sm-12">
-                                                                 <button type="submit" class="btn btn-primary btn-lg btn-block waves-effect">SAVE LECTURE</button>
-                                                             </div>
-                                                         </div>
-                                                     <?php echo form_close(); ?>
-                                                 </div>
+                                                     <div class="offcanvas-footer">
+                                                         <span class="lf-footer-note"><span class="lf-req">*</span> Required fields</span>
+                                                         <button type="button" class="btn btn-default waves-effect lf-btn" id="lecture_cancel_btn">Cancel</button>
+                                                         <button type="submit" class="btn btn-primary waves-effect lf-btn lf-btn-primary">Save Lecture</button>
+                                                     </div>
+                                                 <?php echo form_close(); ?>
                                              </div>
 
                                         <?php } ?>
@@ -443,7 +468,7 @@
         });
 
         // Toggle Offcanvas Form
-        window.openLectureOffcanvas = function(title = 'ADD NEW LECTURE', selectedSectionId = 0) {
+        window.openLectureOffcanvas = function(title = 'Add new lecture', selectedSectionId = 0) {
             $('#offcanvas_lecture_title').text(title);
             
             // Load sections
@@ -483,26 +508,161 @@
             $('#form-lecture-create')[0].reset();
             $('#lecture_id').val('');
             if($('#lecture_section_id').length > 0) $('#lecture_section_id').val('');
+            resetLecturePreview(); // also stops any playing video
+            clearLectureErrors();
+        }
+
+        /* ---------- Lecture live preview ---------- */
+        var previewTimer = null, previewSrc = '';
+
+        function parseYouTubeId(v) {
+            var m = v.match(/(?:youtube(?:-nocookie)?\.com\/(?:embed\/|watch\?(?:.*&)?v=|shorts\/|live\/|v\/)|youtu\.be\/)([A-Za-z0-9_-]{11})/);
+            if (m) return m[1];
+            return /^[A-Za-z0-9_-]{11}$/.test(v) ? v : null;
+        }
+        function parseVimeoId(v) {
+            var m = v.match(/vimeo\.com\/(?:video\/)?(\d+)/);
+            return m ? m[1] : null;
+        }
+        function parseDriveId(v) {
+            var m = v.match(/drive\.google\.com\/(?:file\/d\/|open\?(?:.*&)?id=|uc\?(?:.*&)?id=)([A-Za-z0-9_-]{10,})/) ||
+                    v.match(/docs\.google\.com\/\w+\/d\/([A-Za-z0-9_-]{10,})/);
+            if (m) return m[1];
+            return /^[A-Za-z0-9_-]{20,}$/.test(v) ? v : null;
+        }
+
+        // Returns {src, open, source} or {error}
+        function buildPreview(type, value) {
+            var v = $.trim(value || ''), id;
+            if (!type) return { error: 'Choose a content type to see a preview.' };
+            if (!v) return { error: 'Paste a URL or File ID to see a preview.' };
+
+            if (type === '3') {
+                if ((id = parseYouTubeId(v))) return { src: 'https://www.youtube.com/embed/' + id + '?rel=0', open: 'https://www.youtube.com/watch?v=' + id, source: 'YouTube · ' + id };
+                if ((id = parseVimeoId(v))) return { src: 'https://player.vimeo.com/video/' + id, open: 'https://vimeo.com/' + id, source: 'Vimeo · ' + id };
+                return { error: "This doesn't look like a YouTube or Vimeo link. Paste the video URL or the 11-character YouTube ID." };
+            }
+            if ((id = parseDriveId(v))) {
+                return { src: 'https://drive.google.com/file/d/' + id + '/preview', open: 'https://drive.google.com/file/d/' + id + '/view', source: 'Google Drive · ' + id.substr(0, 10) + '…' };
+            }
+            if (type === '2' && /^https?:\/\/\S+/i.test(v)) {
+                return { src: v, open: v, source: 'PDF link' };
+            }
+            return { error: type === '1'
+                ? "Couldn't find a Google Drive file ID. Paste the Drive share link or the file ID."
+                : "Paste a Google Drive link / file ID or a direct link to the PDF." };
+        }
+
+        function renderLecturePreview() {
+            var p = buildPreview($('#lecture_category').val(), $('#lecture_meta_title').val());
+            var $frame = $('#lecture_preview_frame'), $wrap = $('#lecture_preview');
+            $wrap.toggleClass('is-pdf', $('#lecture_category').val() !== '3');
+
+            if (p.error) {
+                previewSrc = '';
+                $frame.find('iframe').remove();
+                $('#lecture_preview_empty').show().find('span').text(p.error);
+                $wrap.toggleClass('has-error', !!$.trim($('#lecture_meta_title').val()) && !!$('#lecture_category').val());
+                $('#lecture_preview_source').text('');
+                $('#lecture_preview_open').hide();
+                return;
+            }
+            $wrap.removeClass('has-error');
+            $('#lecture_preview_source').text(p.source);
+            $('#lecture_preview_open').attr('href', p.open).show();
+            if (p.src === previewSrc) return; // avoid reloading the same player
+            previewSrc = p.src;
+            $('#lecture_preview_empty').hide();
+            $frame.find('iframe').remove();
+            $('<iframe>', {
+                src: p.src,
+                allow: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+                allowfullscreen: true,
+                referrerpolicy: 'strict-origin-when-cross-origin',
+                title: 'Lecture preview'
+            }).appendTo($frame);
+        }
+        window.renderLecturePreview = renderLecturePreview;
+
+        $('#lecture_meta_title').on('input', function () {
+            clearTimeout(previewTimer);
+            previewTimer = setTimeout(renderLecturePreview, 400);
+        });
+        $('#lecture_category').on('change', renderLecturePreview);
+
+        function resetLecturePreview() {
+            previewSrc = '';
+            $('#lecture_preview_frame iframe').remove();
+            $('#lecture_preview').removeClass('has-error is-pdf');
+            $('#lecture_preview_empty').show().find('span').text('Choose a content type and paste a URL or File ID to see a preview.');
+            $('#lecture_preview_source').text('');
+            $('#lecture_preview_open').hide();
         }
 
         $('#btn_add_lecture').on('click', function() {
             closeLectureOffcanvas(); // Clear any existing state
-            openLectureOffcanvas('ADD NEW LECTURE');
+            openLectureOffcanvas('Add new lecture');
         });
 
-        $('#close-lecture-offcanvas, #lecture-offcanvas-backdrop').on('click', function() {
+        $('#close-lecture-offcanvas, #lecture-offcanvas-backdrop, #lecture_cancel_btn').on('click', function() {
             closeLectureOffcanvas();
         });
 
         // Handle AJAX Form Submission for Lectures
+        // Inline field errors (browser validation can't reach the theme's hidden <select>s, so we do it here)
+        var lectureFieldMap = { category: '#lecture_category', title: '#lecture_title', meta_title: '#lecture_meta_title', section_id: '#lecture_section_id_select' };
+        function clearLectureErrors() {
+            $('#form-lecture-create .lecture-field-error').remove();
+            $('#form-lecture-create .has-lecture-error').removeClass('has-lecture-error');
+        }
+        function showLectureError(field, msg) {
+            var $group = $(lectureFieldMap[field] || ('[name="' + field + '"]')).closest('.form-group');
+            if (!$group.length) return;
+            $group.addClass('has-lecture-error');
+            if (!$group.find('.lecture-field-error').length) {
+                $('<div class="lecture-field-error"><i class="material-icons">error_outline</i><span></span></div>').appendTo($group).find('span').text(msg);
+            }
+        }
+        function focusFirstLectureError() {
+            var $first = $('#form-lecture-create .has-lecture-error').first();
+            if (!$first.length) return;
+            var $body = $('#lecture-offcanvas .offcanvas-body');
+            $body.animate({ scrollTop: $body.scrollTop() + $first.offset().top - $body.offset().top - 20 }, 200);
+            $first.find('input, textarea').first().trigger('focus');
+        }
+        function validateLectureForm() {
+            clearLectureErrors();
+            var ok = true, type = $('#lecture_category').val();
+            if (!type) { showLectureError('category', 'Please select a content type.'); ok = false; }
+            if (!$.trim($('#lecture_title').val())) { showLectureError('title', 'Please enter a lecture title.'); ok = false; }
+            var url = $.trim($('#lecture_meta_title').val());
+            if (!url) {
+                showLectureError('meta_title', 'Please paste a URL or File ID.'); ok = false;
+            } else if (type === '3') {
+                // Videos must be a recognisable YouTube/Vimeo link (the server enforces the same rule).
+                // Drive/PDF values are free-form (older lectures store plain file names), so only the preview warns.
+                var p = buildPreview(type, url);
+                if (p.error) { showLectureError('meta_title', p.error); ok = false; }
+            }
+            return ok;
+        }
+        $('#lecture_category, #lecture_title, #lecture_meta_title').on('change input', function () {
+            $(this).closest('.form-group').removeClass('has-lecture-error').find('.lecture-field-error').remove();
+        });
+
         $('#form-lecture-create').on('submit', function(e) {
             e.preventDefault();
+
+            if (!validateLectureForm()) {
+                focusFirstLectureError();
+                return;
+            }
             
             var formData = new FormData(this);
             var submitBtn = $(this).find('button[type="submit"]');
             var originalText = submitBtn.text();
             
-            submitBtn.prop('disabled', true).text('SAVING...');
+            submitBtn.prop('disabled', true).text('Saving…');
 
             $.ajax({
                 url: $(this).attr('action'),
@@ -520,12 +680,19 @@
                         closeLectureOffcanvas();
                         loadCurriculum();
                     } else {
-                        // Error
-                        swal('Error', response.msg, 'error');
+                        // Error: mark the fields the server rejected, then show the message
+                        var fields = response.error_fields || [];
+                        if (typeof fields === 'string') { try { fields = JSON.parse(fields); } catch (err) { fields = []; } }
+                        $.each(fields, function (i, f) { showLectureError(f, ''); });
+                        $('#form-lecture-create .lecture-field-error span:empty').closest('.lecture-field-error').remove();
+                        focusFirstLectureError();
+                        swal('Could not save lecture', $('<div>').html(response.msg || 'Please check the form and try again.').text(), 'error');
                     }
                 },
-                error: function() {
-                    swal('Error', 'An internal error occurred', 'error');
+                error: function(xhr) {
+                    var msg = 'The server could not save this lecture (HTTP ' + xhr.status + '). Please try again.';
+                    if (xhr.status === 200) msg = 'Unexpected response from the server. You may have been logged out. Please reload the page and try again.';
+                    swal('Could not save lecture', msg, 'error');
                 },
                 complete: function() {
                     submitBtn.prop('disabled', false).text(originalText);
@@ -584,7 +751,8 @@
                         $('#lecture_featured').val(row.cl_secure).change();
                         
                         // UI Transitions
-                        openLectureOffcanvas('EDIT LECTURE', row.section_id);
+                        openLectureOffcanvas('Edit lecture', row.section_id);
+                        renderLecturePreview();
                     } else {
                          swal("Error", response.msg, "error");
                     }
@@ -864,7 +1032,7 @@
     // Add Lecture (Modified to handle Section ID)
     window.addLectureToSection = function(sectionId) {
         // Open offcanvas with pre-selected section
-        openLectureOffcanvas('ADD LECTURE TO SECTION', sectionId);
+        openLectureOffcanvas('Add lecture to section', sectionId);
     }
 </script>
 <?php } ?>
