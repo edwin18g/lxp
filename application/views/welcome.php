@@ -328,7 +328,7 @@
 
 .lp-course-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
     gap: 28px;
     margin-bottom: 48px;
 }
@@ -374,6 +374,7 @@
     position: absolute;
     top: 14px; left: 14px;
     background: rgba(79,70,229,0.9);
+    -webkit-backdrop-filter: blur(6px);
     backdrop-filter: blur(6px);
     color: #fff;
     font-size: 0.7rem;
@@ -643,6 +644,7 @@
     margin-top: 18px;
     padding: 8px 22px;
     background: rgba(15, 23, 42, 0.8);
+    -webkit-backdrop-filter: blur(12px);
     backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.15);
     border-radius: 50px;
@@ -700,14 +702,11 @@
 /* Equal Height & Spacing between Review Cards in Carousel */
 .lp-testimonials-carousel .owl-stage {
     display: flex !important;
-    margin: 0 -15px !important;
 }
 
 .lp-testimonials-carousel .owl-item {
     display: flex !important;
     height: auto !important;
-    padding: 0 15px !important;
-    box-sizing: border-box !important;
 }
 
 .lp-testimonials-carousel .owl-item > .item {
@@ -718,6 +717,7 @@
 
 .lp-testimonial-card {
     background: rgba(255, 255, 255, 0.98);
+    -webkit-backdrop-filter: blur(16px);
     backdrop-filter: blur(16px);
     border-radius: 20px;
     padding: 28px 24px 24px;
@@ -989,7 +989,6 @@
 
 @media (max-width: 768px) {
     .lp-hero h1 { font-size: 2rem; }
-    .lp-hero-actions { flex-direction: column; align-items: flex-start; }
     .lp-stats-bar-inner { gap: 0; }
     .lp-stats-bar-item { width: 50%; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.15); }
     .lp-stats-bar-item:nth-last-child(-n+2) { border-bottom: none; }
@@ -1093,6 +1092,86 @@
     background: rgba(255, 255, 255, 0.3);
 }
 
+/* ======================================================
+   MOBILE / TABLET REFINEMENTS
+   ====================================================== */
+/* iOS Safari and most touch browsers don't support fixed backgrounds (image renders zoomed or blank) */
+@media (max-width: 1199px), (hover: none) {
+    .lp-hero,
+    .lp-testimonials-section { background-attachment: scroll !important; }
+}
+
+@media (min-width: 1200px) {
+    .lp-course-grid { grid-template-columns: repeat(4, 1fr); gap: 24px; }
+}
+
+/* Equal-height course cards so Enroll buttons line up when a title wraps to 2 lines */
+.lp-course-grid > * { display: flex; }
+.lp-course-grid > * > .lp-course-card { flex: 1; width: 100%; }
+.lp-testimonials-section { overflow: hidden; }
+
+/* Bundled plugin is Owl Carousel v1 (.owl-wrapper), which ignores the v2 "margin" option:
+   add the gap between review cards and keep them equal height ourselves. */
+.lp-testimonials-carousel { margin-left: -10px; margin-right: -10px; }
+.lp-testimonials-carousel .owl-wrapper { display: flex !important; }
+.lp-testimonials-carousel .owl-item { display: flex; float: none; padding: 0 10px; box-sizing: border-box; }
+.lp-testimonials-carousel .owl-item > .item { display: flex; width: 100%; }
+
+@media (max-width: 768px) {
+    .lp-courses-section,
+    .lp-features-section,
+    .lp-testimonials-section,
+    .lp-cta-section { padding: 56px 0; }
+
+    .lp-section-header { margin-bottom: 28px; }
+
+    /* Hero: centered, full-width stacked buttons */
+    .lp-hero-content { text-align: center; }
+    .lp-hero-actions {
+        flex-direction: column;
+        align-items: stretch;
+        max-width: 320px;
+        margin-left: auto;
+        margin-right: auto;
+    }
+    .lp-hero-actions a { justify-content: center; }
+
+    /* Offer bar: compact single block */
+    .lp-top-offer-badge { display: none; }
+    .lp-top-offer-container { gap: 8px 12px; padding: 0 30px 0 0; }
+    .lp-top-offer-text { font-size: 0.88rem; }
+
+    /* Testimonials */
+    .lp-testimonial-card { min-height: 0; padding: 22px 18px 18px; }
+    .lp-testimonial-card-header { flex-wrap: wrap; gap: 8px; }
+
+    /* CTA buttons same width */
+    .lp-cta-buttons a { width: 100%; max-width: 320px; justify-content: center; }
+}
+
+@media (max-width: 576px) {
+    /* Courses: swipeable row instead of a very long stack */
+    .lp-course-grid {
+        display: flex;
+        overflow-x: auto;
+        scroll-snap-type: x mandatory;
+        gap: 14px;
+        margin: 0 -15px 28px;
+        padding: 4px 15px 14px;
+        scroll-padding: 0 15px;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+    }
+    .lp-course-grid::-webkit-scrollbar { display: none; }
+    .lp-course-grid > * { flex: 0 0 82%; scroll-snap-align: start; }
+
+    .lp-feature-card { padding: 18px 16px; gap: 14px; }
+    .lp-feature-icon { width: 44px; height: 44px; font-size: 19px; }
+    .lp-feature-card h4 { font-size: 1.05rem; }
+    .lp-trust-divider { display: none; }
+    .lp-testimonials-trust-bar { border-radius: 20px; }
+}
+
 </style>
 
 <?php
@@ -1134,7 +1213,7 @@ $settings = $CI->settings;
     <div class="lp-hero-orb3"></div>
     <div class="container">
         <div class="row justify-content-center">
-            <div class="col-lg-8 col-md-10 col-12">
+            <div class="col-lg-8 col-lg-offset-2 col-md-10 col-md-offset-1 col-xs-12">
                 <div class="lp-hero-content">
                     
                     <h1>
@@ -1235,35 +1314,45 @@ $settings = $CI->settings;
         <div class="lp-features-grid">
             <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="0">
                 <div class="lp-feature-icon icon-violet"><i class="fa fa-database"></i></div>
-                <h5>BigData &amp; Spark</h5>
-                <p>Deep-dive programs covering Hadoop, Spark, Kafka, Hive and real-time streaming analytics.</p>
+                <div class="lp-feature-body">
+                    <h4>BigData &amp; Spark</h4>
+                    <p>Deep-dive programs covering Hadoop, Spark, Kafka, Hive and real-time streaming analytics.</p>
+                </div>
             </div>
             <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="100">
                 <div class="lp-feature-icon icon-cyan"><i class="fa fa-code"></i></div>
-                <h5>Hands-On Projects</h5>
-                <p>Every batch includes real-time industry projects to build a portfolio that impresses recruiters.</p>
+                <div class="lp-feature-body">
+                    <h4>Hands-On Projects</h4>
+                    <p>Every batch includes real-time industry projects to build a portfolio that impresses recruiters.</p>
+                </div>
             </div>
             <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="200">
                 <div class="lp-feature-icon icon-amber"><i class="fa fa-users"></i></div>
-                <h5>Batch-Based Learning</h5>
-                <p>Learn alongside peers in structured batches — live sessions, recordings, and doubt-clearing included.</p>
+                <div class="lp-feature-body">
+                    <h4>Batch-Based Learning</h4>
+                    <p>Learn alongside peers in structured batches — live sessions, recordings, and doubt-clearing included.</p>
+                </div>
             </div>
             <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="300">
                 <div class="lp-feature-icon icon-emerald"><i class="fa fa-line-chart"></i></div>
-                <h5>Advanced Analytics</h5>
-                <p>From data ingestion to ML pipelines — master the full analytics stack used in production systems.</p>
+                <div class="lp-feature-body">
+                    <h4>Advanced Analytics</h4>
+                    <p>From data ingestion to ML pipelines — master the full analytics stack used in production systems.</p>
+                </div>
             </div>
             <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="400">
                 <div class="lp-feature-icon icon-violet"><i class="fa fa-video-camera"></i></div>
-                <h5>Video Library Access</h5>
-                <p>Get lifetime access to recorded sessions — rewatch any lesson at your own pace, anytime.</p>
+                <div class="lp-feature-body">
+                    <h4>Video Library Access</h4>
+                    <p>Get lifetime access to recorded sessions — rewatch any lesson at your own pace, anytime.</p>
+                </div>
             </div>
             <div class="lp-feature-card" data-aos="fade-up" data-aos-delay="500">
-                <div class="lp-feature-icon icon-indigo">
-                    <i class="fa fa-life-ring" style="display:contents;">🛟</i>
+                <div class="lp-feature-icon icon-indigo"><i class="fa fa-life-ring"></i></div>
+                <div class="lp-feature-body">
+                    <h4>Dedicated Support</h4>
+                    <p>Our support team is always on hand to assist you throughout your learning journey.</p>
                 </div>
-                <h3>Dedicated Support</h3>
-                <p>Our support team is always on hand to assist you throughout your learning journey.</p>
             </div>
         </div>
     </div>
@@ -1309,7 +1398,7 @@ $settings = $CI->settings;
         <div class="owl-carousel lp-testimonials-carousel" data-items="3" data-desktop="3" data-desktopsmall="2" data-tablet="1" data-mobile="1"
             data-margin="30" data-loop="true" data-autoplay="true" data-nav="false" data-dots="true">
             <?php foreach ($testimonials as $key => $val): ?>
-                <div class="item" data-aos="fade-up" data-aos-delay="<?php echo ($key % 3) * 100; ?>">
+                <div class="item">
                     <div class="lp-testimonial-card">
                         <div class="lp-testimonial-card-header">
                             <div class="lp-testimonial-stars">

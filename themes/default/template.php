@@ -491,20 +491,59 @@ if (
         /* ============================================
            RESPONSIVE HEADER
            ============================================ */
-        @media (max-width: 991px) {
-            .header-search { max-width: 300px; }
+        /* Legacy theme.js adds body.sticky-menu-active and menu.css then shifts the header to top:-57px
+           (built for an old header with a top strip). Keep the modern header pinned at the top instead. */
+        body #header,
+        body.sticky-menu-active #header {
+            position: sticky !important;
+            top: 0 !important;
         }
-        @media (max-width: 768px) {
-            #header { height: auto; padding: 12px 0; }
-            .header-left { gap: 12px; }
+
+        .mobile-menu-extra { display: none; }
+
+        @media (max-width: 1199px) {
+            .header-search { max-width: 300px; }
+            .header-left { gap: 16px; }
+        }
+        @media (max-width: 991px) {
+            #header { height: 64px; padding: 0; }
+            #header .container { gap: 10px; }
+            .header-left { gap: 12px; flex-grow: 1; min-width: 0; }
             .header-links { display: none; }
             .header-search { display: none; }
-            .mobile-toggle { display: flex; }
+            .header-right { order: 2; gap: 8px; }
+            .mobile-toggle { display: flex; order: 3; align-items: center; justify-content: center; width: 40px; height: 38px; }
             .footer-grid { grid-template-columns: 1fr; gap: 36px; }
             .footer-bottom { flex-direction: column; text-align: center; }
+
+            /* Mobile dropdown menu */
+            #header.menu-open .header-links {
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 2px;
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #fff;
+                padding: 10px 15px 14px;
+                border-bottom: 1px solid #E5E7EB;
+                box-shadow: 0 12px 24px rgba(15, 23, 42, 0.08);
+                z-index: 100;
+            }
+            #header.menu-open .header-links a {
+                padding: 12px 10px;
+                border-radius: 8px;
+                font-size: 15px;
+            }
+            #header.menu-open .header-links .mobile-menu-extra { display: block; }
         }
         @media (max-width: 480px) {
             .header-right .btn-login { display: none; }
+            .header-right .btn-join { padding: 8px 14px; font-size: 13px; }
+            .logo img { height: 28px; }
+            .header-right .user-nav .dropdown-toggle > span { display: none; }
         }
 
         /* ============================================
@@ -550,6 +589,9 @@ if (
                         <?php endif; ?>
                         <a href="<?php echo site_url('cms/about-us') ?>">About</a>
                         <a href="<?php echo site_url('contact') ?>">Contact</a>
+                        <?php if (!$this->ion_auth->logged_in()): ?>
+                        <a href="<?php echo site_url('auth/login') ?>" class="mobile-menu-extra">Log In</a>
+                        <?php endif; ?>
                     </nav>
 
                     <!-- Search -->
@@ -910,6 +952,30 @@ if (
             }
         });
     </script>
+<script>
+    /* Mobile header menu toggle */
+    (function () {
+        var header = document.getElementById('header');
+        var toggle = document.getElementById('mobileMenuToggle');
+        if (!header || !toggle) return;
+        var icon = toggle.querySelector('i');
+        function setOpen(open) {
+            header.classList.toggle('menu-open', open);
+            toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+            if (icon) icon.className = open ? 'fa fa-times' : 'fa fa-bars';
+        }
+        toggle.addEventListener('click', function (e) {
+            e.stopPropagation();
+            setOpen(!header.classList.contains('menu-open'));
+        });
+        document.addEventListener('click', function (e) {
+            if (header.classList.contains('menu-open') && !header.contains(e.target)) setOpen(false);
+        });
+        window.addEventListener('resize', function () {
+            if (window.innerWidth > 991) setOpen(false);
+        });
+    })();
+</script>
 </body>
 
 <!-- Load Facebook SDK for JavaScript -->
