@@ -27,9 +27,14 @@ class Admin_Controller extends MY_Controller {
             redirect('auth/');
         }
 
-        if($_SESSION['groups_id'] == 3) 
+        if($_SESSION['groups_id'] == 3)
             redirect('auth/', 'refresh');
-        
+
+        // Apply pending DB migrations (application/database/migrations/*.sql) once, automatically.
+        // Admin-only so visitors never pay for it; a no-op file read once everything is applied.
+        $this->load->library('auto_migrate');
+        $this->auto_migrate->run();
+
         // load notifications model
         $this->load->model('notifications_model');
         $this->notifications = $this->notifications_model->get_notifications($this->user['id']);
