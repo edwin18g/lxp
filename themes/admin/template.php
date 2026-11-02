@@ -331,7 +331,7 @@
   </script>
 
   <!-- Admin Shared JS -->
-  <script type="text/javascript" src="<?php echo base_url('themes/admin/js/admin_shared.js'); ?>?v=<?php echo $this->settings->site_version; ?>"></script>
+  <script type="text/javascript" src="<?php echo base_url('themes/admin/js/admin_shared.js'); ?>?v=<?php echo @filemtime(FCPATH . 'themes/admin/js/admin_shared.js'); ?>"></script>
 
   <!-- User Details Offcanvas (Global) -->
   <div id="userSidebar" class="right-sidebar">

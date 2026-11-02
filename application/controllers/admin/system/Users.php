@@ -36,23 +36,10 @@ class Users extends Admin_Controller
         $this->include_index_plugins();
         $data = $this->includes;
 
-        // Fetch User Stats
-        $data['total_users'] = $this->db->count_all('users');
-        $data['active_users'] = $this->db->where('active', 1)->count_all_results('users');
-        $data['inactive_users'] = $this->db->where('active', 0)->count_all_results('users');
-
-        $data['t_headers'] = array(
-            '#',
-            'Image', // Static string for safety
-            lang('users_first_name'),
-            lang('users_last_name'),
-            lang('users_username'),
-            lang('users_email'),
-            'Phone',
-            'Role',
-            lang('common_status'),
-            lang('action_action'),
-        );
+        $data['stats'] = $this->_user_stats();
+        $data['roles'] = $this->db->select('id, name')->order_by('id')->get('groups')->result();
+        $data['role_labels'] = $this->_role_labels();
+        $data['current_user_id'] = (int) $this->user['id'];
 
         // load views
         $content['content'] = $this->load->view('admin/system/users/index', $data, TRUE);
@@ -60,100 +47,160 @@ class Users extends Admin_Controller
     }
 
     /**
-     * ajax_list
+     * Friendly role names by group id
+     */
+    private function _role_labels()
+    {
+        $labels = array();
+        foreach ($this->db->select('id, name')->get('groups')->result() as $g) {
+            $map = array('admin' => 'Administrator', 'tutors' => 'Instructor', 'customers' => 'Learner', 'members' => 'Learner');
+            $labels[(int) $g->id] = isset($map[$g->name]) ? $map[$g->name] : ucfirst($g->name);
+        }
+        return $labels;
+    }
+
+    /**
+     * Counts for the stat cards (users with a NULL status count as inactive)
+     */
+    private function _user_stats()
+    {
+        $total = (int) $this->db->count_all('users');
+        $active = (int) $this->db->where('active', 1)->count_all_results('users');
+        $admins = (int) $this->db->where('group_id', 1)->count_all_results('users_groups');
+        $new_week = (int) $this->db->where('date_added >=', date('Y-m-d H:i:s', strtotime('-7 days')))->count_all_results('users');
+        return array('all' => $total, 'active' => $active, 'inactive' => max(0, $total - $active), 'admins' => $admins, 'new' => $new_week);
+    }
+
+    /**
+     * ajax_list (server-side DataTables)
      */
     public function ajax_list()
     {
-        $start = $this->input->post('start');
-        $length = $this->input->post('length');
-        $search = $this->input->post('search')['value'];
-        $order_post = $this->input->post('order');
+        // Read-only: don't hold the DB session lock while the list query runs
+        session_write_close();
 
-        $orders = array();
-        // Map columns index to DB columns
-        $columns_map = array(
-            0 => 'users.id',
-            1 => 'users.image',
-            2 => 'users.first_name',
-            3 => 'users.last_name',
-            4 => 'users.username',
-            5 => 'users.email',
-            6 => 'users.mobile',
-            7 => 'group_name',
-            8 => 'users.active',
+        $order = $this->input->post('order');
+        $columns = $this->input->post('columns');
+        $order_col = '';
+        $order_dir = 'desc';
+        if (isset($order[0]['column'], $columns[(int) $order[0]['column']]['name'])) {
+            $order_col = $columns[(int) $order[0]['column']]['name'];
+            $order_dir = isset($order[0]['dir']) ? $order[0]['dir'] : 'desc';
+        }
+        $search = $this->input->post('search');
+
+        $params = array(
+            'search' => isset($search['value']) ? $search['value'] : '',
+            'role' => (int) $this->input->post('role'),
+            'status' => in_array($this->input->post('status'), array('active', 'inactive'), TRUE) ? $this->input->post('status') : '',
+            'order_col' => $order_col,
+            'order_dir' => $order_dir,
+            'start' => (int) $this->input->post('start'),
+            'length' => (int) $this->input->post('length'),
         );
 
-        if ($order_post) {
-            foreach ($order_post as $o) {
-                if (isset($columns_map[$o['column']])) {
-                    $orders[$columns_map[$o['column']]] = $o['dir'];
-                }
-            }
-        }
-
-        $list = $this->users_model->get_users_dt($length, $start, $orders, $search);
+        $list = $this->users_model->get_users_list($params);
+        $roles = $this->_role_labels();
+        $me = (int) $this->user['id'];
+        $e = function ($v) { return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'); };
 
         $data = array();
-        $no = $start;
+        foreach ($list as $u) {
+            $name = trim($u->first_name . ' ' . $u->last_name);
+            $name = $name !== '' ? $name : $u->username;
+            $initials = strtoupper(mb_substr(trim((string) $u->first_name), 0, 1) . mb_substr(trim((string) $u->last_name), 0, 1));
+            $initials = preg_match('/^[\p{L}\p{N}]+$/u', $initials) ? $initials : strtoupper(mb_substr((string) $u->username, 0, 1));
+            $is_active = (int) $u->active === 1;
+            $is_me = (int) $u->id === $me;
+            $is_super = (int) $u->id === 1;
 
-        foreach ($list as $val) {
-            $no++;
+            // User: avatar + name + @username (avatar falls back to initials if the image is missing)
+            $avatar = '<span class="ul-avatar"><span class="ul-initials">' . $e($initials) . '</span>';
+            if ($u->image) {
+                $avatar .= '<img src="' . $e(base_url('upload/users/images/' . $u->image)) . '" alt="" loading="lazy" onerror="this.remove()">';
+            }
+            $avatar .= '</span>';
             $row = array();
-            $row[] = $no;
+            $row[] = '<button type="button" class="ul-user" onclick="openUserSidebar(' . (int) $u->id . ')">' . $avatar
+                . '<span class="ul-user-text"><span class="ul-name" title="' . $e($name) . '">' . $e($name) . ($is_me ? ' <span class="ul-you">You</span>' : '') . '</span>'
+                . '<span class="ul-sub">@' . $e($u->username) . '</span></span></button>';
 
-            // Image
-            if ($val->image) {
-                $img_url = base_url('upload/users/images/' . $val->image);
-                $row[] = '<div class="user-avatar-premium"><img src="' . $img_url . '" class="img-circle" width="40" height="40" alt="User"></div>';
-            } else {
-                $initial = mb_substr($val->first_name, 0, 1) . mb_substr($val->last_name, 0, 1);
-                $row[] = '<div class="user-initials-premium bg-indigo-soft color-indigo">' . strtoupper($initial) . '</div>';
+            $row[] = '<span class="ul-contact"><a href="mailto:' . $e($u->email) . '" title="' . $e($u->email) . '">' . $e($u->email) . '</a>'
+                . ($u->mobile ? '<span class="ul-sub">' . $e($u->mobile) . '</span>' : '') . '</span>';
+
+            $gid = (int) $u->group_id;
+            $row[] = '<span class="ul-role ul-role-' . $gid . '">' . $e(isset($roles[$gid]) ? $roles[$gid] : '—') . '</span>';
+
+            $row[] = '<span class="cl-num' . ($u->course_count ? '' : ' is-zero') . '"><i class="material-icons">school</i>' . (int) $u->course_count . '</span>';
+
+            // Inline status switch (confirmed + AJAX); you can't deactivate yourself or the super admin
+            $locked = ($is_me || $is_super);
+            $row[] = '<label class="ul-switch' . ($locked ? ' is-locked' : '') . '" title="' . ($locked ? 'You can\'t deactivate this account' : ($is_active ? 'Click to deactivate' : 'Click to activate')) . '">'
+                . '<input type="checkbox"' . ($is_active ? ' checked' : '') . ($locked ? ' disabled' : '')
+                . ' onchange="toggleUserStatus(' . (int) $u->id . ', this)" data-name="' . $e($name) . '">'
+                . '<span class="ul-switch-track"><span class="ul-switch-thumb"></span></span>'
+                . '<span class="ul-switch-label">' . ($is_active ? 'Active' : 'Inactive') . '</span></label>';
+
+            $joined = $u->date_added ? strtotime($u->date_added) : 0;
+            $row[] = '<span class="ul-date" title="' . ($joined ? date('d M Y, g:i A', $joined) : '') . '">' . ($joined ? date('d M Y', $joined) : '—') . '</span>'
+                . '<span class="ul-sub">' . ($u->last_login ? 'Last login ' . $e(time_elapsed_string((int) $u->last_login)) : 'Never logged in') . '</span>';
+
+            // Actions
+            $actions = '<div class="ul-actions">';
+            $actions .= '<button type="button" class="cl-btn cl-btn-icon" title="View details" onclick="openUserSidebar(' . (int) $u->id . ')"><i class="material-icons">visibility</i></button>';
+            $actions .= '<button type="button" class="cl-btn cl-btn-icon" title="Edit" onclick="openUserFormSidebar(' . (int) $u->id . ')"><i class="material-icons">edit</i></button>';
+            if (!$is_me) {
+                $actions .= '<a href="' . site_url('admin/users/login_as_user/' . (int) $u->id) . '" class="cl-btn cl-btn-icon" title="Log in as this user" onclick="return confirm(' . $e(json_encode('Log in as ' . $name . '? You can switch back from the banner at the top.')) . ');"><i class="material-icons">login</i></a>';
             }
-
-            $row[] = '<span class="font-weight-bold color-slate">' . $val->first_name . '</span>';
-            $row[] = '<span class="font-weight-bold color-slate">' . $val->last_name . '</span>';
-            $row[] = '<span class="text-lowercase color-slate-soft">@' . $val->username . '</span>';
-            $row[] = '<span class="color-slate-soft">' . $val->email . '</span>';
-            $row[] = '<span class="color-slate-soft">' . ($val->mobile ? $val->mobile : '-') . '</span>';
-
-            // Group badge
-            $group_class = ($val->group_name == 'admin') ? 'bg-indigo color-white' : 'bg-slate-soft color-slate';
-            $row[] = '<span class="badge-premium ' . $group_class . '">' . $val->group_name . '</span>';
-
-            // Status 
-            $status_class = $val->active ? 'bg-emerald-soft color-emerald' : 'bg-rose-soft color-rose';
-            $status_link = $val->active ? site_url('admin/users/deactivate/' . $val->id) : site_url('admin/users/activate/' . $val->id);
-            $status_label = '<span class="badge-premium ' . $status_class . '">' . ($val->active ? lang('users_active') : lang('users_inactive')) . '</span>';
-            $row[] = '<a href="' . $status_link . '" class="text-decoration-none">' . $status_label . '</a>';
-
-
-            // Action
-            $action = '<div class="btn-group-premium">';
-            // View Offcanvas
-            $action .= '<button type="button" class="btn-table-action color-indigo bg-indigo-soft" onclick="openUserSidebar(' . $val->id . ')" title="View Details"><i class="material-icons">visibility</i></button>';
-            // Edit Offcanvas
-            $action .= '<button type="button" class="btn-table-action color-slate bg-slate-soft" onclick="openUserFormSidebar(' . $val->id . ')" title="Edit"><i class="material-icons">edit</i></button>';
-            // Login as User (Impersonate)
-            if ($val->id != $this->user['id']) {
-                $action .= '<a href="' . site_url('admin/users/login_as_user/' . $val->id) . '" class="btn-table-action color-emerald bg-emerald-soft" title="Login as ' . htmlspecialchars($val->first_name, ENT_QUOTES) . '" onclick="return confirm(\'Login as ' . htmlspecialchars($val->first_name . ' ' . $val->last_name, ENT_QUOTES) . '?\');"><i class="material-icons">login</i></a>';
+            if (!$is_me && !$is_super) {
+                $actions .= '<button type="button" class="cl-btn cl-btn-icon ul-danger" title="Delete" onclick="ajaxDelete(' . (int) $u->id . ', ' . $e(json_encode($e($name))) . ', `User`)"><i class="material-icons">delete_outline</i></button>';
             }
-            // Delete
-            $action .= '<button type="button" class="btn-table-action color-rose bg-rose-soft" onclick="ajaxDelete(' . $val->id . ', ``, `User`)" title="Delete"><i class="material-icons">delete_outline</i></button>';
-
-            $action .= '</div>';
-            $row[] = $action;
+            $actions .= '</div>';
+            $row[] = $actions;
 
             $data[] = $row;
         }
 
-        $output = array(
-            "draw" => $this->input->post('draw'),
-            "recordsTotal" => $this->users_model->count_all_users(),
-            "recordsFiltered" => $this->users_model->count_filtered_users($search),
-            "data" => $data,
-        );
+        echo json_encode(array(
+            'draw' => (int) $this->input->post('draw'),
+            'recordsTotal' => (int) $this->db->count_all('users'),
+            'recordsFiltered' => $this->users_model->count_users_list($params),
+            'data' => $data,
+            'stats' => $this->_user_stats(),
+        ));
+    }
 
-        echo json_encode($output);
+    /**
+     * Activate / deactivate a user (POST id, active=1|0) — JSON
+     */
+    public function set_status()
+    {
+        $id = (int) $this->input->post('id');
+        $active = (int) $this->input->post('active') === 1;
+
+        if (!$this->ion_auth->is_admin()) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Only administrators can change a user\'s status.'));
+            return;
+        }
+        if (!$id || !$this->users_model->get_users_by_id($id)) {
+            echo json_encode(array('flag' => 0, 'msg' => 'User not found.'));
+            return;
+        }
+        if (!$active && ($id === (int) $this->user['id'] || $id === 1)) {
+            echo json_encode(array('flag' => 0, 'msg' => 'You can\'t deactivate this account.'));
+            return;
+        }
+
+        $ok = $active ? $this->ion_auth->activate($id) : $this->ion_auth->deactivate($id);
+        if ($ok && !$active) {
+            // Sign the user out everywhere so the deactivation takes effect immediately
+            $this->user_sessions_model->logout_all($id, session_id());
+        }
+
+        echo json_encode(array(
+            'flag' => $ok ? 1 : 0,
+            'msg' => $ok ? ($active ? 'User activated.' : 'User deactivated and signed out.') : 'Could not update the status.',
+        ));
     }
 
     /**
@@ -161,9 +208,18 @@ class Users extends Admin_Controller
      */
     public function get_user_details($id)
     {
-        $user = $this->users_model->get_users_by_id($id);
+        $user = $this->users_model->get_users_by_id((int) $id);
 
         if ($user) {
+            // Every text field below comes from user input (public signup), so HTML-escape them all once here
+            foreach (get_object_vars($user) as $k => $v) {
+                if (is_string($v)) {
+                    $user->$k = htmlspecialchars($v, ENT_QUOTES, 'UTF-8');
+                } elseif ($v === NULL) {
+                    $user->$k = ''; // avoids PHP 8.1+ "passing null" deprecation output in the panel
+                }
+            }
+
             $html = '<div class="user-profile-header animate-up">';
             $html .= '<div class="profile-cover"></div>';
             $html .= '<div class="profile-info-main">';
@@ -181,9 +237,10 @@ class Users extends Admin_Controller
             // Name & Role
             $html .= '<div class="profile-name-area">';
             $html .= '<h2>' . ucwords($user->first_name . ' ' . $user->last_name) . '</h2>';
-            $html .= '<span class="role-badge">' . $user->group_name . '</span>';
+            $role_names = array('admin' => 'Administrator', 'tutors' => 'Instructor', 'customers' => 'Learner', 'members' => 'Learner');
+            $html .= '<span class="role-badge">' . (isset($role_names[$user->group_name]) ? $role_names[$user->group_name] : ucfirst($user->group_name)) . '</span>';
             if ($user->id != $this->user['id']) {
-                $html .= '<div style="margin-top: 10px;"><a href="' . site_url('admin/users/login_as_user/' . $user->id) . '" class="btn btn-emerald waves-effect" onclick="return confirm(\'Login as ' . htmlspecialchars($user->first_name . ' ' . $user->last_name, ENT_QUOTES) . '?\');" style="border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #10b981; color: #fff; text-decoration: none;"><i class="material-icons" style="font-size: 18px;">login</i> Login as User</a></div>';
+                $html .= '<div style="margin-top: 10px;"><a href="' . site_url('admin/users/login_as_user/' . $user->id) . '" class="btn btn-emerald waves-effect" onclick="return confirm(' . htmlspecialchars(json_encode('Log in as ' . htmlspecialchars_decode($user->first_name . ' ' . $user->last_name, ENT_QUOTES) . '? You can switch back from the banner at the top.'), ENT_QUOTES, 'UTF-8') . ');" style="border-radius: 8px; font-weight: 600; font-size: 13px; display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; background: #10b981; color: #fff; text-decoration: none;"><i class="material-icons" style="font-size: 18px;">login</i> Login as User</a></div>';
             }
             $html .= '</div>';
             $html .= '</div>';
@@ -446,13 +503,13 @@ class Users extends Admin_Controller
 
         /* Load View */
         if ($this->input->is_ajax_request()) {
-            echo $this->load->view('admin/users/form', $data, TRUE);
+            echo $this->load->view('admin/system/users/form', $data, TRUE);
             exit;
         }
 
         /* Load Template */
         $content['breadcrumb'] = $this->breadcrumb;
-        $content['content'] = $this->load->view('admin/users/form', $data, TRUE);
+        $content['content'] = $this->load->view('admin/system/users/form', $data, TRUE);
         $this->load->view($this->template, $content);
     }
 
@@ -778,7 +835,11 @@ class Users extends Admin_Controller
         $result = $this->users_model->get_users_by_id($id);
 
         if ($id === 1) {
-            echo '<p>' . lang('users_super_admin_no_delete') . '</p>';
+            echo json_encode(array('flag' => 0, 'msg' => 'The main administrator account can\'t be deleted.', 'type' => 'fail'));
+            exit;
+        }
+        if ($id === (int) $this->user['id']) {
+            echo json_encode(array('flag' => 0, 'msg' => 'You can\'t delete your own account.', 'type' => 'fail'));
             exit;
         }
 
@@ -801,6 +862,10 @@ class Users extends Admin_Controller
             // Remove image
             if (!empty($result->image))
                 $this->file_uploads->remove_file('./upload/users/images/', $result->image);
+
+            // Don't leave orphaned enrollments / sessions behind (they skew course learner counts)
+            $this->users_model->remove_all_user_enrollments($id);
+            $this->user_sessions_model->logout_all($id, session_id());
 
             echo json_encode(array(
                 'flag' => 1,

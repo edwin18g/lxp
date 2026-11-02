@@ -29,13 +29,15 @@ function openUserSidebar(id) {
     );
 
     $.ajax({
-        url: site_url + 'admin/users/quick_view/' + id,
+        url: site_url + 'admin/users/get_user_details/' + parseInt(id, 10),
         type: 'GET',
+        dataType: 'html',
         success: function (data) {
             $body.html(data);
         },
-        error: function () {
-            $body.html('<p class="text-danger text-center" style="margin-top:100px;">Error fetching data.</p>');
+        error: function (xhr) {
+            $body.html('<p class="text-danger text-center" style="margin-top:100px;">Couldn\'t load this user'
+                + (xhr.status ? ' (HTTP ' + xhr.status + ')' : '') + '. Please try again.</p>');
         }
     });
 }

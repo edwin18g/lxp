@@ -586,6 +586,79 @@ class Users_model extends CI_Model
     }
 
     /**
+     * Admin Learners list (server-side DataTables).
+     *
+     * @param array $p search, role (group id), status ('active'|'inactive'), order_col, order_dir, start, length
+     * @return array rows
+     */
+    public function get_users_list($p)
+    {
+        $this->db->select("
+            users.id, users.image, users.first_name, users.last_name, users.username, users.email, users.mobile,
+            users.active, users.date_added, users.last_login,
+            (SELECT ug.group_id FROM users_groups ug WHERE ug.user_id = users.id ORDER BY ug.group_id LIMIT 1) AS group_id,
+            (SELECT COUNT(*) FROM course_subscription cs WHERE cs.cs_user_id = users.id AND cs.cs_status = '1') AS course_count
+        ", FALSE);
+        $this->db->from('users');
+        $this->_users_list_filters($p);
+
+        $sortable = array('name' => 'users.first_name', 'email' => 'users.email', 'role' => 'group_id',
+            'courses' => 'course_count', 'status' => 'users.active', 'joined' => 'users.id', 'last_login' => 'users.last_login');
+        $col = (isset($p['order_col']) && isset($sortable[$p['order_col']])) ? $sortable[$p['order_col']] : 'users.id';
+        $dir = (isset($p['order_dir']) && strtolower($p['order_dir']) === 'asc') ? 'ASC' : 'DESC';
+        $this->db->order_by($col, $dir, FALSE);
+        if ($col !== 'users.id') {
+            $this->db->order_by('users.id', 'DESC');
+        }
+
+        if (!isset($p['length']) || (int) $p['length'] !== -1) {
+            $length = isset($p['length']) ? max(1, min(200, (int) $p['length'])) : 25;
+            $this->db->limit($length, max(0, (int) (isset($p['start']) ? $p['start'] : 0)));
+        }
+
+        return $this->db->get()->result();
+    }
+
+    /**
+     * Count rows for the admin Learners list with the same filters.
+     */
+    public function count_users_list($p)
+    {
+        $this->db->from('users');
+        $this->_users_list_filters($p);
+        return (int) $this->db->count_all_results();
+    }
+
+    /**
+     * Shared filters for the admin Learners list (all values bound/escaped by the query builder).
+     */
+    private function _users_list_filters($p)
+    {
+        $search = isset($p['search']) ? trim((string) $p['search']) : '';
+        if ($search !== '') {
+            $this->db->group_start()
+                ->like('users.first_name', $search)
+                ->or_like('users.last_name', $search)
+                ->or_like("CONCAT(users.first_name, ' ', users.last_name)", $search)
+                ->or_like('users.username', $search)
+                ->or_like('users.email', $search)
+                ->or_like('users.mobile', $search)
+                ->group_end();
+        }
+
+        if (!empty($p['role'])) {
+            $this->db->where('users.id IN (SELECT ug.user_id FROM users_groups ug WHERE ug.group_id = ' . (int) $p['role'] . ')', NULL, FALSE);
+        }
+
+        if (isset($p['status']) && $p['status'] === 'active') {
+            $this->db->where('users.active', 1);
+        } elseif (isset($p['status']) && $p['status'] === 'inactive') {
+            // NULL counts as inactive too (older rows)
+            $this->db->group_start()->where('users.active', 0)->or_where('users.active IS NULL', NULL, FALSE)->group_end();
+        }
+    }
+
+    /**
      * get_recent_users
      */
     public function get_recent_users($limit = 5)

@@ -1,87 +1,75 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
-/* User Management View */
+/* Learners / user management */
 ?>
+<div class="cl-page">
 
-<div class="row clearfix">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div class="stats-bar-container animate-up">
-            <div class="stats-bar-item">
-                <div class="item-icon bg-indigo-soft color-indigo">
-                    <i class="material-icons">people</i>
-                </div>
-                <div class="item-content">
-                    <span class="item-label">TOTAL USERS</span>
-                    <span class="item-number"><?php echo $total_users; ?></span>
-                </div>
+    <div class="cl-head">
+        <div>
+            <h1>Learners &amp; Users</h1>
+            <p>Find people, manage access and see what they're enrolled in.</p>
+        </div>
+        <button type="button" class="cl-btn cl-btn-primary cl-btn-lg" onclick="openUserFormSidebar()">
+            <i class="material-icons">person_add</i><span>Add user</span>
+        </button>
+    </div>
+
+    <!-- Stat cards double as quick filters -->
+    <div class="cl-stats" aria-label="Filter users">
+        <button type="button" class="cl-stat is-active" data-filter="all">
+            <span class="cl-stat-icon is-indigo"><i class="material-icons">people</i></span>
+            <span><strong id="stat_all"><?php echo number_format($stats['all']); ?></strong><small>All users</small></span>
+        </button>
+        <button type="button" class="cl-stat" data-filter="active">
+            <span class="cl-stat-icon is-green"><i class="material-icons">how_to_reg</i></span>
+            <span><strong id="stat_active"><?php echo number_format($stats['active']); ?></strong><small>Active</small></span>
+        </button>
+        <button type="button" class="cl-stat" data-filter="inactive">
+            <span class="cl-stat-icon is-slate"><i class="material-icons">person_off</i></span>
+            <span><strong id="stat_inactive"><?php echo number_format($stats['inactive']); ?></strong><small>Inactive</small></span>
+        </button>
+        <button type="button" class="cl-stat" data-filter="admins">
+            <span class="cl-stat-icon is-amber"><i class="material-icons">admin_panel_settings</i></span>
+            <span><strong id="stat_admins"><?php echo number_format($stats['admins']); ?></strong><small>Administrators</small></span>
+        </button>
+    </div>
+
+    <div class="cl-card">
+        <div class="cl-toolbar">
+            <div class="cl-search">
+                <i class="material-icons">search</i>
+                <input type="text" class="global-dt-search" data-table="users_table" placeholder="Search name, email, username or phone…" aria-label="Search users">
             </div>
-
-            <div class="stats-bar-item">
-                <div class="item-icon bg-emerald-soft color-emerald">
-                    <i class="material-icons">person_add_alt</i>
-                </div>
-                <div class="item-content">
-                    <span class="item-label">ACTIVE</span>
-                    <span class="item-number"><?php echo $active_users; ?></span>
-                </div>
-            </div>
-
-            <div class="stats-bar-item">
-                <div class="item-icon bg-rose-soft color-rose">
-                    <i class="material-icons">person_off</i>
-                </div>
-                <div class="item-content">
-                    <span class="item-label">INACTIVE</span>
-                    <span class="item-number"><?php echo $total_users - $active_users; ?></span>
-                </div>
-            </div>
-
-            <!-- External Search Box -->
-            <div class="stats-bar-item search-item" style="flex: 2; min-width: 300px;">
-                <div class="global-search-wrapper" style="width: 100%;">
-                    <i class="material-icons">search</i>
-                    <input type="text" class="global-dt-search" placeholder="Search by name, email or phone..."
-                        data-table="table">
-                    <button type="button" id="clearAllFilters" class="btn-clear-all" style="display: none;"
-                        title="Clear All Filters">
-                        <i class="material-icons">filter_alt_off</i>
-                        <span>Clear Filters</span>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Add New User Action Card -->
-            <button onclick="openUserFormSidebar()"
-                class="stats-bar-item action-item bg-indigo color-white text-decoration-none"
-                style="flex: 0; min-width: 180px; border: none; cursor: pointer; text-align: left;">
-                <div class="item-icon" style="background: rgba(255,255,255,0.2);">
-                    <i class="material-icons">add</i>
-                </div>
-                <div class="item-content">
-                    <span class="item-label" style="color: rgba(255,255,255,0.8);">ACTION</span>
-                    <span class="item-number" style="color: #fff; font-size: 14px;">ADD NEW USER</span>
-                </div>
+            <select id="role_filter" class="form-control" title="All roles">
+                <option value="">All roles</option>
+                <?php foreach ($roles as $r) { ?>
+                    <option value="<?php echo (int) $r->id; ?>"><?php echo htmlspecialchars(isset($role_labels[(int) $r->id]) ? $role_labels[(int) $r->id] : $r->name); ?></option>
+                <?php } ?>
+            </select>
+            <select id="status_filter" class="form-control" title="Any status">
+                <option value="">Any status</option>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+            </select>
+            <button type="button" class="cl-reset" id="ul_reset" style="display:none;">
+                <i class="material-icons">close</i> Clear filters
             </button>
         </div>
-    </div>
-</div>
 
-<div class="row clearfix index-page">
-    <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-        <div class="card premium-table-card">
-
-            <div class="body table-responsive">
-                <table id="table" class="table table-hover table-striped dataTable">
-                    <thead>
-                        <tr>
-                            <?php foreach ($t_headers as $val) {
-                                echo '<th>' . $val . '</th>';
-                            } ?>
-                        </tr>
-                    </thead>
-                    <tbody class="text-capitalize">
-                    </tbody>
-                </table>
-            </div>
+        <div class="table-responsive">
+            <table id="users_table" class="table cl-table" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>User</th>
+                        <th>Contact</th>
+                        <th>Role</th>
+                        <th>Courses</th>
+                        <th>Status</th>
+                        <th>Joined</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
         </div>
     </div>
 </div>
@@ -89,209 +77,108 @@
 <script>
     var table;
     $(document).ready(function () {
-        // Initialize DataTable
-        table = $('#table').DataTable({
-            "destroy": true, // Fix for Cannot reinitialise DataTable
-            "processing": true,
-            "serverSide": true,
-            "pageLength": 50,
-            "ajax": {
-                "url": "<?php echo site_url('admin/users/ajax_list') ?>",
-                "type": "POST",
-                "data": { <?php echo $this->security->get_csrf_token_name(); ?>: '<?php echo $this->security->get_csrf_hash(); ?>' }
+        table = $('#users_table').DataTable({
+            processing: true,
+            serverSide: true,
+            order: [[5, 'desc']], // newest first
+            pageLength: 25,
+            lengthMenu: [10, 25, 50, 100],
+            dom: 'rt<"cl-foot"lip>',
+            autoWidth: false,
+            searchDelay: 400,
+            ajax: {
+                url: "<?php echo site_url('admin/users/ajax_list') ?>",
+                type: "POST",
+                data: function (d) {
+                    d.role = $('#role_filter').val();
+                    d.status = $('#status_filter').val();
+                },
+                dataSrc: function (json) {
+                    if (json.stats) {
+                        $.each(json.stats, function (k, v) { $('#stat_' + k).text(Number(v).toLocaleString()); });
+                    }
+                    return json.data;
+                }
             },
-            "columnDefs": [
-                { "orderable": false, "targets": [0, 1, 9] } // Disable sorting on ID, Image and actions columns
+            // "name" tells the server which column to sort by. One entry per column (className isn't merged).
+            columns: [
+                { name: 'name' },
+                { name: 'email', className: 'cl-hide-xs' },
+                { name: 'role', className: 'cl-hide-sm' },
+                { name: 'courses', className: 'cl-col-num cl-hide-sm' },
+                { name: 'status' },
+                { name: 'joined', className: 'ul-hide-lg' },
+                { name: 'actions', orderable: false, className: 'text-right' }
             ],
-            "initComplete": function () {
-                var api = this.api();
+            language: {
+                processing: '<div class="cl-loading"><i class="material-icons">sync</i> Loading…</div>',
+                emptyTable: 'No users yet. Click “Add user” to create one.',
+                zeroRecords: 'No users match your search or filters.',
+                info: 'Showing _START_–_END_ of _TOTAL_',
+                infoEmpty: 'No users',
+                infoFiltered: '(filtered from _MAX_)',
+                lengthMenu: 'Show _MENU_',
+                paginate: { previous: '<i class="material-icons">chevron_left</i>', next: '<i class="material-icons">chevron_right</i>' }
+            }
+        });
 
-                // Add filter icons to headers
-                $('#table thead th').each(function (i) {
-                    var title = $(this).text();
-                    var searchable_cols = [2, 3, 4, 5, 6, 7, 8];
+        function refreshSelect($s) { if ($.fn.selectpicker && $s.data('selectpicker')) $s.selectpicker('refresh'); }
+        function syncUi() {
+            var role = $('#role_filter').val(), status = $('#status_filter').val();
+            var key = (role === '1' && !status) ? 'admins' : (!role && status === 'active') ? 'active' : (!role && status === 'inactive') ? 'inactive' : (!role && !status) ? 'all' : '';
+            $('.cl-stat').removeClass('is-active');
+            if (key) $('.cl-stat[data-filter="' + key + '"]').addClass('is-active');
+            $('#ul_reset').toggle(!!(role || status || $.trim($('.cl-search input').val())));
+        }
 
-                    if (searchable_cols.includes(i)) {
-                        var filterHtml = `
-                            <div class="header-filter-wrapper">
-                                <button type="button" class="btn-filter-toggle">
-                                    <i class="material-icons">filter_alt</i>
-                                </button>
-                                <div class="filter-dropdown">
-                                    <div class="filter-dropdown-content">
-                                        <div class="filter-sort-options">
-                                            <button type="button" class="btn-sort-action" data-dir="asc">
-                                                <i class="material-icons">sort_by_alpha</i>
-                                                <span>Sort A → Z</span>
-                                            </button>
-                                            <button type="button" class="btn-sort-action" data-dir="desc">
-                                                <i class="material-icons">sort_by_alpha</i>
-                                                <span>Sort Z → A</span>
-                                            </button>
-                                        </div>
-                                        <div class="filter-divider"></div>
-                                        <h6>Filter by ${title}</h6>
-                                        ${i === 7 ? `
-                                            <select class="form-control filter-select-google">
-                                                <option value="">All Groups</option>
-                                                <option value="admin">Admin</option>
-                                                <option value="manager">Manager</option>
-                                                <option value="user">User</option>
-                                            </select>
-                                        ` : i === 8 ? `
-                                            <select class="form-control filter-select-google">
-                                                <option value="">All Status</option>
-                                                <option value="1">Active</option>
-                                                <option value="0">Inactive</option>
-                                            </select>
-                                        ` : `
-                                            <input type="text" class="form-control filter-input-google" placeholder="Search ${title}...">
-                                        `}
-                                        <div class="filter-dropdown-actions">
-                                            <button type="button" class="btn btn-link btn-xs btn-clear">Clear</button>
-                                            <button type="button" class="btn btn-primary btn-xs btn-apply">Apply</button>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                        $(this).append(filterHtml);
-                    }
-                });
-
-                // Toggle dropdown
-                $(document).on('click', '.btn-filter-toggle', function (e) {
-                    e.stopPropagation();
-                    var wrapper = $(this).closest('.header-filter-wrapper');
-                    $('.header-filter-wrapper').not(wrapper).find('.filter-dropdown').removeClass('show');
-                    wrapper.find('.filter-dropdown').toggleClass('show');
-                });
-
-                // Sort action
-                $(document).on('click', '.btn-sort-action', function (e) {
-                    e.stopPropagation();
-                    var dir = $(this).data('dir');
-                    var colIdx = $(this).closest('th').index();
-                    api.order([colIdx, dir]).draw();
-                    $('.filter-dropdown').removeClass('show');
-                });
-
-                // Apply filter
-                function applyFilter(wrapper) {
-                    var colIdx = wrapper.closest('th').index();
-                    var value = wrapper.find('.filter-input-google, .filter-select-google').val();
-
-                    if (api.column(colIdx).search() !== value) {
-                        api.column(colIdx).search(value).draw();
-                    }
-                    wrapper.find('.filter-dropdown').removeClass('show');
-
-                    if (value) {
-                        wrapper.find('.btn-filter-toggle').addClass('active');
-                    } else {
-                        wrapper.find('.btn-filter-toggle').removeClass('active');
-                    }
-                    updateClearAllVisibility();
-                }
-
-                $(document).on('click', '.btn-apply', function (e) {
-                    e.stopPropagation();
-                    applyFilter($(this).closest('.header-filter-wrapper'));
-                });
-
-                // Enter key to apply
-                $(document).on('keypress', '.filter-input-google', function (e) {
-                    if (e.which == 13) {
-                        applyFilter($(this).closest('.header-filter-wrapper'));
-                    }
-                });
-
-                // Clear filter
-                $(document).on('click', '.btn-clear', function (e) {
-                    e.stopPropagation();
-                    var wrapper = $(this).closest('.header-filter-wrapper');
-                    var colIdx = wrapper.closest('th').index();
-                    wrapper.find('.filter-input-google, .filter-select-google').val('');
-
-                    if (api.column(colIdx).search() !== '') {
-                        api.column(colIdx).search('').draw();
-                    }
-                    wrapper.find('.filter-dropdown').removeClass('show');
-                    wrapper.find('.btn-filter-toggle').removeClass('active');
-                    updateClearAllVisibility();
-                });
-
-                // Prevent click propagation from dropdown
-                $(document).on('click', '.filter-dropdown', function (e) {
-                    e.stopPropagation();
-                });
-
-                // Close dropdown on outside click
-                $(document).on('click', function () {
-                    $('.filter-dropdown').removeClass('show');
-                });
-
-                // Clear All Filters
-                function updateClearAllVisibility() {
-                    var hasActiveFilter = $('.btn-filter-toggle.active').length > 0;
-                    if (hasActiveFilter) {
-                        $('#clearAllFilters').fadeIn();
-                    } else {
-                        $('#clearAllFilters').fadeOut();
-                    }
-                }
-
-                $('#clearAllFilters').on('click', function () {
-                    $('.filter-input-google, .filter-select-google').val('');
-                    $('.btn-filter-toggle').removeClass('active');
-                    api.columns().search('').draw();
-                    $(this).fadeOut();
-                });
-            },
-            "drawCallback": function (settings) {
-                var api = this.api();
-                var rowCount = api.rows({ page: 'current' }).count();
-                var tableBody = $('#table tbody');
-
-                if (rowCount === 0) {
-                    var colCount = api.columns().count();
-                    tableBody.html(`
-                        <tr>
-                            <td colspan="${colCount}" class="p-0">
-                                <div class="table-empty-state animate-up">
-                                    <i class="material-icons">search_off</i>
-                                    <h4>No matches found</h4>
-                                    <p>Try adjusting your filters or search terms to find what you're looking for.</p>
-                                </div>
-                            </td>
-                        </tr>
-                    `);
-                }
-            },
-            "order": [[2, "asc"]] // Default sort by First Name
+        $('.cl-stat').on('click', function () {
+            var f = $(this).data('filter');
+            $('#role_filter').val(f === 'admins' ? '1' : '');
+            $('#status_filter').val(f === 'active' || f === 'inactive' ? f : '');
+            refreshSelect($('#role_filter')); refreshSelect($('#status_filter'));
+            syncUi(); table.draw();
+        });
+        $('#role_filter, #status_filter').on('change', function () { syncUi(); table.draw(); });
+        $('.cl-search input').on('input', syncUi);
+        $('#ul_reset').on('click', function () {
+            $('#role_filter, #status_filter').val('');
+            refreshSelect($('#role_filter')); refreshSelect($('#status_filter'));
+            $('.cl-search input').val(''); table.search('');
+            syncUi(); table.draw();
         });
     });
 
-    function openUserSidebar(id) {
-        $('#userSidebarTitle').text('User Details');
-        $('#userSidebar').addClass('open');
-        $('#userSidebarBody').html('<div class="text-center" style="margin-top:100px;"><div class="preloader pl-size-xl"><div class="spinner-layer pl-indigo"><div class="circle-clipper left"><div class="circle"></div></div><div class="circle-clipper right"><div class="circle"></div></div></div></div><p style="margin-top:20px; color:#94a3b8; font-weight:500;">Fetching Details...</p></div>');
+    // Inline status switch: confirm, save via AJAX, update the row in place
+    function toggleUserStatus(id, input) {
+        var $in = $(input), active = input.checked ? 1 : 0;
+        var name = $in.data('name') || 'this user';
+        var msg = active ? 'Activate ' + name + '? They will be able to log in.'
+                         : 'Deactivate ' + name + '? They will be signed out and won\'t be able to log in.';
+        if (!confirm(msg)) { input.checked = !input.checked; return; }
 
-        $.ajax({
-            url: "<?php echo site_url('admin/users/get_user_details/') ?>" + id,
-            type: "GET",
-            success: function (data) {
-                $('#userSidebarBody').html(data);
-            },
-            error: function () {
-                $('#userSidebarBody').html('<p class="text-danger">Error fetching data.</p>');
-            }
-        });
+        var $label = $in.closest('.ul-switch');
+        $in.prop('disabled', true);
+        $label.addClass('is-saving').find('.ul-switch-label').text(active ? 'Active' : 'Inactive');
+        $.post("<?php echo site_url('admin/users/set_status') ?>", { id: id, active: active, csrf_token: csrf_token }, null, 'json')
+            .done(function (res) {
+                if (res.flag == 1) {
+                    show_success(res.msg);
+                    table.ajax.reload(null, false); // refresh counts + row
+                } else {
+                    show_danger(res.msg);
+                    input.checked = !active;
+                    $label.find('.ul-switch-label').text(active ? 'Inactive' : 'Active');
+                }
+            })
+            .fail(function () {
+                show_danger('Could not update the status. Please try again.');
+                input.checked = !active;
+                $label.find('.ul-switch-label').text(active ? 'Inactive' : 'Active');
+            })
+            .always(function () { $in.prop('disabled', false); $label.removeClass('is-saving'); });
     }
 
-    function closeUserSidebar() {
-        $('#userSidebar').removeClass('open');
-    }
+    // openUserSidebar() / closeUserSidebar() live in themes/admin/js/admin_shared.js (loaded globally)
     function openUserFormSidebar(id = null) {
         var url = site_url + 'admin/users/form';
         if (id) {
@@ -383,4 +270,3 @@
         });
     }
 </script>
-

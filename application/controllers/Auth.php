@@ -556,9 +556,26 @@ class Auth extends Public_Controller
                 'language' => $this->input->post('language'),
             );
 
+            // Self-registered learners are active immediately: no admin approval and no activation email.
+            // (Overrides manual_activation / email_activation for this signup only; admin-created users are unaffected.)
+            $ion_cfg = $this->config->item('ion_auth');
+            if (is_array($ion_cfg)) {
+                $ion_cfg['manual_activation'] = FALSE;
+                $ion_cfg['email_activation'] = FALSE;
+                $this->config->set_item('ion_auth', $ion_cfg);
+            }
+
             $flag = $this->ion_auth->register($username, $password, $email, $additional_data);
 
+            // register() returns the new id, or an array with 'id' when the email-activation flow ran
+            if (is_array($flag)) {
+                $flag = isset($flag['id']) ? $flag['id'] : FALSE;
+            }
+
             if ($flag) {
+                // Make sure the account is active (also clears any pending activation code)
+                $this->ion_auth->activate($flag);
+
                 $this->session->language = $this->input->post('language');
                 $this->session->set_flashdata('message', sprintf(lang('users_register_success'), $this->input->post('first_name', TRUE)));
 
