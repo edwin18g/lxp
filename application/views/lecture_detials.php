@@ -128,6 +128,47 @@
             max-height: 100%;
         }
 
+        /* Start the YouTube iframe at 1080p size so YouTube picks HD from the first frame (scaled to fit by fitHqPlayer) */
+        @media (min-width: 768px) {
+            .plyr__video-embed iframe {
+                width: 1920px;
+                height: 1080px;
+                transform-origin: 0 0;
+            }
+        }
+
+        /* Quality menu in the player's control bar */
+        .quality-menu { position: relative; }
+        .quality-btn { font-size: 13px; font-weight: 600; white-space: nowrap; }
+        .quality-list {
+            position: absolute;
+            right: 0;
+            bottom: calc(100% + 10px);
+            min-width: 130px;
+            padding: 6px;
+            background: rgba(255, 255, 255, 0.97);
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+            z-index: 10;
+        }
+        .quality-list[hidden] { display: none; }
+        .quality-item {
+            display: block;
+            width: 100% !important;
+            min-width: 118px;
+            padding: 8px 12px;
+            border: 0;
+            border-radius: 6px;
+            background: none;
+            color: #1e293b;
+            font-size: 13px;
+            font-weight: 500;
+            text-align: left;
+            cursor: pointer;
+        }
+        .quality-item:hover { background: #eef2ff; }
+        .quality-item.is-active { background: #4f46e5; color: #fff; }
+
         /* Sidebar */
         .sidebar {
             width: 380px;
@@ -423,7 +464,8 @@
             const videoId = getYoutubeId(videoFile);
 
             const player = new Plyr('#player', {
-                settings: ['captions', 'quality', 'speed', 'loop'],
+                // No 'quality' item: Plyr's quality menu only works for self-hosted video, not YouTube
+                settings: ['captions', 'speed', 'loop'],
                 youtube: {
                     noCookie: true,
                     rel: 0,
@@ -441,6 +483,130 @@
                         provider: 'youtube',
                     }],
                 };
+
+                // YouTube removed every API for choosing quality (setPlaybackQuality / vq= are ignored) and picks
+                // it from the player's pixel size + connection speed. So the iframe is rendered at the pixel size of
+                // the wanted quality and scaled to fit: the Quality menu below sets that size. Auto uses 1080p size on
+                // tablets/desktops and the default on phones (saves mobile data). YouTube still drops lower on slow
+                // connections, so a choice is the quality to aim for, not a guarantee.
+                const QUALITIES = {
+                    hd2160: { width: 3840, label: '2160p 4K' },
+                    hd1440: { width: 2560, label: '1440p' },
+                    hd1080: { width: 1920, label: '1080p' },
+                    hd720: { width: 1280, label: '720p' },
+                    large: { width: 854, label: '480p' },
+                    medium: { width: 640, label: '360p' },
+                    small: { width: 426, label: '240p' },
+                    tiny: { width: 256, label: '144p' }
+                };
+                const QUALITY_KEY = 'lecture_quality';
+                let chosenQuality = 'auto';
+                try { chosenQuality = localStorage.getItem(QUALITY_KEY) || 'auto'; } catch (e) { }
+                if (chosenQuality !== 'auto' && !QUALITIES[chosenQuality]) chosenQuality = 'auto';
+                let availableLevels = [];
+
+                // Quality in use for this video: a saved choice this video doesn't have falls back to Auto
+                function activeQuality() {
+                    return (chosenQuality !== 'auto' && (!availableLevels.length || availableLevels.indexOf(chosenQuality) !== -1)) ? chosenQuality : 'auto';
+                }
+
+                function fitHqPlayer() {
+                    const wrap = document.querySelector('.plyr__video-embed');
+                    const frame = wrap && wrap.querySelector('iframe');
+                    if (!frame || !wrap.clientWidth) return;
+                    const q = activeQuality();
+                    const width = q !== 'auto' ? QUALITIES[q].width : (window.innerWidth >= 768 ? 1920 : 0);
+                    if (!width) {
+                        frame.style.width = frame.style.height = frame.style.transform = '';
+                        return;
+                    }
+                    const scale = wrap.clientWidth / width;
+                    frame.style.transformOrigin = '0 0';
+                    frame.style.width = width + 'px';
+                    frame.style.height = (wrap.clientHeight / scale) + 'px';
+                    frame.style.transform = 'scale(' + scale + ')';
+                }
+
+                // Quality button + menu in Plyr's control bar
+                function buildQualityMenu() {
+                    const controls = document.querySelector('.plyr__controls');
+                    if (!controls || document.getElementById('qualityMenu')) return;
+                    const box = document.createElement('div');
+                    box.id = 'qualityMenu';
+                    box.className = 'plyr__controls__item quality-menu';
+                    box.innerHTML = '<button type="button" class="plyr__control quality-btn" aria-haspopup="true" aria-expanded="false" aria-label="Video quality"><span class="quality-btn-text">Auto</span></button><div class="quality-list" role="menu" hidden></div>';
+                    const anchor = controls.querySelector('[data-plyr="fullscreen"]');
+                    controls.insertBefore(box, anchor || null);
+
+                    const btn = box.querySelector('.quality-btn');
+                    const list = box.querySelector('.quality-list');
+                    const toggle = function (open) {
+                        list.hidden = !open;
+                        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+                    };
+                    btn.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        toggle(list.hidden);
+                    });
+                    list.addEventListener('click', function (e) {
+                        e.stopPropagation();
+                        const item = e.target.closest('[data-quality]');
+                        if (!item) return;
+                        chosenQuality = item.getAttribute('data-quality');
+                        try { localStorage.setItem(QUALITY_KEY, chosenQuality); } catch (err) { }
+                        fitHqPlayer();
+                        renderQualityMenu();
+                        toggle(false);
+                    });
+                    document.addEventListener('click', function () { toggle(false); });
+                    renderQualityMenu();
+                }
+
+                function renderQualityMenu() {
+                    const list = document.querySelector('#qualityMenu .quality-list');
+                    if (!list) return;
+                    const active = activeQuality();
+                    let html = '';
+                    availableLevels.forEach(function (level) {
+                        if (QUALITIES[level]) {
+                            html += '<button type="button" role="menuitemradio" data-quality="' + level + '" aria-checked="' + (active === level) + '" class="quality-item' + (active === level ? ' is-active' : '') + '">' + QUALITIES[level].label + '</button>';
+                        }
+                    });
+                    html += '<button type="button" role="menuitemradio" data-quality="auto" aria-checked="' + (active === 'auto') + '" class="quality-item' + (active === 'auto' ? ' is-active' : '') + '">Auto</button>';
+                    list.innerHTML = html;
+                    updateQualityLabel();
+                }
+
+                // Button shows the choice, and for Auto what is playing right now
+                function updateQualityLabel() {
+                    const text = document.querySelector('#qualityMenu .quality-btn-text');
+                    if (!text) return;
+                    const active = activeQuality();
+                    const playing = player.embed && player.embed.getPlaybackQuality ? player.embed.getPlaybackQuality() : '';
+                    text.textContent = active !== 'auto' ? QUALITIES[active].label : ('Auto' + (QUALITIES[playing] ? ' (' + QUALITIES[playing].label + ')' : ''));
+                }
+
+                // YouTube only reports a video's levels once it has started loading
+                setInterval(function () {
+                    const embed = player.embed;
+                    if (!embed || !embed.getAvailableQualityLevels) return;
+                    const levels = (embed.getAvailableQualityLevels() || []).filter(function (l) { return QUALITIES[l]; });
+                    if (levels.length && levels.join() !== availableLevels.join()) {
+                        availableLevels = levels;
+                        fitHqPlayer();
+                        renderQualityMenu();
+                    } else {
+                        updateQualityLabel();
+                    }
+                }, 2000);
+
+                player.on('ready', function () {
+                    fitHqPlayer();
+                    buildQualityMenu();
+                    const wrap = document.querySelector('.plyr__video-embed');
+                    if (wrap && window.ResizeObserver) new ResizeObserver(fitHqPlayer).observe(wrap); // resize + fullscreen
+                });
+                window.addEventListener('resize', fitHqPlayer);
             }
 
             player.on('ended', event => {
