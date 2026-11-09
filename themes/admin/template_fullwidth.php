@@ -90,6 +90,29 @@
             white-space: nowrap;
         }
         .navbar .navbar-brand:hover { color: #4f46e5 !important; }
+
+        /* Merged page header in the top bar: back button + breadcrumb + course name */
+        .navbar .navbar-header { display: flex; align-items: center; min-width: 0; flex: 1; margin-left: 0 !important; margin-right: 0 !important; }
+        .fw-head { display: flex; align-items: center; gap: 14px; min-width: 0; }
+        .fw-back {
+            width: 40px; height: 40px; flex-shrink: 0; border-radius: 10px; border: 1px solid #e2e8f0;
+            display: flex; align-items: center; justify-content: center; color: #475569 !important; background: #fff;
+            transition: all 0.15s ease; text-decoration: none !important;
+        }
+        .fw-back:hover { border-color: #c7d2fe; background: #eef2ff; color: #4f46e5 !important; }
+        .fw-title { min-width: 0; line-height: 1.25; }
+        .fw-crumb { display: flex; align-items: center; gap: 2px; font-size: 12.5px; color: #64748b; }
+        .fw-crumb a { color: #64748b !important; text-decoration: none !important; }
+        .fw-crumb a:hover { color: #4f46e5 !important; }
+        .fw-crumb i { font-size: 16px; }
+        .fw-name { font-size: 17px; font-weight: 800; color: #0f172a; letter-spacing: -0.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 60vw; }
+        @media (max-width: 600px) { .fw-crumb { display: none; } .fw-name { font-size: 15px; max-width: 65vw; } }
+        /* This layout has no sidebar or tab bar: drop the theme's mobile toggle and the extra top padding it reserves */
+        .navbar .navbar-toggle, .navbar .bars { display: none !important; }
+        @media (max-width: 1170px) {
+            section.content { padding-top: 0 !important; }
+            .navbar .container-fluid { padding: 0 16px !important; }
+        }
         .navbar .navbar-header { float: none; }
         .navbar .navbar-collapse { display: flex !important; padding-right: 0 !important; }
 
@@ -153,10 +176,19 @@
                 <a href="javascript:void(0);" class="navbar-toggle collapsed" data-toggle="collapse"
                     data-target="#navbar-collapse" aria-expanded="false"></a>
                 <a href="javascript:void(0);" class="bars"></a>
-                <a class="navbar-brand" href="<?php echo site_url('admin/courses'); ?>">
-                    <i class="material-icons" style="vertical-align: middle; margin-right: 5px;">chevron_left</i>
-                    BACK TO COURSES
-                </a>
+                <div class="fw-head">
+                    <a class="fw-back" href="<?php echo site_url('admin/courses'); ?>" title="Back to courses" aria-label="Back to courses">
+                        <i class="material-icons">arrow_back</i>
+                    </a>
+                    <div class="fw-title">
+                        <div class="fw-crumb">
+                            <a href="<?php echo site_url('admin/courses'); ?>">Courses</a>
+                            <i class="material-icons">chevron_right</i>
+                            <span><?php echo htmlspecialchars(isset($page_crumb) ? $page_crumb : 'Edit'); ?></span>
+                        </div>
+                        <div class="fw-name"><?php echo htmlspecialchars(isset($page_heading) ? $page_heading : 'Course'); ?></div>
+                    </div>
+                </div>
             </div>
             <div class="collapse navbar-collapse" id="navbar-collapse">
                 <ul class="nav navbar-nav navbar-right">

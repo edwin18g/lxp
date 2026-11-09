@@ -499,8 +499,10 @@ class Courses extends Admin_Controller
     /**
      * form
      */
-    public function form($id = NULL)
+    public function form($id = NULL, $tab = NULL)
     {
+        // Tab in the URL: admin/courses/form/{id}/{overview|curriculum|learners}
+        $tab = in_array($tab, array('overview', 'curriculum', 'learners'), TRUE) ? $tab : 'overview';
         /* Initialize assets */
         $this->add_plugin_theme(array(
             "tinymce/tinymce.js",
@@ -517,6 +519,7 @@ class Courses extends Admin_Controller
         $this->set_template('template_fullwidth.php');
 
         $data = $this->includes;
+        $data['active_tab'] = ((int) $id) ? $tab : 'overview'; // Curriculum/Learners need a saved course
 
         // in case of edit
         $id = (int) $id;
@@ -627,6 +630,11 @@ class Courses extends Admin_Controller
         );
 
         /* Load Template */
+        $data['insights'] = !empty($data['id']) ? $this->_course_insights((int) $data['id'], $result) : NULL;
+
+        // Heading for the full-width template's top bar (view vars are shared with the template)
+        $data['page_heading'] = !empty($data['title']['value']) ? $data['title']['value'] : (empty($data['id']) ? 'New course' : 'Untitled course');
+        $data['page_crumb'] = empty($data['id']) ? 'New course' : 'Edit course';
         $content['content'] = $this->load->view('admin/lms/courses/form', $data, TRUE);
         $this->load->view($this->template, $content);
     }
@@ -1586,6 +1594,512 @@ class Courses extends Admin_Controller
         exit;
     }
 
+    /**
+     * Numbers + setup checklist for the course Overview tab
+     */
+    private function _course_insights($course_id, $course)
+    {
+        $db = $this->db;
+
+        $lec = $db->select("COUNT(*) AS total, SUM(cl_status = 1) AS published, SUM(cl_secure = 0) AS public_count,
+                SUM(cl_type = 3) AS videos, SUM(cl_type = 2) AS pdfs, SUM(cl_type = 1) AS drive,
+                SUM(TRIM(cl_file_name) = '') AS missing_url", FALSE)
+            ->where('cl_course_id', $course_id)->get('course_lecture')->row();
+        $sections = (int) $db->where('course_id', $course_id)->count_all_results('course_sections');
+
+        $since = date('Y-m-d', strtotime('-30 days'));
+        $lr = $db->select("COUNT(*) AS total, SUM(cs_status = '1') AS active,
+                SUM(cs_start_date >= " . $db->escape($since) . ") AS new_30", FALSE) // legacy zero dates are never >= $since
+            ->where('cs_course_id', $course_id)->get('course_subscription')->row();
+
+        // Progress: completions of currently published lectures by currently enrolled learners
+        $published = (int) $lec->published;
+        $prog = $db->query("
+            SELECT COUNT(*) AS done, COUNT(DISTINCT p.user_id) AS started, MAX(p.completed_at) AS last_at
+            FROM user_lecture_progress p
+            JOIN course_lecture l ON l.id = p.lecture_id AND l.cl_course_id = ? AND l.cl_status = 1
+            JOIN course_subscription s ON s.cs_user_id = p.user_id AND s.cs_course_id = ?
+            WHERE p.course_id = ?", array($course_id, $course_id, $course_id))->row();
+        $finished = $published ? (int) $db->query("
+            SELECT COUNT(*) AS n FROM (
+                SELECT p.user_id FROM user_lecture_progress p
+                JOIN course_lecture l ON l.id = p.lecture_id AND l.cl_course_id = ? AND l.cl_status = 1
+                JOIN course_subscription s ON s.cs_user_id = p.user_id AND s.cs_course_id = ?
+                WHERE p.course_id = ? GROUP BY p.user_id HAVING COUNT(DISTINCT p.lecture_id) >= ?
+            ) t", array($course_id, $course_id, $course_id, $published))->row()->n : 0;
+        $enrolled = (int) $lr->total;
+        $avg = ($enrolled && $published) ? round(100 * (int) $prog->done / ($enrolled * $published)) : NULL;
+
+        // Setup checklist (each item says where to fix it)
+        $images = !empty($course->images) ? json_decode($course->images) : array();
+        $desc = trim(html_entity_decode(strip_tags((string) $course->description)));
+        $checks = array(
+            array('ok' => mb_strlen($desc) >= 50, 'label' => 'Description of at least 50 characters', 'hint' => mb_strlen($desc) ? mb_strlen($desc) . ' characters now' : 'Empty', 'fix' => 'field:description'),
+            array('ok' => !empty($images), 'label' => 'Course image', 'hint' => 'Shown on course cards', 'fix' => 'field:images'),
+            array('ok' => $published > 0, 'label' => 'At least one published lecture', 'hint' => $published . ' published', 'fix' => 'tab:curriculum'),
+            array('ok' => (int) $lec->missing_url === 0, 'label' => 'Every lecture has a URL / file', 'hint' => (int) $lec->missing_url . ' missing', 'fix' => 'tab:curriculum'),
+            array('ok' => $sections > 0 || (int) $lec->total <= 8, 'label' => 'Lectures grouped into sections', 'hint' => $sections ? $sections . ' sections' : 'Recommended once a course has more than 8 lectures', 'fix' => 'tab:curriculum'),
+            array('ok' => trim((string) $course->meta_title) !== '' && trim((string) $course->meta_description) !== '', 'label' => 'SEO title and description', 'hint' => 'Helps the course page appear in search', 'fix' => 'field:seo'),
+            array('ok' => (string) $course->status === '1', 'label' => 'Course is active (visible to learners)', 'hint' => 'Status is set in Publishing', 'fix' => 'field:status'),
+        );
+        $done = count(array_filter($checks, function ($c) { return $c['ok']; }));
+
+        return array(
+            'lectures' => array('total' => (int) $lec->total, 'published' => $published, 'draft' => (int) $lec->total - $published,
+                'public' => (int) $lec->public_count, 'videos' => (int) $lec->videos, 'pdfs' => (int) $lec->pdfs, 'drive' => (int) $lec->drive),
+            'sections' => $sections,
+            'learners' => array('total' => $enrolled, 'active' => (int) $lr->active, 'new_30' => (int) $lr->new_30),
+            'progress' => array('started' => (int) $prog->started, 'finished' => $finished, 'avg' => $avg, 'last_at' => $prog->last_at),
+            'updated' => $course->date_updated,
+            'checks' => $checks,
+            'score' => (int) round(100 * $done / count($checks)),
+            'done' => $done,
+        );
+    }
+
+    /* =====================================================================
+     * Course → Learners tab
+     * ===================================================================== */
+
+    /**
+     * Enrolled learners of a course (server-side DataTables) — JSON
+     */
+    public function learners_list($course_id = NULL)
+    {
+        session_write_close(); // read-only
+        $course_id = (int) $course_id;
+        $search = $this->input->post('search');
+        $search = isset($search['value']) ? trim((string) $search['value']) : '';
+        $status = $this->input->post('status');
+
+        $filter = function ($db) use ($course_id, $search, $status) {
+            $db->from('course_subscription cs')->join('users u', 'u.id = cs.cs_user_id', 'inner')->where('cs.cs_course_id', $course_id);
+            if ($search !== '') {
+                $db->group_start()->like('u.first_name', $search)->or_like('u.last_name', $search)
+                    ->or_like("CONCAT(u.first_name, ' ', u.last_name)", $search)->or_like('u.email', $search)
+                    ->or_like('u.mobile', $search)->or_like('u.username', $search)->group_end();
+            }
+            if ($status === 'active') {
+                $db->where('cs.cs_status', '1');
+            } elseif ($status === 'inactive') {
+                $db->where("(cs.cs_status IS NULL OR cs.cs_status <> '1')", NULL, FALSE);
+            }
+        };
+
+        $order = $this->input->post('order');
+        $columns = $this->input->post('columns');
+        $sortable = array('name' => 'u.first_name', 'enrolled' => 'cs.id', 'last_login' => 'u.last_login', 'status' => 'cs.cs_status');
+        $col = 'cs.id';
+        $dir = 'DESC';
+        if (isset($order[0]['column'], $columns[(int) $order[0]['column']]['name']) && isset($sortable[$columns[(int) $order[0]['column']]['name']])) {
+            $col = $sortable[$columns[(int) $order[0]['column']]['name']];
+            $dir = (isset($order[0]['dir']) && strtolower($order[0]['dir']) === 'asc') ? 'ASC' : 'DESC';
+        }
+
+        $this->db->select('cs.id AS cs_id, cs.cs_status, cs.cs_start_date, u.id AS user_id, u.first_name, u.last_name, u.username, u.email, u.mobile, u.image, u.last_login, u.active');
+        $filter($this->db);
+        $length = (int) $this->input->post('length');
+        $rows = $this->db->order_by($col, $dir)->order_by('cs.id', 'DESC')
+            ->limit($length > 0 ? min($length, 200) : 25, max(0, (int) $this->input->post('start')))->get()->result();
+
+        $e = function ($v) { return htmlspecialchars((string) $v, ENT_QUOTES, 'UTF-8'); };
+        $data = array();
+        foreach ($rows as $r) {
+            $name = trim($r->first_name . ' ' . $r->last_name);
+            $name = $name !== '' ? $name : $r->username;
+            $initials = strtoupper(mb_substr(trim((string) $r->first_name), 0, 1) . mb_substr(trim((string) $r->last_name), 0, 1));
+            $initials = preg_match('/^[\p{L}\p{N}]+$/u', $initials) ? $initials : strtoupper(mb_substr((string) $r->username, 0, 1));
+            $avatar = '<span class="ul-avatar"><span class="ul-initials">' . $e($initials) . '</span>'
+                . ($r->image ? '<img src="' . $e(base_url('upload/users/images/' . $r->image)) . '" alt="" loading="lazy" onerror="this.remove()">' : '') . '</span>';
+            $on = ((string) $r->cs_status === '1');
+            $enrolled = ($r->cs_start_date && $r->cs_start_date !== '0000-00-00') ? date('d M Y', strtotime($r->cs_start_date)) : '—';
+
+            $data[] = array(
+                '<label class="curr-check"><input type="checkbox" class="js-learner-check" value="' . (int) $r->cs_id . '"><span class="curr-check-box"></span></label>',
+                '<span class="ul-user">' . $avatar . '<span class="ul-user-text"><span class="ul-name" title="' . $e($name) . '">' . $e($name)
+                    . ((int) $r->active !== 1 ? ' <span class="lr-flag" title="This user account is deactivated">Account off</span>' : '') . '</span>'
+                    . '<span class="ul-sub" title="' . $e($r->email) . '">' . $e($r->email) . '</span></span></span>',
+                '<span class="ul-sub" style="color:#334155">' . ($r->mobile ? $e($r->mobile) : '—') . '</span>',
+                '<span class="ul-date">' . $enrolled . '</span>',
+                '<span class="ul-sub" style="color:#64748b">' . ($r->last_login ? $e(time_elapsed_string((int) $r->last_login)) : 'Never') . '</span>',
+                '<label class="ul-switch" title="' . ($on ? 'Click to deactivate access' : 'Click to activate access') . '"><input type="checkbox"' . ($on ? ' checked' : '')
+                    . ' onchange="learnerToggle(' . (int) $r->cs_id . ', this)"><span class="ul-switch-track"><span class="ul-switch-thumb"></span></span>'
+                    . '<span class="ul-switch-label">' . ($on ? 'Active' : 'Inactive') . '</span></label>',
+                '<button type="button" class="cl-btn cl-btn-icon ul-danger" title="Remove from course" onclick="learnerRemove(' . (int) $r->cs_id . ', ' . $e(json_encode($e($name))) . ')"><i class="material-icons">person_remove</i></button>',
+            );
+        }
+
+        $filter($this->db);
+        $filtered = (int) $this->db->count_all_results();
+        $stats = $this->db->select("COUNT(*) AS total, SUM(cs_status = '1') AS active", FALSE)->where('cs_course_id', $course_id)->get('course_subscription')->row();
+
+        echo json_encode(array(
+            'draw' => (int) $this->input->post('draw'),
+            'recordsTotal' => (int) $stats->total,
+            'recordsFiltered' => $filtered,
+            'data' => $data,
+            'stats' => array('total' => (int) $stats->total, 'active' => (int) $stats->active, 'inactive' => (int) $stats->total - (int) $stats->active),
+        ));
+        exit;
+    }
+
+    /**
+     * Bulk / single actions on enrollments of one course (POST course_id, ids[] = enrollment ids, action) — JSON
+     * actions: activate, deactivate, remove
+     */
+    public function learners_bulk()
+    {
+        $course_id = (int) $this->input->post('course_id');
+        $action = (string) $this->input->post('action');
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array) $this->input->post('ids')))));
+        $perm = ($action === 'remove') ? 'p_delete' : 'p_edit';
+        if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', $perm)) {
+            echo json_encode(array('flag' => 0, 'msg' => strip_tags(sprintf(lang('manage_acl_permission_no'), lang($perm === 'p_delete' ? 'manage_acl_delete' : 'manage_acl_edit')))));
+            exit;
+        }
+        if (!$course_id || empty($ids)) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Select at least one learner.'));
+            exit;
+        }
+
+        // Only enrollments of this course are touched
+        $n = (int) $this->db->where('cs_course_id', $course_id)->where_in('id', $ids)->count_all_results('course_subscription');
+        if ($action === 'activate' || $action === 'deactivate') {
+            $this->db->where('cs_course_id', $course_id)->where_in('id', $ids)->update('course_subscription', array('cs_status' => $action === 'activate' ? '1' : '0'));
+            $msg = sprintf('%d learner%s %s.', $n, $n == 1 ? '' : 's', $action === 'activate' ? 'activated' : 'deactivated');
+        } elseif ($action === 'remove') {
+            $this->db->where('cs_course_id', $course_id)->where_in('id', $ids)->delete('course_subscription');
+            $msg = sprintf('%d learner%s removed from this course.', $n, $n == 1 ? '' : 's');
+        } else {
+            echo json_encode(array('flag' => 0, 'msg' => 'Unknown action.'));
+            exit;
+        }
+        echo json_encode(array('flag' => 1, 'msg' => $msg, 'count' => $n));
+        exit;
+    }
+
+    /**
+     * Learners not yet enrolled in the course, for the Enroll dialog (POST q, offset) — JSON
+     */
+    public function learner_candidates($course_id = NULL)
+    {
+        session_write_close(); // read-only
+        $course_id = (int) $course_id;
+        $q = trim((string) $this->input->post('q'));
+        $offset = max(0, (int) $this->input->post('offset'));
+        $limit = 30;
+
+        $filter = function ($db) use ($course_id, $q) {
+            $db->from('users u')
+                ->where('u.id IN (SELECT ug.user_id FROM users_groups ug WHERE ug.group_id = 3)', NULL, FALSE)
+                ->where('NOT EXISTS (SELECT 1 FROM course_subscription cs WHERE cs.cs_user_id = u.id AND cs.cs_course_id = ' . $course_id . ')', NULL, FALSE);
+            if ($q !== '') {
+                $db->group_start()->like('u.first_name', $q)->or_like('u.last_name', $q)->or_like("CONCAT(u.first_name, ' ', u.last_name)", $q)
+                    ->or_like('u.email', $q)->or_like('u.mobile', $q)->or_like('u.username', $q)->group_end();
+            }
+        };
+
+        $this->db->select('u.id, u.first_name, u.last_name, u.username, u.email, u.mobile, u.image, u.active');
+        $filter($this->db);
+        $rows = $this->db->order_by('u.id', 'DESC')->limit($limit, $offset)->get()->result_array();
+        $filter($this->db);
+        $total = (int) $this->db->count_all_results();
+
+        foreach ($rows as &$r) {
+            $r['name'] = trim($r['first_name'] . ' ' . $r['last_name']) ?: $r['username'];
+            $r['image'] = $r['image'] ? base_url('upload/users/images/' . $r['image']) : '';
+            unset($r['first_name'], $r['last_name']);
+        }
+        echo json_encode(array('flag' => 1, 'rows' => $rows, 'total' => $total, 'next' => ($offset + $limit < $total) ? $offset + $limit : NULL));
+        exit;
+    }
+
+    /**
+     * Enroll learners (POST course_id, user_ids[] and/or list = emails / phones / usernames; preview=1 to dry-run) — JSON
+     */
+    public function learners_enroll()
+    {
+        if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', 'p_add')) {
+            echo json_encode(array('flag' => 0, 'msg' => strip_tags(sprintf(lang('manage_acl_permission_no'), lang('manage_acl_add')))));
+            exit;
+        }
+        $course_id = (int) $this->input->post('course_id');
+        if (!$course_id || !$this->db->where('id', $course_id)->count_all_results('courses')) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Course not found.'));
+            exit;
+        }
+        $preview = (int) $this->input->post('preview') === 1;
+        $status = (int) $this->input->post('status') === 0 ? '0' : '1';
+
+        $user_ids = array_values(array_unique(array_filter(array_map('intval', (array) $this->input->post('user_ids')))));
+        $not_found = array();
+
+        // Pasted list: one per line or comma/semicolon separated; matched against email, mobile or username
+        $tokens = array_values(array_unique(array_filter(array_map('trim', preg_split('/[\r\n,;\t]+/', (string) $this->input->post('list'))))));
+        if (count($tokens) + count($user_ids) > 2000) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Please enroll at most 2000 learners at a time.'));
+            exit;
+        }
+        if ($tokens) {
+            $lower = array_map('strtolower', $tokens);
+            // where_in(..., FALSE) keeps LOWER(...) unquoted but also skips value escaping, so escape the values here
+            $lower_sql = array_map(array($this->db, 'escape'), $lower);
+            $found = $this->db->select('id, LOWER(email) AS email, mobile, LOWER(username) AS username', FALSE)->from('users')
+                ->group_start()->where_in('LOWER(email)', $lower_sql, FALSE)->or_where_in('mobile', $tokens)->or_where_in('LOWER(username)', $lower_sql, FALSE)->group_end()
+                ->get()->result();
+            foreach ($tokens as $t) {
+                $tl = strtolower($t);
+                $match = NULL;
+                foreach ($found as $f) {
+                    if ($f->email === $tl || (string) $f->mobile === $t || $f->username === $tl) { $match = (int) $f->id; break; }
+                }
+                if ($match) $user_ids[] = $match; else $not_found[] = $t;
+            }
+            $user_ids = array_values(array_unique($user_ids));
+        }
+
+        if (empty($user_ids)) {
+            echo json_encode(array('flag' => $preview ? 1 : 0, 'msg' => 'No matching learners to enroll.', 'enroll' => array(), 'already' => array(), 'not_found' => $not_found));
+            exit;
+        }
+
+        $already_ids = array_map('intval', array_column($this->db->select('cs_user_id')->where('cs_course_id', $course_id)->where_in('cs_user_id', $user_ids)
+            ->get('course_subscription')->result_array(), 'cs_user_id'));
+        $new_ids = array_values(array_diff($user_ids, $already_ids));
+
+        $describe = function ($ids) {
+            if (!$ids) return array();
+            $out = array();
+            foreach ($this->db->select('id, first_name, last_name, username, email')->where_in('id', $ids)->get('users')->result() as $u) {
+                $out[] = array('id' => (int) $u->id, 'name' => trim($u->first_name . ' ' . $u->last_name) ?: $u->username, 'email' => $u->email);
+            }
+            return $out;
+        };
+
+        if ($preview) {
+            echo json_encode(array('flag' => 1, 'enroll' => $describe($new_ids), 'already' => $describe($already_ids), 'not_found' => $not_found));
+            exit;
+        }
+
+        if ($new_ids) {
+            $today = date('Y-m-d');
+            $batch = array();
+            foreach ($new_ids as $uid) {
+                $batch[] = array('cs_user_id' => $uid, 'cs_course_id' => $course_id, 'cs_start_date' => $today, 'cs_end_date' => '0000-00-00', 'cs_status' => $status);
+            }
+            $this->db->trans_start();
+            foreach (array_chunk($batch, 500) as $chunk) {
+                $this->db->insert_batch('course_subscription', $chunk);
+            }
+            $this->db->trans_complete();
+            if (!$this->db->trans_status()) {
+                echo json_encode(array('flag' => 0, 'msg' => 'Could not enroll the learners. Nothing was saved.'));
+                exit;
+            }
+        }
+
+        $n = count($new_ids);
+        $msg = $n ? sprintf('%d learner%s enrolled.', $n, $n == 1 ? '' : 's') : 'No new learners to enroll.';
+        if ($already_ids) $msg .= sprintf(' %d already enrolled.', count($already_ids));
+        if ($not_found) $msg .= sprintf(' %d not found.', count($not_found));
+        echo json_encode(array('flag' => 1, 'msg' => $msg, 'count' => $n));
+        exit;
+    }
+
+    /**
+     * Bulk actions on lectures of one course (POST course_id, ids[], action[, section_id]) — JSON
+     * actions: publish, unpublish, secure, public, move, delete
+     */
+    public function lecture_bulk()
+    {
+        $course_id = (int) $this->input->post('course_id');
+        $action = (string) $this->input->post('action');
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array) $this->input->post('ids')))));
+
+        $perm = ($action === 'delete') ? 'p_delete' : 'p_edit';
+        if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', $perm)) {
+            echo json_encode(array('flag' => 0, 'msg' => strip_tags(sprintf(lang('manage_acl_permission_no'), lang($action === 'delete' ? 'manage_acl_delete' : 'manage_acl_edit')))));
+            exit;
+        }
+        if (!$course_id || empty($ids)) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Select at least one lecture.'));
+            exit;
+        }
+        if (count($ids) > 1000) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Too many lectures selected at once (max 1000).'));
+            exit;
+        }
+
+        $updates = array(
+            'publish' => array('cl_status' => 1),
+            'unpublish' => array('cl_status' => 0),
+            'secure' => array('cl_secure' => 1),
+            'public' => array('cl_secure' => 0),
+        );
+
+        // Only lectures that belong to this course are ever touched (filter applied in each branch)
+        if (isset($updates[$action])) {
+            $this->db->where('cl_course_id', $course_id)->where_in('id', $ids)->update('course_lecture', $updates[$action]);
+            $labels = array('publish' => 'published', 'unpublish' => 'set to draft', 'secure' => 'set to secure', 'public' => 'set to public');
+            $n = (int) $this->db->where('cl_course_id', $course_id)->where_in('id', $ids)->count_all_results('course_lecture');
+            $msg = sprintf('%d lecture%s %s.', $n, $n == 1 ? '' : 's', $labels[$action]);
+        } elseif ($action === 'move') {
+            $section_id = (int) $this->input->post('section_id');
+            if ($section_id && !$this->db->where('id', $section_id)->where('course_id', $course_id)->count_all_results('course_sections')) {
+                echo json_encode(array('flag' => 0, 'msg' => 'That section does not belong to this course.'));
+                exit;
+            }
+            // Append after the lectures already in the target section, keeping the selected order
+            $max = (int) $this->db->select_max('sort_order', 'm')->where('cl_course_id', $course_id)->where('section_id', $section_id)
+                ->where_not_in('id', $ids)->get('course_lecture')->row()->m;
+            $ordered = $this->db->select('id')->where('cl_course_id', $course_id)->where_in('id', $ids)
+                ->order_by('section_id', 'ASC')->order_by('sort_order', 'ASC')->get('course_lecture')->result();
+            $this->db->trans_start();
+            foreach ($ordered as $i => $row) {
+                $this->db->where('id', $row->id)->update('course_lecture', array('section_id' => $section_id, 'sort_order' => $max + $i + 1));
+            }
+            $this->db->trans_complete();
+            $n = count($ordered);
+            $msg = sprintf('%d lecture%s moved.', $n, $n == 1 ? '' : 's');
+        } elseif ($action === 'delete') {
+            $this->db->where('cl_course_id', $course_id)->where_in('id', $ids)->delete('course_lecture');
+            $n = $this->db->affected_rows();
+            $msg = sprintf('%d lecture%s deleted.', $n, $n == 1 ? '' : 's');
+        } else {
+            echo json_encode(array('flag' => 0, 'msg' => 'Unknown action.'));
+            exit;
+        }
+
+        echo json_encode(array('flag' => 1, 'msg' => $msg, 'count' => (int) $n));
+        exit;
+    }
+
+    /**
+     * Bulk add lectures from pasted lines: "Title | URL" or just a URL / file id (POST) — JSON
+     */
+    public function lecture_bulk_add()
+    {
+        if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', 'p_add')) {
+            echo json_encode(array('flag' => 0, 'msg' => strip_tags(sprintf(lang('manage_acl_permission_no'), lang('manage_acl_add')))));
+            exit;
+        }
+        $course_id = (int) $this->input->post('course_id');
+        $section_id = (int) $this->input->post('section_id');
+        $type = (int) $this->input->post('category');
+        $status = (int) $this->input->post('status') === 1 ? 1 : 0;
+        $secure = (int) $this->input->post('featured') === 1 ? 1 : 0;
+        $preview_only = (int) $this->input->post('preview') === 1;
+        $lines = preg_split('/\R/', (string) $this->input->post('lines'));
+
+        if (!$course_id || !$this->db->where('id', $course_id)->count_all_results('courses')) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Course not found.'));
+            exit;
+        }
+        if (!in_array($type, array(1, 2, 3), TRUE)) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Please select a content type.'));
+            exit;
+        }
+        if ($section_id && !$this->db->where('id', $section_id)->where('course_id', $course_id)->count_all_results('course_sections')) {
+            echo json_encode(array('flag' => 0, 'msg' => 'That section does not belong to this course.'));
+            exit;
+        }
+
+        $rows = array();
+        foreach ($lines as $i => $line) {
+            $line = trim($line);
+            if ($line === '') {
+                continue;
+            }
+            if (count($rows) >= 200) {
+                echo json_encode(array('flag' => 0, 'msg' => 'Please add at most 200 lectures at a time.'));
+                exit;
+            }
+            // "Title | URL" (or tab-separated, as pasted from a spreadsheet); otherwise the whole line is the URL
+            $parts = preg_split('/\s*[|\t]\s*/', $line, 2);
+            $title = count($parts) === 2 ? trim($parts[0]) : '';
+            $url = trim(count($parts) === 2 ? $parts[1] : $parts[0]);
+            $row = array('line' => $i + 1, 'title' => $title, 'url' => $url, 'error' => '');
+
+            if ($url === '') {
+                $row['error'] = 'Missing URL / file ID';
+            } elseif (mb_strlen($url) > 200) {
+                $row['error'] = 'URL is longer than 200 characters';
+            } elseif ($type === 3) {
+                $video = $this->generate_youtube_url($url);
+                if ($video === FALSE && preg_match('~vimeo\.com/(?:video/)?(\d+)~', $url, $vm)) {
+                    $video = 'https://player.vimeo.com/video/' . $vm[1];
+                }
+                if ($video === FALSE) {
+                    $row['error'] = 'Not a YouTube or Vimeo link';
+                } else {
+                    $row['url'] = $video;
+                    if ($row['title'] === '') {
+                        $row['title'] = $this->_video_title($video);
+                    }
+                }
+            }
+            if ($row['error'] === '' && $row['title'] === '') {
+                $row['title'] = 'Lecture ' . (count($rows) + 1);
+            }
+            $row['title'] = mb_substr($row['title'], 0, 200);
+            $rows[] = $row;
+        }
+
+        if (empty($rows)) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Paste at least one line.'));
+            exit;
+        }
+
+        $valid = array_values(array_filter($rows, function ($r) { return $r['error'] === ''; }));
+        if ($preview_only) {
+            echo json_encode(array('flag' => 1, 'rows' => $rows, 'valid' => count($valid)));
+            exit;
+        }
+        if (count($valid) !== count($rows)) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Fix the lines marked in red first.', 'rows' => $rows));
+            exit;
+        }
+
+        $max = (int) $this->db->select_max('sort_order', 'm')->where('cl_course_id', $course_id)->where('section_id', $section_id)
+            ->get('course_lecture')->row()->m;
+        $this->db->trans_start();
+        foreach ($valid as $i => $r) {
+            $this->db->insert('course_lecture', array(
+                'cl_course_id' => $course_id,
+                'cl_name' => $r['title'],
+                'cl_type' => $type,
+                'cl_file_name' => $r['url'],
+                'cl_decsription' => '',
+                'cl_status' => $status,
+                'cl_secure' => $secure,
+                'section_id' => $section_id,
+                'sort_order' => $max + $i + 1,
+            ));
+        }
+        $this->db->trans_complete();
+
+        if (!$this->db->trans_status()) {
+            echo json_encode(array('flag' => 0, 'msg' => 'Could not save the lectures. Nothing was added.'));
+            exit;
+        }
+        echo json_encode(array('flag' => 1, 'msg' => sprintf('%d lecture%s added.', count($valid), count($valid) == 1 ? '' : 's'), 'count' => count($valid)));
+        exit;
+    }
+
+    /**
+     * Title of a YouTube/Vimeo video via oEmbed (no API key); '' if unavailable
+     */
+    private function _video_title($url)
+    {
+        $endpoint = (strpos($url, 'vimeo.com') !== FALSE)
+            ? 'https://vimeo.com/api/oembed.json?url=' . rawurlencode($url)
+            : 'https://www.youtube.com/oembed?format=json&url=' . rawurlencode('https://www.youtube.com/watch?v=' . substr($url, strrpos($url, '/') + 1));
+        $ctx = stream_context_create(array('http' => array('timeout' => 4, 'ignore_errors' => TRUE, 'header' => "User-Agent: LMS-lecture-import\r\n")));
+        $json = @file_get_contents($endpoint, FALSE, $ctx);
+        $data = $json ? json_decode($json, TRUE) : NULL;
+        return (is_array($data) && !empty($data['title'])) ? trim((string) $data['title']) : '';
+    }
+
     public function status_lecture()
     {
         if (!$this->acl->get_method_permission($_SESSION['groups_id'], 'courses', 'p_edit')) {
@@ -1595,7 +2109,7 @@ class Courses extends Admin_Controller
         $id = $this->input->post('id');
         $status = $this->input->post('status');
 
-        if ($this->db->update('course_lectures', array('cl_secure' => $status), array('id' => $id))) {
+        if ($this->db->update('course_lecture', array('cl_secure' => (int) $status ? 1 : 0), array('id' => (int) $id))) {
             echo json_encode(array('flag' => 1, 'msg' => 'Status updated successfully'));
         } else {
             echo json_encode(array('flag' => 0, 'msg' => 'Failed to update status'));

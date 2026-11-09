@@ -1,40 +1,32 @@
 <?php defined('BASEPATH') OR exit('No direct script access allowed');
+$active_tab = (isset($active_tab) && !empty($id)) ? $active_tab : 'overview';
+$tab_base = site_url('admin/courses/form' . (!empty($id) ? '/' . (int) $id : ''));
 ?>
 
 <div class="row clearfix">
     <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12 course-form-tabs course-form-card course-offcanvas">
         <!-- Page Header -->
-        <div class="course-page-head">
-            <a href="<?php echo site_url('admin/courses'); ?>" class="course-back" title="Back to courses">
-                <i class="material-icons">arrow_back</i>
-            </a>
-            <div class="course-page-title">
-                <div class="course-crumb"><a href="<?php echo site_url('admin/courses'); ?>">Courses</a> <i class="material-icons">chevron_right</i> <?php echo empty($id) ? 'New course' : 'Edit course'; ?></div>
-                <h1><?php echo !empty($title['value']) ? htmlspecialchars($title['value']) : 'Untitled course'; ?></h1>
-            </div>
-        </div>
-
         <!-- Tabs: left menu + right content -->
         <div class="card course-tabs-card">
             <div class="body course-tabs-layout">
                 <aside class="course-tabs-nav">
                     <div class="course-tabs-nav-label">Course setup</div>
                     <ul class="nav nav-tabs" role="tablist">
-                        <li role="presentation" class="active">
-                            <a href="#overview" data-toggle="tab">
+                        <li role="presentation" class="<?php echo $active_tab === 'overview' ? 'active' : ''; ?>">
+                            <a href="#overview" data-toggle="tab" data-tab="overview" data-url="<?php echo $tab_base; ?>">
                                 <i class="material-icons">info_outline</i>
                                 <span class="course-nav-text"><strong>Overview</strong><small>Title, category, pricing &amp; media</small></span>
                             </a>
                         </li>
-                        <li role="presentation" class="<?php echo empty($id) ? 'disabled' : ''; ?>">
-                            <a href="#curriculum" data-toggle="tab" <?php echo empty($id) ? 'onclick="return false;"' : ''; ?>>
+                        <li role="presentation" class="<?php echo empty($id) ? 'disabled' : ($active_tab === 'curriculum' ? 'active' : ''); ?>">
+                            <a href="#curriculum" data-toggle="tab" data-tab="curriculum" data-url="<?php echo $tab_base . '/curriculum'; ?>" <?php echo empty($id) ? 'onclick="return false;"' : ''; ?>>
                                 <i class="material-icons">format_list_numbered</i>
                                 <span class="course-nav-text"><strong>Curriculum</strong><small>Sections &amp; lectures</small></span>
                                 <?php echo empty($id) ? '<span class="course-nav-lock" title="Save the course first"><i class="material-icons">lock</i></span>' : ''; ?>
                             </a>
                         </li>
-                        <li role="presentation" class="<?php echo empty($id) ? 'disabled' : ''; ?>">
-                            <a href="#students" data-toggle="tab" <?php echo empty($id) ? 'onclick="return false;"' : ''; ?>>
+                        <li role="presentation" class="<?php echo empty($id) ? 'disabled' : ($active_tab === 'learners' ? 'active' : ''); ?>">
+                            <a href="#students" data-toggle="tab" data-tab="learners" data-url="<?php echo $tab_base . '/learners'; ?>" <?php echo empty($id) ? 'onclick="return false;"' : ''; ?>>
                                 <i class="material-icons">people_outline</i>
                                 <span class="course-nav-text"><strong>Learners</strong><small>Enrolled students</small></span>
                                 <?php echo empty($id) ? '<span class="course-nav-lock" title="Save the course first"><i class="material-icons">lock</i></span>' : ''; ?>
@@ -46,7 +38,81 @@
                 <div class="tab-content course-tabs-content">
                     
                     <!-- Tab 1: Overview (The Main Form) -->
-                    <div role="tabpanel" class="tab-pane fade in active" id="overview">
+                    <div role="tabpanel" class="tab-pane fade<?php echo $active_tab === 'overview' ? ' in active' : ''; ?>" id="overview">
+                        <?php if (!empty($insights)) { $in = $insights; ?>
+                        <!-- Course insights -->
+                        <div class="ci-wrap">
+                            <div class="ci-tiles">
+                                <a class="ci-tile" href="#" data-goto="tab:curriculum">
+                                    <span class="ci-icon is-indigo"><i class="material-icons">format_list_numbered</i></span>
+                                    <span class="ci-body">
+                                        <span class="ci-label">Lectures</span>
+                                        <strong><?php echo number_format($in['lectures']['published']); ?><small> published</small></strong>
+                                        <span class="ci-sub"><?php
+                                            $bits = array();
+                                            if ($in['lectures']['draft']) $bits[] = $in['lectures']['draft'] . ' draft';
+                                            if ($in['lectures']['videos']) $bits[] = $in['lectures']['videos'] . ' video';
+                                            if ($in['lectures']['pdfs']) $bits[] = $in['lectures']['pdfs'] . ' PDF';
+                                            if ($in['lectures']['drive']) $bits[] = $in['lectures']['drive'] . ' Drive';
+                                            $bits[] = $in['sections'] . ' section' . ($in['sections'] == 1 ? '' : 's');
+                                            echo htmlspecialchars(implode(' · ', $bits));
+                                        ?></span>
+                                    </span>
+                                </a>
+                                <a class="ci-tile" href="#" data-goto="tab:learners">
+                                    <span class="ci-icon is-green"><i class="material-icons">groups</i></span>
+                                    <span class="ci-body">
+                                        <span class="ci-label">Learners</span>
+                                        <strong><?php echo number_format($in['learners']['total']); ?><small> enrolled</small></strong>
+                                        <span class="ci-sub"><?php echo number_format($in['learners']['active']); ?> with access<?php echo $in['learners']['new_30'] ? ' · <b class="ci-up">+' . number_format($in['learners']['new_30']) . '</b> in 30 days' : ''; ?></span>
+                                    </span>
+                                </a>
+                                <div class="ci-tile">
+                                    <span class="ci-icon is-amber"><i class="material-icons">insights</i></span>
+                                    <span class="ci-body">
+                                        <span class="ci-label">Avg. completion</span>
+                                        <?php if ($in['progress']['avg'] === NULL) { ?>
+                                            <strong class="ci-muted">—</strong>
+                                            <span class="ci-sub">Needs learners and published lectures</span>
+                                        <?php } else { ?>
+                                            <strong><?php echo (int) $in['progress']['avg']; ?><small>%</small></strong>
+                                            <span class="ci-bar"><span style="width: <?php echo min(100, (int) $in['progress']['avg']); ?>%"></span></span>
+                                            <span class="ci-sub"><?php echo number_format($in['progress']['started']); ?> started · <?php echo number_format($in['progress']['finished']); ?> finished<?php echo $in['progress']['last_at'] ? ' · last ' . htmlspecialchars(time_elapsed_string($in['progress']['last_at'])) : ''; ?></span>
+                                        <?php } ?>
+                                    </span>
+                                </div>
+                                <div class="ci-tile">
+                                    <span class="ci-icon is-slate"><i class="material-icons">update</i></span>
+                                    <span class="ci-body">
+                                        <span class="ci-label">Last updated</span>
+                                        <strong class="ci-strong-sm"><?php echo $in['updated'] ? htmlspecialchars(time_elapsed_string($in['updated'])) : '—'; ?></strong>
+                                        <span class="ci-sub"><?php echo $in['updated'] ? date('d M Y, g:i A', strtotime($in['updated'])) : ''; ?></span>
+                                    </span>
+                                </div>
+                            </div>
+
+                            <div class="ci-check">
+                                <div class="ci-check-head">
+                                    <div>
+                                        <div class="ci-check-title">Course setup</div>
+                                        <div class="ci-sub"><?php echo $in['done']; ?> of <?php echo count($in['checks']); ?> done<?php echo $in['score'] === 100 ? ' — ready for learners' : ''; ?></div>
+                                    </div>
+                                    <span class="ci-score <?php echo $in['score'] === 100 ? 'is-done' : ($in['score'] >= 60 ? 'is-mid' : 'is-low'); ?>"><?php echo $in['score']; ?>%</span>
+                                </div>
+                                <span class="ci-bar ci-bar-lg"><span style="width: <?php echo $in['score']; ?>%"></span></span>
+                                <ul class="ci-list">
+                                    <?php foreach ($in['checks'] as $c) { ?>
+                                        <li class="<?php echo $c['ok'] ? 'is-ok' : 'is-todo'; ?>">
+                                            <i class="material-icons"><?php echo $c['ok'] ? 'check_circle' : 'radio_button_unchecked'; ?></i>
+                                            <span class="ci-item"><?php echo htmlspecialchars($c['label']); ?><span class="ci-sub"><?php echo htmlspecialchars($c['hint']); ?></span></span>
+                                            <?php if (!$c['ok']) { ?><a href="#" class="ci-fix" data-goto="<?php echo htmlspecialchars($c['fix']); ?>">Fix</a><?php } ?>
+                                        </li>
+                                    <?php } ?>
+                                </ul>
+                            </div>
+                        </div>
+                        <?php } ?>
+
                         <?php echo form_open_multipart(site_url($this->uri->segment(1).'/'.$this->uri->segment(2).'/'.'save'), array('class' => 'form-horizontal', 'id' => 'form-create', 'role'=>"form")); ?>
                             
                             <?php if(! empty($id)) { ?> <!-- in case of update courses -->
@@ -211,7 +277,7 @@
                     </div>
 
                     <!-- Tab 2: Curriculum -->
-                    <div role="tabpanel" class="tab-pane fade" id="curriculum">
+                    <div role="tabpanel" class="tab-pane fade<?php echo $active_tab === 'curriculum' ? ' in active' : ''; ?>" id="curriculum">
                         <div class="row clearfix">
                             <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
                                 <div class="card">
@@ -225,6 +291,9 @@
                                             <div class="curr-card-buttons">
                                             <button type="button" class="btn btn-default waves-effect" onclick="addSection()">
                                                 <i class="material-icons">view_agenda</i> Add Section
+                                            </button>
+                                            <button type="button" class="btn btn-default waves-effect" onclick="openBulkAdd()">
+                                                <i class="material-icons">playlist_add</i> Bulk Add
                                             </button>
                                             <button type="button" id="btn_add_lecture" class="btn btn-primary waves-effect">
                                                 <i class="material-icons">add</i> Add Lecture
@@ -379,43 +448,58 @@
                     </div>
 
                     <!-- Tab 3: Learners -->
-                    <div role="tabpanel" class="tab-pane fade" id="students">
-                         <div class="row clearfix">
-                            <div class="col-lg-12 col-md-12 col-sm-12 col-xs-12">
-                                <div class="card">
-                                    <div class="header">
-                                        <h2 style="display: flex; align-items: center; justify-content: space-between; width: 100%;">
-                                            <span>ENROLLED LEARNERS</span>
-                                            <button type="button" class="btn btn-primary waves-effect btn-sm" onclick="enrollLearners()">
-                                                <i class="material-icons" style="font-size: 18px;">person_add</i> ENROLL LEARNERS
-                                            </button>
-                                        </h2>
+                    <div role="tabpanel" class="tab-pane fade<?php echo $active_tab === 'learners' ? ' in active' : ''; ?>" id="students">
+                        <div class="card lr-card">
+                            <div class="header curr-card-head">
+                                <div class="curr-card-title">
+                                    <div>
+                                        <h2>Learners</h2>
+                                        <p>People enrolled in this course. Select several to change access or remove them in one go.</p>
                                     </div>
-                                    <div class="body">
-                                        <?php if(empty($id)) { ?>
-                                            <div class="alert alert-info">Please save the course details first to manage learners.</div>
-                                        <?php } else { ?>
-                                            <div class="table-responsive">
-                                                <table id="students_table" class="table table-bordered table-striped table-hover dataTable" style="width: 100%;">
-                                                    <thead>
-                                                        <tr>
-                                                            <th>#</th>
-                                                            <th>User</th>
-                                                            <th>Status</th>
-                                                            <th>Action</th>
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        <?php } ?>
+                                    <?php if (!empty($id)) { ?>
+                                    <div class="curr-card-buttons">
+                                        <button type="button" class="btn btn-primary waves-effect" onclick="enrollLearners()">
+                                            <i class="material-icons">group_add</i> Enroll learners
+                                        </button>
                                     </div>
+                                    <?php } ?>
                                 </div>
+                            </div>
+                            <div class="body">
+                                <?php if (empty($id)) { ?>
+                                    <div class="alert alert-info">Please save the course details first to manage learners.</div>
+                                <?php } else { ?>
+                                    <div class="lr-stats">
+                                        <button type="button" class="lr-stat is-active" data-status=""><strong id="lr_stat_total">–</strong> enrolled</button>
+                                        <button type="button" class="lr-stat" data-status="active"><span class="lr-dot is-on"></span><strong id="lr_stat_active">–</strong> active</button>
+                                        <button type="button" class="lr-stat" data-status="inactive"><span class="lr-dot"></span><strong id="lr_stat_inactive">–</strong> inactive</button>
+                                    </div>
+                                    <div class="cl-toolbar lr-toolbar">
+                                        <div class="cl-search">
+                                            <i class="material-icons">search</i>
+                                            <input type="text" id="lr_search" placeholder="Search name, email, phone or username…" aria-label="Search learners">
+                                        </div>
+                                    </div>
+                                    <div class="table-responsive">
+                                        <table id="students_table" class="table cl-table" style="width:100%">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width:36px"><label class="curr-check" title="Select all on this page"><input type="checkbox" id="lr_check_all"><span class="curr-check-box"></span></label></th>
+                                                    <th>Learner</th>
+                                                    <th>Phone</th>
+                                                    <th>Enrolled</th>
+                                                    <th>Last login</th>
+                                                    <th>Access</th>
+                                                    <th></th>
+                                                </tr>
+                                            </thead>
+                                            <tbody></tbody>
+                                        </table>
+                                    </div>
+                                <?php } ?>
                             </div>
                         </div>
                     </div>
-
                 </div>
             </div>
         </div>
@@ -453,6 +537,7 @@
             timeout: 30000
         }).done(function (html) {
             $c.html(html);
+            if (window.bulkSelection) bulkSelection.restore(); // keep ticks across reloads
         }).fail(function (xhr, status) {
             if (status === 'abort') return;
             var reason = status === 'timeout' ? 'The server took too long to respond.'
@@ -476,30 +561,101 @@
         function initStudentsTable() {
             if (studentsTableReady) return;
             studentsTableReady = true;
-        $('#students_table').DataTable({
-            "processing": true,
-            "serverSide": true,
-            "ajax": {
-                "url": "<?php echo site_url('admin/courses/ajax_users_list') ?>",
-                "type": "POST",
-                "data": function ( d ) {
-                    d.id = "<?php echo $id; ?>";
-                }
-            },
-            "columns": [
-                { "data": 0 }, 
-                { "data": 1 }, 
-                { "data": 2 }, 
-                { "data": 3 },
-            ],
-            "order": [[ 0, "desc" ]],
-            "language": {
-                "search": "",
-                "searchPlaceholder": "Search learners..."
-            }
-        });
+            window.learnersTable = $('#students_table').DataTable({
+                processing: true,
+                serverSide: true,
+                dom: 'rt<"cl-foot"lip>',
+                pageLength: 25,
+                lengthMenu: [10, 25, 50, 100],
+                autoWidth: false,
+                order: [[3, 'desc']],
+                ajax: {
+                    url: "<?php echo site_url('admin/courses/learners_list/' . (int) $id); ?>",
+                    type: 'POST',
+                    data: function (d) { d.status = $('.lr-stat.is-active').data('status') || ''; d[csrf_name] = csrf_token; },
+                    dataSrc: function (json) {
+                        if (json.stats) $.each(json.stats, function (k, v) { $('#lr_stat_' + k).text(Number(v).toLocaleString()); });
+                        return json.data;
+                    }
+                },
+                columns: [
+                    { name: 'select', orderable: false },
+                    { name: 'name' },
+                    { name: 'phone', orderable: false, className: 'cl-hide-sm' },
+                    { name: 'enrolled', className: 'cl-hide-xs' },
+                    { name: 'last_login', className: 'cl-hide-sm' },
+                    { name: 'status' },
+                    { name: 'actions', orderable: false, className: 'text-right' }
+                ],
+                language: {
+                    processing: '<div class="cl-loading"><i class="material-icons">sync</i> Loading…</div>',
+                    emptyTable: 'No learners yet. Click “Enroll learners” to add some.',
+                    zeroRecords: 'No learners match your search.',
+                    info: 'Showing _START_–_END_ of _TOTAL_', infoEmpty: 'No learners', infoFiltered: '(filtered from _MAX_)', lengthMenu: 'Show _MENU_',
+                    paginate: { previous: '<i class="material-icons">chevron_left</i>', next: '<i class="material-icons">chevron_right</i>' }
+                },
+                drawCallback: function () { if (window.learnerSelection) learnerSelection.sync(); }
+            });
+            var lrTimer = null;
+            $('#lr_search').on('input', function () {
+                var v = $.trim(this.value);
+                clearTimeout(lrTimer);
+                lrTimer = setTimeout(function () { if (learnersTable.search() !== v) learnersTable.search(v).draw(); }, 400);
+            });
+            $('.lr-stat').on('click', function () {
+                $('.lr-stat').removeClass('is-active'); $(this).addClass('is-active');
+                learnersTable.draw();
+            });
         }
         $('a[href="#students"][data-toggle="tab"]').on('shown.bs.tab', initStudentsTable);
+
+        // Each tab has its own URL (…/form/{id}/curriculum, …/learners): keep the address bar in sync,
+        // and support Back/Forward between tabs.
+        var $tabLinks = $('.course-tabs-nav a[data-toggle="tab"][data-url]');
+        $tabLinks.on('shown.bs.tab', function () {
+            var url = $(this).data('url');
+            if (window.history && history.pushState && location.href.split(/[?#]/)[0] !== url) {
+                history.pushState({ courseTab: $(this).data('tab') }, '', url + location.search);
+            }
+        });
+        if (window.history && history.replaceState) {
+            var $activeLink = $('.course-tabs-nav li.active a[data-tab]');
+            var canonical = $activeLink.data('url');
+            // Unknown tab names (e.g. …/form/49/abc) open Overview: show its real URL in the address bar
+            history.replaceState({ courseTab: $activeLink.data('tab') || 'overview' }, '',
+                canonical && location.href.split(/[?#]/)[0] !== canonical ? canonical + location.search : location.href);
+        }
+        // Insights: "Fix" links / tiles jump to the right tab or field
+        $(document).on('click', '[data-goto]', function (e) {
+            e.preventDefault();
+            var target = String($(this).data('goto'));
+            if (target.indexOf('tab:') === 0) {
+                $tabLinks.filter('[data-tab="' + target.slice(4) + '"]').tab('show');
+                $('html, body').animate({ scrollTop: 0 }, 200);
+                return;
+            }
+            var field = target.slice(6), $el;
+            if (field === 'seo') { $('#seo_body').collapse('show'); $el = $('#meta_title'); }
+            else if (field === 'images') { $el = $('input[name="images[]"]').first(); }
+            else if (field === 'description') { $el = $('#description'); }
+            else { $el = $('#' + field); }
+            var $box = $el.closest('.form-group, .card').first();
+            if (!$box.length) $box = $el;
+            $('html, body').animate({ scrollTop: Math.max(0, $box.offset().top - 100) }, 250);
+            $box.addClass('ci-flash'); setTimeout(function () { $box.removeClass('ci-flash'); }, 1600);
+            if (field === 'description' && window.tinymce && tinymce.get('description')) tinymce.get('description').focus();
+            else if (field !== 'images') $el.trigger('focus');
+        });
+
+        window.addEventListener('popstate', function (e) {
+            var tab = (e.state && e.state.courseTab) || 'overview';
+            var $link = $tabLinks.filter('[data-tab="' + tab + '"]');
+            if ($link.length && !$link.parent().hasClass('active')) {
+                $link.data('fromHistory', true);
+                $link.one('shown.bs.tab', function () { $link.removeData('fromHistory'); });
+                $link.tab('show');
+            }
+        });
         if ($('#students').hasClass('active')) initStudentsTable();
 
         // Toggle Offcanvas Form
@@ -826,122 +982,230 @@
         });
     }
 
-    window.enrollLearners = function() {
-        $('#enrollmentModal').modal('show');
-        loadUsersForEnrollment();
-    }
 </script>
 
-<!-- Enrollment Modal -->
-<div class="modal fade" id="enrollmentModal" tabindex="-1" role="dialog">
+<!-- ===================== Learners: bulk bar + Enroll dialog ===================== -->
+<div class="bulk-bar" id="lrBulkBar" hidden role="toolbar" aria-label="Bulk actions for selected learners">
+    <div class="bulk-bar-count"><strong id="lrBulkCount">0</strong> selected</div>
+    <div class="bulk-bar-actions">
+        <button type="button" class="bulk-btn" data-lr-bulk="activate"><i class="material-icons">check_circle</i><span>Activate access</span></button>
+        <button type="button" class="bulk-btn" data-lr-bulk="deactivate"><i class="material-icons">block</i><span>Deactivate access</span></button>
+        <button type="button" class="bulk-btn is-danger" data-lr-bulk="remove"><i class="material-icons">person_remove</i><span>Remove from course</span></button>
+    </div>
+    <button type="button" class="bulk-clear" id="lrBulkClear" title="Clear selection"><i class="material-icons">close</i></button>
+</div>
+
+<div class="modal fade" id="enrollmentModal" tabindex="-1" role="dialog" aria-labelledby="enrollTitle">
     <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content" style="border-radius: 12px;">
-            <div class="modal-header" style="padding: 20px 25px; border-bottom: 1px solid #f0f0f0;">
-                <h4 class="modal-title" style="font-weight: 700; color: #333;">ENROLL LEARNERS</h4>
-            </div>
-            <div class="modal-body" style="padding: 0;">
-                <div class="search-bar" style="padding: 15px 25px; background: #f8f9fa; display: flex; align-items: center;">
-                    <div class="form-group" style="margin: 0; flex-grow: 1;">
-                        <div class="form-line">
-                            <input type="text" id="user_search" class="form-control" placeholder="Search by name, email or mobile...">
-                        </div>
-                    </div>
-                    <i class="material-icons" style="color: #aaa; margin-left: 10px;">search</i>
-                </div>
-                <div id="users_list_container" style="height: 400px; overflow-y: auto; padding: 10px 25px;">
-                    <!-- Users will be loaded here via AJAX -->
-                    <div class="text-center" style="padding: 50px;">
-                        <div class="preloader pl-size-md">
-                            <div class="spinner-layer pl-blue">
-                                <div class="circle-clipper left"><div class="circle"></div></div>
-                                <div class="circle-clipper right"><div class="circle"></div></div>
-                            </div>
-                        </div>
-                        <p style="margin-top: 15px; color: #888;">Loading learners...</p>
-                    </div>
+        <div class="modal-content bulk-add enroll-modal">
+            <div class="modal-header">
+                <h4 class="modal-title" id="enrollTitle">Enroll learners</h4>
+                <p>Pick learners from the list, or paste a list of emails, phone numbers or usernames.</p>
+                <div class="enroll-tabs" role="tablist">
+                    <button type="button" class="enroll-tab is-active" data-mode="pick" role="tab"><i class="material-icons">checklist</i> Search &amp; select</button>
+                    <button type="button" class="enroll-tab" data-mode="paste" role="tab"><i class="material-icons">content_paste</i> Paste a list</button>
                 </div>
             </div>
-            <div class="modal-footer" style="padding: 15px 25px; border-top: 1px solid #f0f0f0;">
-                <div class="pull-left" id="selected_count_wrapper" style="display: none; align-items: center;">
-                    <span class="label label-primary" id="selected_user_count_badge" style="padding: 5px 10px; border-radius: 20px;">0 SELECTED</span>
+            <div class="modal-body">
+                <!-- Pick mode -->
+                <div class="enroll-pane" data-pane="pick">
+                    <div class="enroll-pick-bar">
+                        <div class="cl-search"><i class="material-icons">search</i><input type="text" id="enroll_q" placeholder="Search learners not yet in this course…"></div>
+                        <label class="curr-check"><input type="checkbox" id="enroll_all_shown"><span class="curr-check-box"></span><span>Select all shown</span></label>
+                    </div>
+                    <div class="enroll-list" id="enroll_list"></div>
+                    <div class="enroll-list-foot"><span id="enroll_list_info"></span><button type="button" class="btn btn-default btn-sm" id="enroll_more" hidden>Load more</button></div>
                 </div>
-                <button type="button" class="btn btn-primary waves-effect" id="confirm_enrollment" disabled>ENROLL SELECTED</button>
-                <button type="button" class="btn btn-link waves-effect" data-dismiss="modal">CANCEL</button>
+                <!-- Paste mode -->
+                <div class="enroll-pane" data-pane="paste" hidden>
+                    <textarea id="enroll_paste" class="bulk-lines" rows="7" spellcheck="false" placeholder="One per line, or separated by commas:&#10;priya@example.com&#10;9876543210&#10;rahul.k"></textarea>
+                    <div class="bulk-preview" id="enroll_paste_preview" hidden></div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <label class="curr-check enroll-status"><input type="checkbox" id="enroll_active" checked><span class="curr-check-box"></span><span>Give access now (active)</span></label>
+                <span class="bulk-add-note" id="enroll_note"></span>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-default" id="enroll_check" hidden><i class="material-icons">fact_check</i> Check list</button>
+                <button type="button" class="btn btn-primary" id="enroll_go" disabled><i class="material-icons">group_add</i> <span>Enroll</span></button>
             </div>
         </div>
     </div>
 </div>
 
 <script>
-    var selectedUsers = [];
-    
-    function loadUsersForEnrollment() {
-        var keyword = $('#user_search').val();
-        $.ajax({
-            url: "<?php echo site_url('admin/courses/ajax_get_unrolled_users/'); ?>" + courseId,
-            type: "POST",
-            data: {
-                keyword: keyword,
-                csrf_token: '<?php echo $this->security->get_csrf_hash(); ?>'
-            },
-            success: function(html) {
-                $('#users_list_container').html(html);
-                updateSelectedView();
-            }
-        });
+(function () {
+    function esc(t) { return $('<div>').text(t == null ? '' : String(t)).html(); }
+    function toast(ok, msg) {
+        if (ok && typeof show_success === 'function') return show_success(msg);
+        if (!ok && typeof show_danger === 'function') return show_danger(msg);
+        swal(ok ? 'Done' : 'Could not update', msg, ok ? 'success' : 'error');
+    }
+    function reloadLearners() { if (window.learnersTable) learnersTable.ajax.reload(null, false); }
+
+    /* ---------- Selection + bulk actions on enrolled learners ---------- */
+    var sel = {};
+    function selIds() { return Object.keys(sel); }
+    window.learnerSelection = {
+        sync: function () {
+            var boxes = $('#students_table .js-learner-check');
+            boxes.each(function () { this.checked = !!sel[this.value]; $(this).closest('tr').toggleClass('is-selected', this.checked); });
+            var on = boxes.filter(':checked').length, all = document.getElementById('lr_check_all');
+            if (all) { all.checked = boxes.length > 0 && on === boxes.length; all.indeterminate = on > 0 && on < boxes.length; }
+            var n = selIds().length;
+            $('#lrBulkCount').text(n);
+            $('#lrBulkBar').prop('hidden', n === 0);
+            $('body').toggleClass('has-bulk-bar', n > 0);
+        },
+        clear: function () { sel = {}; this.sync(); }
+    };
+    $(document).on('change', '.js-learner-check', function () { if (this.checked) sel[this.value] = true; else delete sel[this.value]; learnerSelection.sync(); });
+    $(document).on('change', '#lr_check_all', function () {
+        var on = this.checked;
+        $('#students_table .js-learner-check').each(function () { if (on) sel[this.value] = true; else delete sel[this.value]; });
+        learnerSelection.sync();
+    });
+    $('#lrBulkClear').on('click', function () { learnerSelection.clear(); });
+    // Leaving the Learners tab clears its selection (its bar would otherwise sit over other tabs)
+    $('a[href="#students"][data-toggle="tab"]').on('hide.bs.tab', function () { learnerSelection.clear(); });
+
+    function learnersAction(action, ids, done) {
+        var data = { course_id: courseId, action: action, ids: ids };
+        data[csrf_name] = csrf_token;
+        $('#lrBulkBar').addClass('is-busy');
+        return $.post("<?php echo site_url('admin/courses/learners_bulk'); ?>", data, null, 'json')
+            .done(function (res) { toast(res.flag == 1, $('<div>').html(res.msg).text()); if (res.flag == 1 && done) done(); reloadLearners(); })
+            .fail(function (xhr) { toast(false, 'Server error (HTTP ' + xhr.status + '). Please try again.'); reloadLearners(); })
+            .always(function () { $('#lrBulkBar').removeClass('is-busy'); });
+    }
+    $('#lrBulkBar').on('click', '[data-lr-bulk]', function () {
+        var action = $(this).data('lr-bulk'), ids = selIds(), n = ids.length;
+        if (action === 'remove') {
+            swal({ title: 'Remove ' + n + ' learner' + (n === 1 ? '' : 's') + ' from this course?', text: 'They will lose access to this course. Their user accounts are not deleted.',
+                type: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Yes, remove ' + n, closeOnConfirm: true },
+                function (ok) { if (ok !== false) learnersAction('remove', ids, function () { learnerSelection.clear(); }); });
+            return;
+        }
+        learnersAction(action, ids);
+    });
+    // Row switch + row remove
+    window.learnerToggle = function (csId, input) {
+        var active = input.checked;
+        $(input).closest('.ul-switch').find('.ul-switch-label').text(active ? 'Active' : 'Inactive');
+        learnersAction(active ? 'activate' : 'deactivate', [csId]);
+    };
+    window.learnerRemove = function (csId, name) {
+        swal({ title: 'Remove ' + name + ' from this course?', text: 'Their user account is not deleted.', type: 'warning', html: false,
+            showCancelButton: true, confirmButtonColor: '#e11d48', confirmButtonText: 'Yes, remove', closeOnConfirm: true },
+            function (ok) { if (ok !== false) { delete sel[csId]; learnersAction('remove', [csId]); } });
+    };
+
+    /* ---------- Enroll dialog ---------- */
+    var picked = {}, mode = 'pick', nextOffset = 0, qTimer = null, pastePreview = null;
+    function pickedIds() { return Object.keys(picked); }
+
+    function updateEnrollButton() {
+        var n = mode === 'pick' ? pickedIds().length : (pastePreview ? pastePreview.enroll.length : 0);
+        $('#enroll_go').prop('disabled', n === 0).find('span').text(n ? 'Enroll ' + n + ' learner' + (n === 1 ? '' : 's') : 'Enroll');
+        if (mode === 'pick') $('#enroll_note').text(n ? n + ' selected' : '');
+    }
+    function syncShownAll() {
+        var boxes = $('#enroll_list .js-enroll-pick'), on = boxes.filter(':checked').length, all = document.getElementById('enroll_all_shown');
+        all.checked = boxes.length > 0 && on === boxes.length; all.indeterminate = on > 0 && on < boxes.length;
+    }
+    function loadCandidates(append) {
+        if (!append) { nextOffset = 0; $('#enroll_list').html('<div class="enroll-empty"><span class="curr-spinner"></span> Loading…</div>'); }
+        var data = { q: $.trim($('#enroll_q').val()), offset: nextOffset };
+        data[csrf_name] = csrf_token;
+        $.post("<?php echo site_url('admin/courses/learner_candidates/' . (int) $id); ?>", data, null, 'json').done(function (res) {
+            var html = '';
+            (res.rows || []).forEach(function (u) {
+                var initials = (u.name || '?').split(/\s+/).map(function (w) { return w.charAt(0); }).join('').slice(0, 2).toUpperCase();
+                html += '<label class="enroll-row"><span class="curr-check"><input type="checkbox" class="js-enroll-pick" value="' + parseInt(u.id, 10) + '"' + (picked[u.id] ? ' checked' : '') + '><span class="curr-check-box"></span></span>'
+                    + '<span class="ul-avatar"><span class="ul-initials">' + esc(initials) + '</span>' + (u.image ? '<img src="' + esc(u.image) + '" alt="" loading="lazy" onerror="this.remove()">' : '') + '</span>'
+                    + '<span class="ul-user-text"><span class="ul-name">' + esc(u.name) + (u.active != 1 ? ' <span class="lr-flag">Account off</span>' : '') + '</span>'
+                    + '<span class="ul-sub">' + esc(u.email) + (u.mobile ? ' · ' + esc(u.mobile) : '') + '</span></span></label>';
+            });
+            if (!append) $('#enroll_list').html(html || '<div class="enroll-empty">' + (data.q ? 'No learners match “' + esc(data.q) + '” (or they are already enrolled).' : 'Everyone is already enrolled.') + '</div>');
+            else $('#enroll_list').append(html);
+            nextOffset = res.next;
+            $('#enroll_more').prop('hidden', res.next === null);
+            $('#enroll_list_info').text(res.total ? 'Showing ' + $('#enroll_list .enroll-row').length + ' of ' + Number(res.total).toLocaleString() : '');
+            syncShownAll();
+        }).fail(function (xhr) { $('#enroll_list').html('<div class="enroll-empty">Could not load learners (HTTP ' + xhr.status + ').</div>'); });
     }
 
-    $(document).on('keyup', '#user_search', function() {
-        clearTimeout(window.userSearchTimer);
-        window.userSearchTimer = setTimeout(loadUsersForEnrollment, 500);
+    window.enrollLearners = function () {
+        picked = {}; pastePreview = null; mode = 'pick';
+        $('#enroll_q').val(''); $('#enroll_paste').val(''); $('#enroll_paste_preview').prop('hidden', true).empty();
+        $('.enroll-tab').removeClass('is-active').filter('[data-mode="pick"]').addClass('is-active');
+        $('.enroll-pane').prop('hidden', true).filter('[data-pane="pick"]').prop('hidden', false);
+        $('#enroll_check').prop('hidden', true); $('#enroll_note').text('');
+        updateEnrollButton();
+        $('#enrollmentModal').modal('show');
+        loadCandidates(false);
+        setTimeout(function () { $('#enroll_q').trigger('focus'); }, 300);
+    };
+    $('.enroll-tab').on('click', function () {
+        mode = $(this).data('mode');
+        $('.enroll-tab').removeClass('is-active'); $(this).addClass('is-active');
+        $('.enroll-pane').prop('hidden', true).filter('[data-pane="' + mode + '"]').prop('hidden', false);
+        $('#enroll_check').prop('hidden', mode !== 'paste');
+        $('#enroll_note').text(mode === 'paste' ? (pastePreview ? '' : 'Click “Check list” to see who will be enrolled.') : '');
+        updateEnrollButton();
+        setTimeout(function () { $(mode === 'pick' ? '#enroll_q' : '#enroll_paste').trigger('focus'); }, 50);
+    });
+    $('#enroll_q').on('input', function () { clearTimeout(qTimer); qTimer = setTimeout(function () { loadCandidates(false); }, 350); });
+    $('#enroll_more').on('click', function () { loadCandidates(true); });
+    $(document).on('change', '.js-enroll-pick', function () { if (this.checked) picked[this.value] = true; else delete picked[this.value]; syncShownAll(); updateEnrollButton(); });
+    $('#enroll_all_shown').on('change', function () {
+        var on = this.checked;
+        $('#enroll_list .js-enroll-pick').each(function () { this.checked = on; if (on) picked[this.value] = true; else delete picked[this.value]; });
+        updateEnrollButton();
     });
 
-    $(document).on('change', '.user-enroll-check', function() {
-        var userId = $(this).val();
-        if($(this).is(':checked')) {
-            if(!selectedUsers.includes(userId)) selectedUsers.push(userId);
-        } else {
-            selectedUsers = selectedUsers.filter(id => id !== userId);
-        }
-        updateSelectedView();
-    });
-
-    function updateSelectedView() {
-        if(selectedUsers.length > 0) {
-            $('#selected_count_wrapper').css('display', 'flex');
-            $('#selected_user_count_badge').text(selectedUsers.length + ' SELECTED');
-            $('#confirm_enrollment').prop('disabled', false);
-        } else {
-            $('#selected_count_wrapper').hide();
-            $('#confirm_enrollment').prop('disabled', true);
-        }
+    function enrollPost(extra) {
+        var data = $.extend({ course_id: courseId, status: $('#enroll_active').is(':checked') ? 1 : 0 }, extra);
+        data[csrf_name] = csrf_token;
+        return $.post("<?php echo site_url('admin/courses/learners_enroll'); ?>", data, null, 'json');
     }
-
-    $('#confirm_enrollment').on('click', function() {
-        var btn = $(this);
-        btn.prop('disabled', true).text('ENROLLING...');
-        
-        $.ajax({
-            url: "<?php echo site_url('admin/courses/user_save_beta'); ?>",
-            type: "POST",
-            data: {
-                user_id: selectedUsers.join(','),
-                course_id: courseId,
-                csrf_token: '<?php echo $this->security->get_csrf_hash(); ?>'
-            },
-            dataType: 'json',
-            success: function(response) {
-                swal("Success", "Learners enrolled successfully", "success");
+    $('#enroll_paste').on('input', function () { pastePreview = null; $('#enroll_paste_preview').prop('hidden', true); $('#enroll_note').text('Click “Check list” to see who will be enrolled.'); updateEnrollButton(); });
+    $('#enroll_check').on('click', function () {
+        var $b = $(this).prop('disabled', true);
+        $('#enroll_note').text('Checking…');
+        enrollPost({ list: $('#enroll_paste').val(), preview: 1 }).done(function (res) {
+            if (res.flag != 1) { $('#enroll_note').text($('<div>').html(res.msg).text()); return; }
+            pastePreview = res;
+            var block = function (title, cls, items, fmt) {
+                if (!items.length) return '';
+                return '<div class="enroll-group ' + cls + '"><div class="enroll-group-title">' + title + ' (' + items.length + ')</div><div class="enroll-chips">'
+                    + items.slice(0, 200).map(fmt).join('') + (items.length > 200 ? '<span class="enroll-chip">+' + (items.length - 200) + ' more</span>' : '') + '</div></div>';
+            };
+            var person = function (u) { return '<span class="enroll-chip" title="' + esc(u.email) + '">' + esc(u.name) + '</span>'; };
+            $('#enroll_paste_preview').html(
+                block('Will be enrolled', 'is-ok', res.enroll, person) +
+                block('Already enrolled — skipped', 'is-skip', res.already, person) +
+                block('Not found — skipped', 'is-bad', res.not_found, function (t) { return '<span class="enroll-chip">' + esc(t) + '</span>'; }) ||
+                '<div class="enroll-empty">Paste at least one email, phone number or username.</div>'
+            ).prop('hidden', false);
+            $('#enroll_note').text(res.enroll.length ? '' : 'Nobody new to enroll.');
+            updateEnrollButton();
+        }).fail(function (xhr) { $('#enroll_note').text('Server error (HTTP ' + xhr.status + ').'); })
+          .always(function () { $b.prop('disabled', false); });
+    });
+    $('#enroll_go').on('click', function () {
+        var $b = $(this).prop('disabled', true);
+        var extra = mode === 'pick' ? { user_ids: pickedIds() } : { user_ids: pastePreview.enroll.map(function (u) { return u.id; }) };
+        enrollPost(extra).done(function (res) {
+            if (res.flag == 1) {
                 $('#enrollmentModal').modal('hide');
-                if ($.fn.DataTable.isDataTable('#students_table')) $('#students_table').DataTable().ajax.reload();
-                selectedUsers = [];
-            },
-            error: function() {
-                swal("Error", "Failed to enroll learners", "error");
-                btn.prop('disabled', false).text('ENROLL SELECTED');
-            }
-        });
+                toast(true, res.msg);
+                if (!window.learnersTable && typeof initStudentsTable === 'function') initStudentsTable();
+                reloadLearners();
+            } else { $('#enroll_note').text($('<div>').html(res.msg).text()); $b.prop('disabled', false); }
+        }).fail(function (xhr) { $('#enroll_note').text('Server error (HTTP ' + xhr.status + ').'); $b.prop('disabled', false); });
     });
+})();
 </script>
 
 <!-- Section Modal -->
@@ -1069,5 +1333,250 @@
         // Open offcanvas with pre-selected section
         openLectureOffcanvas('Add lecture to section', sectionId);
     }
+</script>
+
+<!-- ===================== Bulk actions for lectures ===================== -->
+<div class="bulk-bar" id="bulkBar" hidden role="toolbar" aria-label="Bulk actions for selected lectures">
+    <div class="bulk-bar-count"><strong id="bulkCount">0</strong> selected</div>
+    <div class="bulk-bar-actions">
+        <button type="button" class="bulk-btn" data-bulk="publish" title="Make visible to learners"><i class="material-icons">visibility</i><span>Publish</span></button>
+        <button type="button" class="bulk-btn" data-bulk="unpublish" title="Hide from learners (draft)"><i class="material-icons">visibility_off</i><span>Unpublish</span></button>
+        <button type="button" class="bulk-btn" data-bulk="secure" title="Only enrolled learners can open"><i class="material-icons">lock</i><span>Secure</span></button>
+        <button type="button" class="bulk-btn" data-bulk="public" title="Anyone can preview"><i class="material-icons">public</i><span>Public</span></button>
+        <div class="bulk-move">
+            <button type="button" class="bulk-btn" id="bulkMoveBtn" aria-haspopup="true"><i class="material-icons">drive_file_move</i><span>Move to…</span></button>
+            <div class="bulk-move-menu" id="bulkMoveMenu" hidden role="menu"></div>
+        </div>
+        <button type="button" class="bulk-btn is-danger" data-bulk="delete" title="Delete selected lectures"><i class="material-icons">delete_outline</i><span>Delete</span></button>
+    </div>
+    <button type="button" class="bulk-clear" id="bulkClear" title="Clear selection"><i class="material-icons">close</i></button>
+</div>
+
+<!-- Bulk add lectures -->
+<div class="modal fade" id="bulkAddModal" tabindex="-1" role="dialog" aria-labelledby="bulkAddTitle">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content bulk-add">
+            <div class="modal-header">
+                <h4 class="modal-title" id="bulkAddTitle">Bulk add lectures</h4>
+                <p>Paste one lecture per line: <code>Title | URL</code>, or just a YouTube link (the title is fetched for you). Rows copied from a spreadsheet (title, URL) work too.</p>
+            </div>
+            <div class="modal-body">
+                <div class="bulk-add-grid">
+                    <div class="form-group">
+                        <label class="lf-label" for="bulk_section">Add to section</label>
+                        <select id="bulk_section" class="form-control"></select>
+                    </div>
+                    <div class="form-group">
+                        <label class="lf-label" for="bulk_type">Content type</label>
+                        <select id="bulk_type" class="form-control">
+                            <option value="3">YouTube / Vimeo</option>
+                            <option value="1">Google Drive</option>
+                            <option value="2">PDF Document</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="lf-label" for="bulk_status">Status</label>
+                        <select id="bulk_status" class="form-control">
+                            <option value="1">Published</option>
+                            <option value="0">Draft</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="lf-label" for="bulk_secure">Access</label>
+                        <select id="bulk_secure" class="form-control">
+                            <option value="1">Secure (enrolled only)</option>
+                            <option value="0">Public preview</option>
+                        </select>
+                    </div>
+                </div>
+                <textarea id="bulk_lines" class="bulk-lines" rows="8" spellcheck="false" placeholder="Intro to Spark | https://www.youtube.com/watch?v=xxxxxxxxxxx&#10;https://youtu.be/yyyyyyyyyyy&#10;Week 1 notes | https://drive.google.com/file/d/…"></textarea>
+                <div class="bulk-preview" id="bulkPreview" hidden></div>
+            </div>
+            <div class="modal-footer">
+                <span class="bulk-add-note" id="bulkAddNote"></span>
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-default" id="bulkPreviewBtn"><i class="material-icons">visibility</i> Preview</button>
+                <button type="button" class="btn btn-primary" id="bulkAddBtn" disabled><i class="material-icons">playlist_add</i> <span>Add lectures</span></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+(function () {
+    var selected = {};      // lecture id -> true (survives curriculum reloads)
+    var lastClicked = null; // for shift-click range selection
+
+    function ids() { return Object.keys(selected); }
+    function esc(t) { return $('<div>').text(t == null ? '' : String(t)).html(); }
+
+    function sync() {
+        var $c = $('#curriculum_container');
+        var all = $c.find('.js-select-lecture');
+        all.each(function () {
+            this.checked = !!selected[this.value];
+            $(this).closest('.curr-lecture').toggleClass('is-selected', this.checked);
+        });
+        $c.find('.curr-section').each(function () {
+            var boxes = $(this).find('.js-select-lecture'), on = boxes.filter(':checked').length;
+            var head = $(this).find('.js-select-section')[0];
+            if (head) { head.checked = boxes.length > 0 && on === boxes.length; head.indeterminate = on > 0 && on < boxes.length; }
+        });
+        var total = all.length, on = all.filter(':checked').length, sa = $c.find('.js-select-all')[0];
+        if (sa) { sa.checked = total > 0 && on === total; sa.indeterminate = on > 0 && on < total; }
+
+        // Drop ids that no longer exist (deleted / reloaded)
+        var present = {}; all.each(function () { present[this.value] = 1; });
+        Object.keys(selected).forEach(function (id) { if (!present[id]) delete selected[id]; });
+
+        var n = ids().length;
+        $('#bulkCount').text(n);
+        $('#bulkBar').prop('hidden', n === 0);
+        $('body').toggleClass('has-bulk-bar', n > 0);
+    }
+
+    window.bulkSelection = { restore: sync, clear: function () { selected = {}; lastClicked = null; sync(); } };
+
+    // Lecture checkbox (shift-click selects the range from the last click)
+    $(document).on('click', '.js-select-lecture', function (e) {
+        var boxes = $('#curriculum_container .js-select-lecture'), idx = boxes.index(this);
+        if (e.shiftKey && lastClicked !== null && lastClicked !== idx) {
+            var from = Math.min(lastClicked, idx), to = Math.max(lastClicked, idx);
+            boxes.slice(from, to + 1).each(function () { if (this.checked !== undefined) { if (e.target.checked) selected[this.value] = true; else delete selected[this.value]; } });
+        } else {
+            if (this.checked) selected[this.value] = true; else delete selected[this.value];
+        }
+        lastClicked = idx;
+        sync();
+    });
+    $(document).on('change', '.js-select-section', function () {
+        var on = this.checked;
+        $(this).closest('.curr-section').find('.js-select-lecture').each(function () { if (on) selected[this.value] = true; else delete selected[this.value]; });
+        sync();
+    });
+    $(document).on('change', '.js-select-all', function () {
+        var on = this.checked;
+        $('#curriculum_container .js-select-lecture').each(function () { if (on) selected[this.value] = true; else delete selected[this.value]; });
+        sync();
+    });
+    // Clicking the checkbox must not start a drag or toggle the section
+    $(document).on('mousedown click', '.curr-check', function (e) { e.stopPropagation(); });
+
+    $('#bulkClear').on('click', function () { window.bulkSelection.clear(); });
+    $(document).on('keydown', function (e) { if (e.key === 'Escape' && ids().length && !$('.modal.in, .modal.show').length) window.bulkSelection.clear(); });
+
+    function runBulk(action, extra) {
+        var n = ids().length;
+        var data = $.extend({ course_id: courseId, action: action, ids: ids() }, extra || {});
+        data[csrf_name] = csrf_token;
+        $('#bulkBar').addClass('is-busy');
+        $.post("<?php echo site_url('admin/courses/lecture_bulk'); ?>", data, null, 'json')
+            .done(function (res) {
+                if (res.flag == 1) {
+                    if (typeof show_success === 'function') show_success(res.msg); else swal('Done', res.msg, 'success');
+                    if (action === 'delete' || action === 'move') window.bulkSelection.clear();
+                    loadCurriculum();
+                } else {
+                    swal('Could not update', $('<div>').html(res.msg).text(), 'error');
+                }
+            })
+            .fail(function (xhr) { swal('Could not update', 'Server error (HTTP ' + xhr.status + '). Please try again.', 'error'); })
+            .always(function () { $('#bulkBar').removeClass('is-busy'); });
+    }
+
+    $('#bulkBar').on('click', '[data-bulk]', function () {
+        var action = $(this).data('bulk'), n = ids().length;
+        if (action === 'delete') {
+            swal({
+                title: 'Delete ' + n + ' lecture' + (n === 1 ? '' : 's') + '?',
+                text: 'This cannot be undone. Learner progress for these lectures may be lost.',
+                type: 'warning', showCancelButton: true, confirmButtonColor: '#e11d48',
+                confirmButtonText: 'Yes, delete ' + n, closeOnConfirm: true
+            }, function (ok) { if (ok !== false) runBulk('delete'); });
+            return;
+        }
+        runBulk(action);
+    });
+
+    // Move to… menu lists the course's sections from the page
+    $('#bulkMoveBtn').on('click', function (e) {
+        e.stopPropagation();
+        var html = '<button type="button" class="bulk-move-item" data-section="0">General / Uncategorized</button>';
+        $('#curriculum_container .curr-section').each(function () {
+            var id = $(this).data('section-id');
+            if (id != 0) html += '<button type="button" class="bulk-move-item" data-section="' + parseInt(id, 10) + '">' + esc($(this).find('.curr-section-title').first().text()) + '</button>';
+        });
+        $('#bulkMoveMenu').html(html).prop('hidden', !$('#bulkMoveMenu').prop('hidden'));
+    });
+    $(document).on('click', '.bulk-move-item', function () {
+        $('#bulkMoveMenu').prop('hidden', true);
+        runBulk('move', { section_id: $(this).data('section') });
+    });
+    $(document).on('click', function () { $('#bulkMoveMenu').prop('hidden', true); });
+
+    /* ---------- Bulk add ---------- */
+    var previewOk = false;
+    window.openBulkAdd = function (sectionId) {
+        var opts = '<option value="0">General / Uncategorized</option>';
+        $('#curriculum_container .curr-section').each(function () {
+            var id = $(this).data('section-id');
+            if (id != 0) opts += '<option value="' + parseInt(id, 10) + '">' + esc($(this).find('.curr-section-title').first().text()) + '</option>';
+        });
+        $('#bulk_section').html(opts).val(String(sectionId || 0));
+        $('#bulkAddModal select').each(function () { if ($.fn.selectpicker && $(this).data('selectpicker')) $(this).selectpicker('refresh'); });
+        previewOk = false; $('#bulkAddBtn').prop('disabled', true); $('#bulkPreview').prop('hidden', true).empty(); $('#bulkAddNote').text('');
+        $('#bulkAddModal').modal('show');
+        setTimeout(function () { $('#bulk_lines').trigger('focus'); }, 300);
+    };
+    // Any change invalidates the preview
+    $('#bulk_lines, #bulk_type').on('input change', function () { previewOk = false; $('#bulkAddBtn').prop('disabled', true); $('#bulkAddNote').text('Preview to check the lines before adding.'); });
+
+    function bulkPost(preview) {
+        var data = {
+            course_id: courseId, section_id: $('#bulk_section').val(), category: $('#bulk_type').val(),
+            status: $('#bulk_status').val(), featured: $('#bulk_secure').val(), lines: $('#bulk_lines').val(), preview: preview ? 1 : 0
+        };
+        data[csrf_name] = csrf_token;
+        return $.post("<?php echo site_url('admin/courses/lecture_bulk_add'); ?>", data, null, 'json');
+    }
+    function renderPreview(rows) {
+        var bad = 0, html = '<table><thead><tr><th>#</th><th>Title</th><th>URL / File ID</th></tr></thead><tbody>';
+        rows.forEach(function (r) {
+            if (r.error) bad++;
+            html += '<tr class="' + (r.error ? 'is-error' : '') + '"><td>' + r.line + '</td><td>' + esc(r.title || '—') + '</td><td>' + esc(r.url)
+                + (r.error ? '<div class="bulk-row-error">' + esc(r.error) + '</div>' : '') + '</td></tr>';
+        });
+        $('#bulkPreview').html(html + '</tbody></table>').prop('hidden', false);
+        return bad;
+    }
+    $('#bulkPreviewBtn').on('click', function () {
+        var $b = $(this).prop('disabled', true);
+        $('#bulkAddNote').text('Checking lines…');
+        bulkPost(true).done(function (res) {
+            if (res.flag != 1) { $('#bulkAddNote').text(res.msg); return; }
+            var bad = renderPreview(res.rows);
+            previewOk = bad === 0;
+            $('#bulkAddBtn').prop('disabled', !previewOk).find('span').text(previewOk ? 'Add ' + res.valid + ' lecture' + (res.valid === 1 ? '' : 's') : 'Add lectures');
+            $('#bulkAddNote').text(bad ? bad + ' line' + (bad === 1 ? ' needs' : 's need') + ' fixing (in red).' : 'Looks good.');
+        }).fail(function (xhr) { $('#bulkAddNote').text('Server error (HTTP ' + xhr.status + ').'); })
+          .always(function () { $b.prop('disabled', false); });
+    });
+    $('#bulkAddBtn').on('click', function () {
+        if (!previewOk) return;
+        var $b = $(this).prop('disabled', true);
+        bulkPost(false).done(function (res) {
+            if (res.flag == 1) {
+                $('#bulkAddModal').modal('hide');
+                $('#bulk_lines').val('');
+                if (typeof show_success === 'function') show_success(res.msg); else swal('Done', res.msg, 'success');
+                loadCurriculum();
+            } else {
+                if (res.rows) renderPreview(res.rows);
+                $('#bulkAddNote').text($('<div>').html(res.msg).text());
+                $b.prop('disabled', false);
+            }
+        }).fail(function (xhr) { $('#bulkAddNote').text('Server error (HTTP ' + xhr.status + ').'); $b.prop('disabled', false); });
+    });
+})();
 </script>
 <?php } ?>

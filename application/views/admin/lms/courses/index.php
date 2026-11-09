@@ -13,28 +13,28 @@
         </a>
     </div>
 
-    <!-- Stat cards double as quick filters -->
-    <div class="cl-stats" role="tablist" aria-label="Filter courses">
-        <button type="button" class="cl-stat is-active" data-filter="all">
-            <span class="cl-stat-icon is-indigo"><i class="material-icons">import_contacts</i></span>
-            <span><strong id="stat_all"><?php echo (int) $total_courses; ?></strong><small>All courses</small></span>
-        </button>
-        <button type="button" class="cl-stat" data-filter="active">
-            <span class="cl-stat-icon is-green"><i class="material-icons">check_circle</i></span>
-            <span><strong id="stat_active"><?php echo (int) $active_courses; ?></strong><small>Active</small></span>
-        </button>
-        <button type="button" class="cl-stat" data-filter="inactive">
-            <span class="cl-stat-icon is-slate"><i class="material-icons">pause_circle_outline</i></span>
-            <span><strong id="stat_inactive"><?php echo (int) $inactive_courses; ?></strong><small>Inactive</small></span>
-        </button>
-        <button type="button" class="cl-stat" data-filter="featured">
-            <span class="cl-stat-icon is-amber"><i class="material-icons">star</i></span>
-            <span><strong id="stat_featured"><?php echo (int) $featured_courses; ?></strong><small>Featured</small></span>
-        </button>
-    </div>
 
     <!-- List -->
     <div class="cl-card">
+        <!-- Stat cards double as quick filters -->
+        <div class="cl-stats" role="tablist" aria-label="Filter courses">
+            <button type="button" class="cl-stat is-active" data-filter="all">
+                <span class="cl-stat-icon is-indigo"><i class="material-icons">import_contacts</i></span>
+                <span><strong id="stat_all"><?php echo (int) $total_courses; ?></strong><small>All courses</small></span>
+            </button>
+            <button type="button" class="cl-stat" data-filter="active">
+                <span class="cl-stat-icon is-green"><i class="material-icons">check_circle</i></span>
+                <span><strong id="stat_active"><?php echo (int) $active_courses; ?></strong><small>Active</small></span>
+            </button>
+            <button type="button" class="cl-stat" data-filter="inactive">
+                <span class="cl-stat-icon is-slate"><i class="material-icons">pause_circle_outline</i></span>
+                <span><strong id="stat_inactive"><?php echo (int) $inactive_courses; ?></strong><small>Inactive</small></span>
+            </button>
+            <button type="button" class="cl-stat" data-filter="featured">
+                <span class="cl-stat-icon is-amber"><i class="material-icons">star</i></span>
+                <span><strong id="stat_featured"><?php echo (int) $featured_courses; ?></strong><small>Featured</small></span>
+            </button>
+        </div>
         <div class="cl-toolbar">
             <div class="cl-search">
                 <i class="material-icons">search</i>
@@ -83,6 +83,11 @@
             pageLength: 25,
             lengthMenu: [10, 25, 50, 100],
             dom: 'rt<"cl-foot"lip>',
+            // Keep the length/info/pagination bar outside the scrolling table area so it's always visible
+            initComplete: function () {
+                var $wrap = $(this.api().table().container());
+                $wrap.find('.cl-foot').insertAfter($wrap.closest('.table-responsive'));
+            },
             autoWidth: false,
             ajax: {
                 url: "<?php echo site_url('admin/courses/ajax_list') ?>",

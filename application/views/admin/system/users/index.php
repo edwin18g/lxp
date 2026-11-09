@@ -13,27 +13,27 @@
         </button>
     </div>
 
-    <!-- Stat cards double as quick filters -->
-    <div class="cl-stats" aria-label="Filter users">
-        <button type="button" class="cl-stat is-active" data-filter="all">
-            <span class="cl-stat-icon is-indigo"><i class="material-icons">people</i></span>
-            <span><strong id="stat_all"><?php echo number_format($stats['all']); ?></strong><small>All users</small></span>
-        </button>
-        <button type="button" class="cl-stat" data-filter="active">
-            <span class="cl-stat-icon is-green"><i class="material-icons">how_to_reg</i></span>
-            <span><strong id="stat_active"><?php echo number_format($stats['active']); ?></strong><small>Active</small></span>
-        </button>
-        <button type="button" class="cl-stat" data-filter="inactive">
-            <span class="cl-stat-icon is-slate"><i class="material-icons">person_off</i></span>
-            <span><strong id="stat_inactive"><?php echo number_format($stats['inactive']); ?></strong><small>Inactive</small></span>
-        </button>
-        <button type="button" class="cl-stat" data-filter="admins">
-            <span class="cl-stat-icon is-amber"><i class="material-icons">admin_panel_settings</i></span>
-            <span><strong id="stat_admins"><?php echo number_format($stats['admins']); ?></strong><small>Administrators</small></span>
-        </button>
-    </div>
 
     <div class="cl-card">
+        <!-- Stat cards double as quick filters -->
+        <div class="cl-stats" aria-label="Filter users">
+            <button type="button" class="cl-stat is-active" data-filter="all">
+                <span class="cl-stat-icon is-indigo"><i class="material-icons">people</i></span>
+                <span><strong id="stat_all"><?php echo number_format($stats['all']); ?></strong><small>All users</small></span>
+            </button>
+            <button type="button" class="cl-stat" data-filter="active">
+                <span class="cl-stat-icon is-green"><i class="material-icons">how_to_reg</i></span>
+                <span><strong id="stat_active"><?php echo number_format($stats['active']); ?></strong><small>Active</small></span>
+            </button>
+            <button type="button" class="cl-stat" data-filter="inactive">
+                <span class="cl-stat-icon is-slate"><i class="material-icons">person_off</i></span>
+                <span><strong id="stat_inactive"><?php echo number_format($stats['inactive']); ?></strong><small>Inactive</small></span>
+            </button>
+            <button type="button" class="cl-stat" data-filter="admins">
+                <span class="cl-stat-icon is-amber"><i class="material-icons">admin_panel_settings</i></span>
+                <span><strong id="stat_admins"><?php echo number_format($stats['admins']); ?></strong><small>Administrators</small></span>
+            </button>
+        </div>
         <div class="cl-toolbar">
             <div class="cl-search">
                 <i class="material-icons">search</i>
@@ -84,6 +84,11 @@
             pageLength: 25,
             lengthMenu: [10, 25, 50, 100],
             dom: 'rt<"cl-foot"lip>',
+            // Keep the length/info/pagination bar outside the scrolling table area so it's always visible
+            initComplete: function () {
+                var $wrap = $(this.api().table().container());
+                $wrap.find('.cl-foot').insertAfter($wrap.closest('.table-responsive'));
+            },
             autoWidth: false,
             searchDelay: 400,
             ajax: {

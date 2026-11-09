@@ -993,10 +993,10 @@ class Users extends Admin_Controller
 
         $orders = array();
         $columns_map = array(
-            0 => 'users.first_name',
-            1 => 'active_count',
-            2 => 'users.device_locked',
+            1 => 'users.first_name',
+            2 => 'active_count',
             3 => 'max_last_activity',
+            4 => 'users.device_locked',
         );
 
         if ($order_post) {
@@ -1019,31 +1019,43 @@ class Users extends Admin_Controller
 
             $row = array();
 
-            $row[] = '<div class="sess-user">'
-                . '<img src="' . $user_img . '" onerror="this.onerror=null;this.src=\'' . $default_img . '\';">'
-                . '<div><div class="sess-user-name">' . htmlspecialchars($user_name) . '</div>'
-                . '<div class="sess-user-email">' . htmlspecialchars($val->email) . '</div></div></div>';
+            $initials = strtoupper(mb_substr(trim((string) $val->first_name), 0, 1) . mb_substr(trim((string) $val->last_name), 0, 1));
+            $initials = preg_match('/^[\p{L}\p{N}]+$/u', $initials) ? $initials : '?';
+            $avatar = '<span class="ul-avatar"><span class="ul-initials">' . htmlspecialchars($initials) . '</span>'
+                . (!empty($val->image) ? '<img src="' . htmlspecialchars($user_img) . '" alt="" loading="lazy" onerror="this.remove()">' : '') . '</span>';
+            $locked = (int) $val->device_locked === 1;
 
-            if ($val->active_count > 1) {
-                $row[] = '<span class="badge-premium bg-amber-soft color-amber">' . $val->active_count . ' devices</span>';
-            } elseif ($val->active_count == 1) {
-                $row[] = '<span class="badge-premium bg-emerald-soft color-emerald">1 device</span>';
+            $row[] = '<label class="curr-check"><input type="checkbox" class="js-sess-check" value="' . (int) $val->user_id . '"><span class="curr-check-box"></span></label>';
+            $row[] = '<button type="button" class="ul-user view-sessions-btn" data-userid="' . (int) $val->user_id . '" data-username="' . $name_attr . '">' . $avatar
+                . '<span class="ul-user-text"><span class="ul-name" title="' . $name_attr . '">' . htmlspecialchars($user_name) . '</span>'
+                . '<span class="ul-sub" title="' . htmlspecialchars($val->email, ENT_QUOTES) . '">' . htmlspecialchars($val->email) . '</span></span></button>';
+
+            $active  = (int) $val->active_count;
+            $devices = max((int) (isset($val->device_count) ? $val->device_count : 0), $active);
+            $dev_txt = '<span class="ss-dev" title="Signed in from ' . $devices . ' device' . ($devices === 1 ? '' : 's') . '"><i class="material-icons">devices</i><b>' . $devices . '</b> device' . ($devices === 1 ? '' : 's') . '</span>';
+            if ($active > 1) {
+                $pill = '<span class="ss-pill is-warn"><span class="ss-dot"></span>' . $active . ' online</span>';
+            } elseif ($active === 1) {
+                $pill = '<span class="ss-pill is-on"><span class="ss-dot"></span>Online</span>';
             } else {
-                $row[] = '<span class="sess-muted">Offline</span>';
+                $pill = '<span class="ss-pill"><span class="ss-dot"></span>Offline</span>';
             }
+            $row[] = '<span class="ss-devcell">' . $dev_txt . $pill . '</span>';
 
-            $row[] = $val->device_locked
-                ? '<span class="badge-premium bg-rose-soft color-rose"><i class="material-icons sess-ico">lock</i> Locked</span>'
-                : '<span class="badge-premium bg-emerald-soft color-emerald">Allowed</span>';
+            $row[] = '<span class="ul-date" title="' . ($val->max_last_activity ? date('d M Y, g:i A', (int) $val->max_last_activity) : '') . '">' . htmlspecialchars(time_elapsed_string($val->max_last_activity)) . '</span>';
 
-            $row[] = '<span class="sess-muted">' . time_elapsed_string($val->max_last_activity) . '</span>';
+            // Learning lock as a switch (on = locked)
+            $row[] = '<label class="ul-switch ss-lock" title="' . ($locked ? 'Locked: course access blocked. Click to unlock' : 'Click to lock course access') . '">'
+                . '<input type="checkbox"' . ($locked ? ' checked' : '') . ' onchange="sessLockToggle(' . (int) $val->user_id . ', this)" data-name="' . $name_attr . '">'
+                . '<span class="ul-switch-track"><span class="ul-switch-thumb"></span></span>'
+                . '<span class="ul-switch-label">' . ($locked ? 'Locked' : 'Allowed') . '</span></label>';
 
-            $actions = '<button type="button" class="btn btn-sm btn-default view-sessions-btn" data-userid="' . $val->user_id . '" data-username="' . $name_attr . '">Devices</button> ';
-            $actions .= $val->device_locked
-                ? '<button type="button" class="btn btn-sm btn-success lock-toggle-btn" data-userid="' . $val->user_id . '" data-username="' . $name_attr . '" data-lock="0">Unlock</button>'
-                : '<button type="button" class="btn btn-sm btn-danger lock-toggle-btn" data-userid="' . $val->user_id . '" data-username="' . $name_attr . '" data-lock="1">Lock</button>';
-
-            $row[] = '<div class="sess-actions">' . $actions . '</div>';
+            $actions = '<div class="ul-actions">'
+                . '<button type="button" class="cl-btn view-sessions-btn" data-userid="' . (int) $val->user_id . '" data-username="' . $name_attr . '" title="See devices"><i class="material-icons">devices</i><span>Devices</span></button>';
+            if ($val->active_count > 0) {
+                $actions .= '<button type="button" class="cl-btn cl-btn-icon ul-danger logout-devices-btn" data-userid="' . (int) $val->user_id . '" data-username="' . $name_attr . '" title="Log out all devices"><i class="material-icons">logout</i></button>';
+            }
+            $row[] = $actions . '</div>';
             $data[] = $row;
         }
 
@@ -1091,6 +1103,36 @@ class Users extends Admin_Controller
             'status' => $ok,
             'msg' => $ok ? 'All devices have been logged out.' : 'Invalid user.',
         ));
+    }
+
+    /**
+     * Bulk lock / unlock / log out (POST user_ids[], action) — JSON
+     */
+    public function sessions_bulk()
+    {
+        if (!$this->ion_auth->is_admin()) {
+            echo json_encode(array('status' => FALSE, 'msg' => 'Only administrators can perform this action.'));
+            return;
+        }
+        $action = (string) $this->input->post('action');
+        $ids = array_values(array_unique(array_filter(array_map('intval', (array) $this->input->post('user_ids')))));
+        if (empty($ids) || count($ids) > 1000) {
+            echo json_encode(array('status' => FALSE, 'msg' => empty($ids) ? 'Select at least one user.' : 'Too many users selected at once (max 1000).'));
+            return;
+        }
+        $n = 0;
+        foreach ($ids as $id) {
+            if ($action === 'lock' || $action === 'unlock') {
+                $n += $this->user_sessions_model->set_lock($id, $action === 'lock') ? 1 : 0;
+            } elseif ($action === 'logout') {
+                $n += $this->user_sessions_model->logout_all($id, session_id()) ? 1 : 0;
+            } else {
+                echo json_encode(array('status' => FALSE, 'msg' => 'Unknown action.'));
+                return;
+            }
+        }
+        $done = array('lock' => 'locked', 'unlock' => 'unlocked', 'logout' => 'logged out of all devices');
+        echo json_encode(array('status' => TRUE, 'msg' => sprintf('%d user%s %s.', $n, $n == 1 ? '' : 's', $done[$action])));
     }
 
     /**

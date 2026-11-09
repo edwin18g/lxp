@@ -284,6 +284,8 @@ class User_sessions_model extends CI_Model
     {
         $cutoff = $this->get_active_cutoff();
         return array(
+            'users'             => (int) $this->count_all_grouped_users(),
+            'online_users'      => (int) $this->db->select('COUNT(DISTINCT user_id) AS n', FALSE)->where('is_active', 1)->where('last_activity >=', $cutoff)->get($this->table)->row()->n,
             'active_sessions'   => (int) $this->db->where('is_active', 1)->where('last_activity >=', $cutoff)->count_all_results($this->table),
             'multidevice_users' => (int) $this->count_multidevice_users(),
             'locked_users'      => (int) $this->count_locked_users(),
@@ -397,6 +399,7 @@ class User_sessions_model extends CI_Model
             users.role,
             COUNT(DISTINCT CASE WHEN user_sessions.is_active = 1 AND user_sessions.last_activity >= ' . $cutoff . ' THEN ' . $device_key_expr . ' END) as active_count,
             COUNT(user_sessions.id) as total_count,
+            COUNT(DISTINCT ' . $device_key_expr . ') as device_count,
             MAX(user_sessions.last_activity) as max_last_activity
         ', FALSE);
         $this->db->from($this->table);

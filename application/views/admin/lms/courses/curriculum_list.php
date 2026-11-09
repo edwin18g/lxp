@@ -23,12 +23,17 @@ foreach ((array) $curriculum as $s) {
 <?php if (!empty($curriculum)): ?>
     <!-- Summary -->
     <div class="curr-summary">
+        <?php if ($total_lectures): ?>
+            <label class="curr-check curr-select-all" title="Select every lecture">
+                <input type="checkbox" class="js-select-all"><span class="curr-check-box"></span><span>Select all</span>
+            </label>
+        <?php endif; ?>
         <span class="curr-stat"><i class="material-icons">view_agenda</i> <strong><?php echo $real_sections; ?></strong> section<?php echo $real_sections == 1 ? '' : 's'; ?></span>
         <span class="curr-stat"><i class="material-icons">format_list_numbered</i> <strong><?php echo $total_lectures; ?></strong> lecture<?php echo $total_lectures == 1 ? '' : 's'; ?></span>
         <?php foreach ($type_counts as $t => $n): if (!$n) continue; ?>
             <span class="curr-stat <?php echo $type_meta[$t]['class']; ?>"><i class="material-icons"><?php echo $type_meta[$t]['icon']; ?></i> <?php echo $n . ' ' . $type_meta[$t]['label']; ?></span>
         <?php endforeach; ?>
-        <span class="curr-hint"><i class="material-icons">drag_indicator</i> Drag to reorder</span>
+        <span class="curr-hint"><i class="material-icons">drag_indicator</i> Drag to reorder &middot; Shift-click to select a range</span>
     </div>
 <?php endif; ?>
 
@@ -44,6 +49,11 @@ foreach ((array) $curriculum as $s) {
             ?>
             <div class="section-item curr-section<?php echo $is_general ? ' is-general' : ''; ?>" data-section-id="<?php echo $section['id']; ?>">
                 <div class="curr-section-head">
+                    <?php if ($count): ?>
+                        <label class="curr-check" title="Select all lectures in this section">
+                            <input type="checkbox" class="js-select-section"><span class="curr-check-box"></span>
+                        </label>
+                    <?php endif; ?>
                     <?php if (!$is_general): ?>
                         <a class="section-drag-handle curr-handle" href="javascript:void(0);" title="Drag to reorder section">
                             <i class="material-icons">drag_indicator</i>
@@ -88,6 +98,9 @@ foreach ((array) $curriculum as $s) {
                                 $is_secure = ($lecture['cl_secure'] == 1);
                                 ?>
                                 <li class="lecture-item curr-lecture<?php echo $is_active ? '' : ' is-draft'; ?>" data-id="<?php echo $lecture['id']; ?>">
+                                    <label class="curr-check" title="Select lecture">
+                                        <input type="checkbox" class="js-select-lecture" value="<?php echo (int) $lecture['id']; ?>"><span class="curr-check-box"></span>
+                                    </label>
                                     <a href="javascript:void(0);" class="lecture-drag-handle curr-handle" title="Drag to reorder or move to another section">
                                         <i class="material-icons">drag_indicator</i>
                                     </a>

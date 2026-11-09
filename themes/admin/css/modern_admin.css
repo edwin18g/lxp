@@ -580,7 +580,7 @@ body {
 section.content {
     margin-left: var(--sidebar-width) !important;
     transition: all 0.3s ease;
-    min-height: calc(100vh - 70px);
+    min-height: calc(100vh - 90px); /* section.content has a 90px top margin; 70px left every admin page 20px too tall */
 }
 
 @media (max-width: 1170px) {
